@@ -1,6 +1,5 @@
 import 'package:banda/common/helpers/type_helper.dart';
 import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/features/entries/entities/entry.dart';
 import 'package:banda/features/loans/entities/loan.dart';
 import 'package:banda/features/loans/entities/loan_payment.dart';
 import 'package:banda/common/helpers/dialog_helper.dart';
@@ -82,7 +81,7 @@ class PaymentTile extends StatelessWidget {
           payment.entry.category.name,
           style: theme.textTheme.titleSmall,
         ),
-        if (payment.loan.status.isSettled)
+        if (loan.status.isSettled)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       ],
     );
