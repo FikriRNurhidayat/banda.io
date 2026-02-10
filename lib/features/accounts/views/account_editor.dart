@@ -161,8 +161,6 @@ class AccountEditor extends StatelessWidget {
                     readOnly: readOnly,
                     initialValue: _d["kind"] ?? account?.kind,
                     onSaved: (value) => _d["kind"] = value,
-                    validator: (value) =>
-                        value == null ? "Type is required" : null,
                     options: AccountKind.values.map((v) {
                       return SelectItem(value: v, label: v.label);
                     }).toList(),

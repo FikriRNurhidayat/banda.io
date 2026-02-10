@@ -35,6 +35,7 @@ class MainState extends State<Main> {
   Future<void> initLink() async {
     final appLinks = AppLinks();
     final uri = await appLinks.getInitialLink();
+
     if (uri != null) navigate(uri);
     appLinks.uriLinkStream.listen((uri) {
       navigate(uri);

@@ -18,7 +18,8 @@ class NotificationHandler {
   handle(NotificationResponse response) async {
     try {
       if (kDebugMode) {
-        print(response.payload);
+        print("response.payload: ${response.payload}");
+        print("navigator.currentState: ${navigator.currentState}");
       }
 
       if (response.payload == null) {

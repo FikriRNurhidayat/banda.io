@@ -15,7 +15,7 @@ class AccountProvider extends ChangeNotifier {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind kind,
+    required AccountKind? kind,
   }) {
     return accountService
         .create(
@@ -32,7 +32,7 @@ class AccountProvider extends ChangeNotifier {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind kind,
+    required AccountKind? kind,
   }) {
     return accountService
         .update(
