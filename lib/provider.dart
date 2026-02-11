@@ -44,19 +44,19 @@ makeProvider({
   required Widget child,
   required NotificationHandler notificationHandler,
 }) async {
-  final db = await DB().connection;
+  final dbManager = DatabaseManager();
 
-  final notificationRepository = await NotificationRepository.build();
-  final categoryRepository = await CategoryRepository.build();
-  final entryRepository = await EntryRepository.build();
-  final accountRepository = await AccountRepository.build();
-  final transferRepository = await TransferRepository.build();
-  final loanRepository = await LoanRepository.build();
-  final loanPaymentRepository = await LoanPaymentRepository.build();
-  final labelRepository = await LabelRepository.build();
-  final partyRepository = await PartyRepository.build();
-  final fundRepository = await FundRepository.build();
-  final billRepository = await BillRepository.build();
+  final notificationRepository = NotificationRepository(dbManager);
+  final categoryRepository = CategoryRepository(dbManager);
+  final entryRepository = EntryRepository(dbManager);
+  final accountRepository = AccountRepository(dbManager);
+  final transferRepository = TransferRepository(dbManager);
+  final loanRepository = LoanRepository(dbManager);
+  final loanPaymentRepository = LoanPaymentRepository(dbManager);
+  final labelRepository = LabelRepository(dbManager);
+  final partyRepository = PartyRepository(dbManager);
+  final fundRepository = FundRepository(dbManager);
+  final billRepository = BillRepository(dbManager);
 
   final notificationManager = NotificationManager(
     notificationRepository: notificationRepository,
@@ -116,7 +116,7 @@ makeProvider({
     notificationManager: notificationManager,
   );
 
-  final toolService = ToolService(db);
+  final toolService = ToolService(dbManager);
 
   await notificationManager.init(
     notificationHandler,

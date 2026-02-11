@@ -8,24 +8,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
-class DB {
-  static final DB _instance = DB._internal();
-  static Database? _db;
-  factory DB() => _instance;
+class DatabaseManager {
+  static final DatabaseManager _instance = DatabaseManager._internal();
+  static Database? _current;
+  factory DatabaseManager() => _instance;
 
-  DB._internal();
-
-  static beginTransaction() {
-    _db!.execute("BEGIN TRANSACTION");
+  static getSingleton() {
+    return _instance;
   }
 
-  static commit() {
-    _db!.execute("COMMIT");
-  }
-
-  static rollback() {
-    _db!.execute("ROLLBACK");
-  }
+  DatabaseManager._internal();
 
   static Future<String> getDir() async {
     final appDir = await getApplicationSupportDirectory();
@@ -35,11 +27,11 @@ class DB {
   }
 
   static Future<String> getPath() async {
-    return join(await DB.getDir(), "bandha.db");
+    return join(await getDir(), "bandha.db");
   }
 
-  static Future<void> reset() async {
-    final db = _db!;
+  Future<void> reset() async {
+    final db = await current;
 
     db.execute("PRAGMA writable_schema = 1");
     db.execute("PRAGMA foreign_keys = OFF");
@@ -64,37 +56,37 @@ class DB {
     db.execute("VACUUM");
     db.execute('PRAGMA user_version = 0;');
 
-    await setup(db);
+    await _setup(db);
   }
 
-  static disconnect() async {
-    _db = null;
+  Future<void> disconnect() async {
+    _current = null;
   }
 
-  static Future<Database> connect() async {
-    final dbPath = await DB.getPath();
-    _db = sqlite3.open(dbPath);
-    return await setup(_db!);
+  Future<Database> connect() async {
+    final dbPath = await getPath();
+    _current = sqlite3.open(dbPath);
+    return await _setup(_current!);
   }
 
-  static reconnect() async {
+  Future<void> reconnect() async {
     await disconnect();
     await connect();
   }
 
-  Future<Database> get connection async {
-    if (_db != null) return _db!;
+  Future<Database> get current async {
+    if (_current != null) return _current!;
     return connect();
   }
 
-  static getMigrationVersion(Database db) {
-    final rows = db.select('PRAGMA user_version;');
+  _migrationVersion(Database client) {
+    final rows = client.select('PRAGMA user_version;');
     if (rows.isEmpty) return 0;
     return rows.first["user_version"] ?? 0;
   }
 
-  static setup(Database db) async {
-    final currentVersion = getMigrationVersion(db);
+  _setup(Database db) async {
+    final currentVersion = _migrationVersion(db);
     if (kDebugMode) {
       print("CURRENT VERSION $currentVersion");
     }

@@ -2,21 +2,26 @@ import 'dart:io';
 
 import 'package:banda/common/services/service.dart';
 import 'package:banda/infra/db.dart';
-import 'package:sqlite3/sqlite3.dart';
 
 class ToolService extends Service {
-  final Database db;
+  final DatabaseManager dbManager;
 
-  ToolService(this.db);
+  ToolService(this.dbManager);
 
-  backupLedger(String backupPath) {
-    db.execute("VACUUM INTO '$backupPath'");
+  resetLedger() async {
+    await dbManager.reset();
+  }
+
+  backupLedger(String backupPath) async {
+    final client = await dbManager.current;
+    client.execute("VACUUM INTO '$backupPath'");
   }
 
   restoreLedger(String backupPath) async {
-    db.dispose();
+    final client = await dbManager.current;
+    client.dispose();
 
-    final dbPath = await DB.getPath();
+    final dbPath = await DatabaseManager.getPath();
 
     final dbFile = File(dbPath);
     if (dbFile.existsSync()) await dbFile.delete();
@@ -29,5 +34,7 @@ class ToolService extends Service {
 
     final backupFile = File(backupPath);
     await backupFile.copy(dbPath);
+
+    dbManager.disconnect();
   }
 }

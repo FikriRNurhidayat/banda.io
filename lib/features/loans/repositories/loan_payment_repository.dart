@@ -35,13 +35,9 @@ class LoanPaymentRepository extends Repository {
     return this;
   }
 
-  static Future<LoanPaymentRepository> build() async {
-    final db = await Repository.connect();
-    return LoanPaymentRepository(db);
-  }
-
   save(LoanPayment entity) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO loan_payments (loan_id, entry_id, addition_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET addition_id = excluded.addition_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, loan_id = excluded.loan_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         entity.loanId,
@@ -64,7 +60,8 @@ class LoanPaymentRepository extends Repository {
         "${query.first} ORDER BY loan_payments.created_at DESC";
     final sqlArgs = query.second;
 
-    final loanRows = db.select(sqlString, sqlArgs);
+    final client = await getClient();
+    final loanRows = client.select(sqlString, sqlArgs);
 
     return await _entities(loanRows);
   }
@@ -78,7 +75,8 @@ class LoanPaymentRepository extends Repository {
   }
 
   Future<LoanPayment> get(String loanId, String entryId) async {
-    final rows = db.select(
+    final client = await getClient();
+    final rows = client.select(
       "SELECT * FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
       [loanId, entryId],
     );
@@ -86,7 +84,8 @@ class LoanPaymentRepository extends Repository {
   }
 
   delete(String loanId, String entryId) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "DELETE FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
       [loanId, entryId],
     );

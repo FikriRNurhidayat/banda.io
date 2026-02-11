@@ -3,19 +3,15 @@ import "package:banda/common/repositories/repository.dart";
 import 'package:sqlite3/sqlite3.dart';
 
 class LabelRepository extends Repository {
-  LabelRepository._(super.db);
-
-  static Future<LabelRepository> build() async {
-    final db = await Repository.connect();
-    return LabelRepository._(db);
-  }
+  LabelRepository(super.db);
 
   Future<Label> create({required String name}) async {
     try {
       final id = Repository.getId();
       final now = DateTime.now();
+      final client = await getClient();
 
-      db.execute(
+      client.execute(
         "INSERT INTO labels (id, name, readonly, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
         [id, name, false, now.toIso8601String(), now.toIso8601String()],
       );
@@ -26,27 +22,36 @@ class LabelRepository extends Repository {
     }
   }
 
-  Future<Label?> update({required String id, required String name}) async {
+  Future<Label?> update({
+    required String id,
+    required String name,
+  }) async {
     final now = DateTime.now();
+    final client = await getClient();
 
-    db.execute("UPDATE labels SET name = ?, updated_at = ? WHERE id = ?", [
-      name,
-      now.toIso8601String(),
-      id,
-    ]);
+    client.execute(
+      "UPDATE labels SET name = ?, updated_at = ? WHERE id = ?",
+      [name, now.toIso8601String(), id],
+    );
 
     return get(id);
   }
 
   Future<Label> getByName(String name) async {
-    final List<Map> rows = db.select("SELECT * FROM labels WHERE name = ?", [
-      name,
-    ]);
+    final client = await getClient();
+    final List<Map> rows = client.select(
+      "SELECT * FROM labels WHERE name = ?",
+      [name],
+    );
     return rows.map((row) => Label.row(row)).first;
   }
 
   Future<Label?> get(String id) async {
-    final List<Map> rows = db.select("SELECT * FROM labels WHERE id = ?", [id]);
+    final client = await getClient();
+    final List<Map> rows = client.select(
+      "SELECT * FROM labels WHERE id = ?",
+      [id],
+    );
     if (rows.isEmpty) {
       return null;
     }
@@ -55,7 +60,8 @@ class LabelRepository extends Repository {
   }
 
   getByIds(List<String> ids) async {
-    final List<Map> rows = db.select(
+    final client = await getClient();
+    final List<Map> rows = client.select(
       "SELECT * FROM labels WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
@@ -63,11 +69,15 @@ class LabelRepository extends Repository {
   }
 
   Future<List<Label>> search() async {
-    final ResultSet rows = db.select("SELECT * FROM labels WHERE readonly = 0 ORDER BY name ASC");
+    final client = await getClient();
+    final ResultSet rows = client.select(
+      "SELECT * FROM labels WHERE readonly = 0 ORDER BY name ASC",
+    );
     return rows.map((row) => Label.row(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    db.execute("DELETE FROM labels WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM labels WHERE id = ?", [id]);
   }
 }

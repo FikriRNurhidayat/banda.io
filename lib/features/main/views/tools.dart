@@ -21,7 +21,10 @@ class _ToolsState extends State<Tools> {
 
   Future<void> reset(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
-    await DB.reset();
+    final toolProvider = context.read<ToolProvider>();
+
+    await toolProvider.resetLedger();
+
     messenger.showSnackBar(
       SnackBar(content: const Text("Ledger reset")),
     );
@@ -29,7 +32,7 @@ class _ToolsState extends State<Tools> {
 
   Future<void> restore(BuildContext context) async {
     final toolProvider = context.read<ToolProvider>();
-    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final pickResult = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ["bandha.db"],
@@ -41,14 +44,8 @@ class _ToolsState extends State<Tools> {
     final backupPath = pickResult.files.single.path!;
     await toolProvider.restoreLedger(backupPath);
 
-    await navigateFlash(
-      navigator,
-      title: "Restart Required",
-      content:
-          "Because the entire ledger has been replaced, this application requires hard restart.",
-      onTap: (context) async {
-        exit(0);
-      },
+    messenger.showSnackBar(
+      SnackBar(content: const Text("Ledger restored")),
     );
   }
 
@@ -95,7 +92,7 @@ class _ToolsState extends State<Tools> {
     }
 
     messenger.showSnackBar(
-      SnackBar(content: const Text("Ledger backed-up")),
+      SnackBar(content: const Text("Ledger backup created")),
     );
   }
 

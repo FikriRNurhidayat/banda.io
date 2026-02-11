@@ -13,4 +13,8 @@ class ToolProvider extends ChangeNotifier {
   restoreLedger(String backupPath) {
     return toolService.restoreLedger(backupPath);
   }
+
+  resetLedger() {
+    return toolService.resetLedger();
+  }
 }

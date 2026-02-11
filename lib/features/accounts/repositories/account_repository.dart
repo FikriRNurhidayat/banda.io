@@ -4,26 +4,26 @@ import "package:banda/common/repositories/repository.dart";
 import "package:sqlite3/sqlite3.dart";
 
 class AccountRepository extends Repository {
-  AccountRepository._(super.db);
-
-  static Future<AccountRepository> build() async {
-    final db = await Repository.connect();
-    return AccountRepository._(db);
-  }
+  AccountRepository(super.db);
 
   sync(String id) async {
-    final ResultSet rows = db.select(
+    final client = await getClient();
+    final ResultSet rows = client.select(
       "SELECT SUM(entries.amount) AS balance FROM entries WHERE entries.account_id = ? AND entries.status = ?",
       [id, EntryStatus.done.label],
     );
 
     final balance = (rows.first["balance"] ?? 0);
 
-    db.execute("UPDATE accounts SET balance = ? WHERE id = ?", [balance, id]);
+    client.execute("UPDATE accounts SET balance = ? WHERE id = ?", [
+      balance,
+      id,
+    ]);
   }
 
   bulkSave(Iterable<Account> accounts) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO accounts (id, name, holder_name, balance, kind, created_at, updated_at) VALUES ${accounts.map((_) => "(?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET name = excluded.name, holder_name = excluded.holder_name, kind = excluded.kind, balance = excluded.balance, updated_at = excluded.updated_at",
       accounts
           .map(
@@ -43,7 +43,8 @@ class AccountRepository extends Repository {
   }
 
   save(Account account) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO accounts (id, name, holder_name, balance, kind, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET name = excluded.name, holder_name = excluded.holder_name, kind = excluded.kind, balance = excluded.balance, updated_at = excluded.updated_at",
       [
         account.id,
@@ -58,15 +59,18 @@ class AccountRepository extends Repository {
   }
 
   Future<Account> get(String id) async {
-    final ResultSet rows = db.select("SELECT * FROM accounts WHERE id = ?", [
-      id,
-    ]);
+    final client = await getClient();
+    final ResultSet rows = client.select(
+      "SELECT * FROM accounts WHERE id = ?",
+      [id],
+    );
 
     return rows.map((row) => Account.row(row)).first;
   }
 
   Future<List<Account>> search() async {
-    final ResultSet rows = db.select(
+    final client = await getClient();
+    final ResultSet rows = client.select(
       "SELECT * FROM accounts ORDER BY accounts.name, accounts.holder_name;",
     );
 
@@ -74,6 +78,7 @@ class AccountRepository extends Repository {
   }
 
   delete(String id) async {
-    db.execute("DELETE FROM accounts WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM accounts WHERE id = ?", [id]);
   }
 }

@@ -12,11 +12,6 @@ class BillRepository extends Repository {
 
   BillRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
 
-  static Future<BillRepository> build() async {
-    final db = await Repository.connect();
-    return BillRepository(db);
-  }
-
   BillRepository withLabels() {
     withArgs.add("labels");
     return BillRepository(db, withArgs: withArgs);
@@ -47,7 +42,8 @@ class BillRepository extends Repository {
   }
 
   save(Bill bill) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO bills (id, note, amount, fee, cycle, iteration, status, category_id, entry_id, addition_id, account_id, due_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, cycle = excluded.cycle, iteration = excluded.iteration, status = excluded.status, category_id = excluded.category_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, account_id = excluded.account_id, due_at = excluded.due_at, updated_at = excluded.updated_at",
       [
         bill.id,
@@ -71,23 +67,26 @@ class BillRepository extends Repository {
   }
 
   delete(String id) async {
-    db.execute("DELETE FROM bills WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM bills WHERE id = ?", [id]);
   }
 
   Future<List<Bill>> search({Filter? filter}) async {
+    final client = await getClient();
     var baseQuery = "SELECT bills.* FROM bills";
 
     final query = defineQuery(baseQuery, filter);
     final sqlString = "${query.first} ORDER BY bills.updated_at DESC";
     final sqlArgs = query.second;
 
-    final rows = db.select(sqlString, sqlArgs);
+    final rows = client.select(sqlString, sqlArgs);
 
     return await entities(rows);
   }
 
   Future<Bill?> get(String id) async {
-    final rows = db.select("SELECT bills.* FROM bills WHERE id = ?", [id]);
+    final client = await getClient();
+    final rows = client.select("SELECT bills.* FROM bills WHERE id = ?", [id]);
     return (await entities(rows)).firstOrNull;
   }
 
