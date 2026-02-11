@@ -12,7 +12,8 @@ import 'package:sqlite3/sqlite3.dart';
 class EntryRepository extends Repository {
   WithArgs withArgs;
 
-  EntryRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
+  EntryRepository(super.db, {WithArgs? withArgs})
+    : withArgs = withArgs ?? {};
 
   static Future<EntryRepository> build() async {
     final db = await Repository.connect();
@@ -40,16 +41,23 @@ class EntryRepository extends Repository {
   }
 
   _saveAnnotations(Iterable<Entry> entries) {
+    final args = entries
+        .where(
+          (e) => e.annotations != null && e.annotations!.isNotEmpty,
+        )
+        .expand(
+          (e) =>
+              e.annotations!.entries.map((a) => [e.id, a.key, a.value]),
+        );
+
+    if (args.isEmpty) {
+      return;
+    }
+
     db.execute(
       "DELETE FROM entry_annotations WHERE entry_id IN (${entries.map((_) => "?").join(", ")})",
       entries.map((entry) => entry.id).toList(),
     );
-
-    final args = entries
-        .where((e) => e.annotations != null && e.annotations!.isNotEmpty)
-        .expand(
-          (e) => e.annotations!.entries.map((a) => [e.id, a.key, a.value]),
-        );
 
     db.execute(
       "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${args.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
@@ -58,14 +66,18 @@ class EntryRepository extends Repository {
   }
 
   _saveLabels(Iterable<Entry> entries) async {
+    final args = entries
+        .where((e) => e.labelIds.isNotEmpty)
+        .expand((e) => e.labelIds.map((labelId) => [e.id, labelId]));
+
+    if (args.isEmpty) {
+      return;
+    }
+
     db.execute(
       "DELETE FROM entry_labels WHERE entry_id IN (${entries.map((_) => "?").join(", ")})",
       entries.map((entry) => entry.id).toList(),
     );
-
-    final args = entries
-        .where((e) => e.labelIds.isNotEmpty)
-        .expand((e) => e.labelIds.map((labelId) => [e.id, labelId]));
 
     db.execute(
       "INSERT INTO entry_labels (entry_id, label_id) VALUES ${args.map((_) => "(?, ?)").join(", ")} ON CONFLICT (entry_id, label_id) DO NOTHING",
@@ -111,14 +123,18 @@ class EntryRepository extends Repository {
   }
 
   saveAnnotations(String entryId, Map<String, dynamic>? annotations) {
-    db.execute("DELETE FROM entry_annotations WHERE entry_id = ?", [entryId]);
+    db.execute("DELETE FROM entry_annotations WHERE entry_id = ?", [
+      entryId,
+    ]);
 
     if (annotations == null || annotations.isEmpty) {
       return;
     }
 
     final arguments = annotations.entries
-        .map((annotation) => [entryId, annotation.key, annotation.value])
+        .map(
+          (annotation) => [entryId, annotation.key, annotation.value],
+        )
         .expand((i) => i)
         .toList();
 
@@ -212,7 +228,8 @@ class EntryRepository extends Repository {
         for (var annotation in annotationRows.where(
           (annotation) => annotation["entry_id"] == entry["id"],
         )) {
-          annotations[annotation["name"] as String] = annotation["value"];
+          annotations[annotation["name"] as String] =
+              annotation["value"];
         }
 
         return {...entry, "annotations": annotations};
@@ -260,7 +277,10 @@ class EntryRepository extends Repository {
   joinQuery(Map? spec) {
     if (spec == null) return null;
 
-    final Map<String, dynamic> join = {"query": <String>[], "sql": null};
+    final Map<String, dynamic> join = {
+      "query": <String>[],
+      "sql": null,
+    };
 
     if (spec.containsKey("label_in")) {
       final value = spec["label_in"] as List<String>;
