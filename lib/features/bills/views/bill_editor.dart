@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/common/widgets/growable_multi_select_form_field.dart';
 import 'package:banda/common/widgets/growable_select_form_field.dart';
 import 'package:banda/features/accounts/entities/account.dart';
@@ -84,9 +85,7 @@ class BillEditor extends StatelessWidget {
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Edit bill details failed!")),
-        );
+        alert(messenger, "Edit bill details failed!");
       }
     }
   }
@@ -162,7 +161,9 @@ class BillEditor extends StatelessWidget {
               final categories = snapshot.data![0] as List<Category>;
               final accounts = snapshot.data![1] as List<Account>;
               final labels = snapshot.data![2] as List<Label>;
-              final bill = id != null ? snapshot.data![3] as Bill : null;
+              final bill = id != null
+                  ? snapshot.data![3] as Bill
+                  : null;
 
               return Form(
                 key: _form,
@@ -186,7 +187,8 @@ class BillEditor extends StatelessWidget {
                         labelText: "Amount",
                         hintText: "Enter amount...",
                       ),
-                      initialValue: _d["amount"]?.abs() ?? bill?.amount.abs(),
+                      initialValue:
+                          _d["amount"]?.abs() ?? bill?.amount.abs(),
                       onSaved: (value) => _d["amount"] = value,
                       validator: (value) =>
                           value == null ? "Enter amount" : null,
@@ -197,13 +199,16 @@ class BillEditor extends StatelessWidget {
                         labelText: "Fee",
                         hintText: "Enter fee...",
                       ),
-                      initialValue: _d["fee"]?.abs() ?? bill?.fee?.abs(),
+                      initialValue:
+                          _d["fee"]?.abs() ?? bill?.fee?.abs(),
                       onSaved: (value) => _d["fee"] = value,
                     ),
                     SelectFormField<BillCycle>(
                       readOnly: readOnly,
                       initialValue:
-                          _d["cycle"] ?? bill?.cycle ?? BillCycle.monthly,
+                          _d["cycle"] ??
+                          bill?.cycle ??
+                          BillCycle.monthly,
                       onSaved: (value) => _d["cycle"] = value,
                       decoration: InputStyles.field(
                         labelText: "Cycle",
@@ -222,8 +227,9 @@ class BillEditor extends StatelessWidget {
                               ? When.specificTime(bill!.dueAt)
                               : When.now()),
                       onSaved: (value) => _d["due_at"] = value,
-                      validator: (value) =>
-                          value == null ? "Date & time are required" : null,
+                      validator: (value) => value == null
+                          ? "Date & time are required"
+                          : null,
                       decoration: InputStyles.field(
                         hintText: "Select date & time...",
                         labelText: "Date & Time",
@@ -240,7 +246,9 @@ class BillEditor extends StatelessWidget {
                     SelectFormField<BillStatus>(
                       readOnly: readOnly,
                       initialValue:
-                          _d["status"] ?? bill?.status ?? BillStatus.pending,
+                          _d["status"] ??
+                          bill?.status ??
+                          BillStatus.pending,
                       onSaved: (value) => _d["status"] = value,
                       decoration: InputStyles.field(
                         labelText: "Status",
@@ -252,7 +260,8 @@ class BillEditor extends StatelessWidget {
                     ),
                     GrowableSelectFormField(
                       readOnly: readOnly,
-                      initialValue: _d["category_id"] ?? bill?.categoryId,
+                      initialValue:
+                          _d["category_id"] ?? bill?.categoryId,
                       onSaved: (value) => _d["category_id"] = value,
                       decoration: InputStyles.field(
                         labelText: "Category",
@@ -264,7 +273,10 @@ class BillEditor extends StatelessWidget {
                       options: categories
                           .where((c) => readOnly || !c.readonly)
                           .map((c) {
-                            return SelectItem(value: c.id, label: c.name);
+                            return SelectItem(
+                              value: c.id,
+                              label: c.name,
+                            );
                           })
                           .toList(),
                     ),
@@ -295,10 +307,14 @@ class BillEditor extends StatelessWidget {
                         actionText: "New label",
                         actionPath: "/labels/edit",
                         onRedirect: handleRedirect,
-                        initialValue: _d["label_ids"] ?? bill?.labelIds ?? [],
+                        initialValue:
+                            _d["label_ids"] ?? bill?.labelIds ?? [],
                         onSaved: (value) => _d["label_ids"] = value,
                         options: labels.map((l) {
-                          return MultiSelectItem(value: l.id, label: l.name);
+                          return MultiSelectItem(
+                            value: l.id,
+                            label: l.name,
+                          );
                         }).toList(),
                       ),
                   ],

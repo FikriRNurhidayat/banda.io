@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/loans/entities/loan.dart';
 import 'package:banda/features/tags/entities/party.dart';
@@ -71,9 +72,7 @@ class _LoanEditorState extends State<LoanEditor> {
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Edit loan details failed")),
-        );
+        alert(messenger, "Edit loan details failed");
       });
     }
   }
@@ -178,7 +177,9 @@ class _LoanEditorState extends State<LoanEditor> {
                       readOnly: widget.readOnly,
                       onSaved: (value) => _d["type"] = value,
                       initialValue:
-                          _d["type"] ?? loan?.type ?? LoanType.receiveable,
+                          _d["type"] ??
+                          loan?.type ??
+                          LoanType.receiveable,
                       validator: (value) =>
                           value == null ? "Type is required" : null,
                       options: LoanType.values.map((v) {
@@ -193,7 +194,9 @@ class _LoanEditorState extends State<LoanEditor> {
                       readOnly: widget.readOnly,
                       onSaved: (value) => _d["status"] = value,
                       initialValue:
-                          _d["status"] ?? loan?.status ?? LoanStatus.active,
+                          _d["status"] ??
+                          loan?.status ??
+                          LoanStatus.active,
                       validator: (value) =>
                           value == null ? "Status is required" : null,
                       options: LoanStatus.values.map((v) {
@@ -206,7 +209,10 @@ class _LoanEditorState extends State<LoanEditor> {
                     ),
                     WhenFormField(
                       readOnly: widget.readOnly,
-                      options: [WhenOption.now, WhenOption.specificTime],
+                      options: [
+                        WhenOption.now,
+                        WhenOption.specificTime,
+                      ],
                       decoration: InputStyles.field(
                         labelText: "Issue",
                         hintText: "Select issue date & time...",
@@ -320,7 +326,10 @@ class _LoanEditorState extends State<LoanEditor> {
                           ),
                       ],
                       options: parties.map((party) {
-                        return SelectItem(value: party.id, label: party.name);
+                        return SelectItem(
+                          value: party.id,
+                          label: party.name,
+                        );
                       }).toList(),
                       decoration: InputStyles.field(
                         labelText: "Party",

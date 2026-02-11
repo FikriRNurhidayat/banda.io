@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/loans/entities/loan_payment.dart';
 import 'package:banda/common/helpers/type_helper.dart';
@@ -77,9 +78,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Edit loan payment details failed!")),
-        );
+        alert(messenger, "Edit loan payment details failed!");
       }
     }
   }

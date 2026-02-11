@@ -1,3 +1,4 @@
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,7 @@ showError({
       print(stackTrace);
     }
 
-    messenger.showSnackBar(SnackBar(content: Text(content)));
+    alert(messenger, content);
 
     callback?.call(error, stackTrace);
   };

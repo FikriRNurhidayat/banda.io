@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/common/widgets/amount_form_field.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/accounts/providers/account_provider.dart';
@@ -55,9 +56,7 @@ class AccountEditor extends StatelessWidget {
         print(stackTrace);
       }
 
-      messenger.showSnackBar(
-        SnackBar(content: Text("Edit account details failed")),
-      );
+      alert(messenger, "Edit account details failed");
     }
   }
 
@@ -115,7 +114,9 @@ class AccountEditor extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final account = id != null ? snapshot.data![0] as Account : null;
+          final account = id != null
+              ? snapshot.data![0] as Account
+              : null;
 
           return Padding(
             padding: EdgeInsets.all(16),
@@ -142,7 +143,8 @@ class AccountEditor extends StatelessWidget {
                       labelText: "Holder",
                       hintText: "Enter holder name...",
                     ),
-                    initialValue: _d["holderName"] ?? account?.holderName,
+                    initialValue:
+                        _d["holderName"] ?? account?.holderName,
                     onSaved: (value) => _d["holderName"] = value ?? '',
                     validator: (value) => value == null || value.isEmpty
                         ? "Holder is required"

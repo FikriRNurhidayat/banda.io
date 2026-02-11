@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/tags/entities/label.dart';
 import 'package:banda/features/funds/entities/fund.dart';
@@ -66,9 +67,7 @@ class _FundEditorState extends State<FundEditor> {
         print(stackTrace);
       }
 
-      messenger.showSnackBar(
-        SnackBar(content: Text("Edit fund details failed")),
-      );
+      alert(messenger, "Edit fund details failed");
     }
   }
 
@@ -147,13 +146,15 @@ class _FundEditorState extends State<FundEditor> {
             hintText: "Enter balance...",
             labelText: "Balance",
           ),
-          validator: (value) => value == null ? "Balance is required" : null,
+          validator: (value) =>
+              value == null ? "Balance is required" : null,
         ),
       SelectFormField<String>(
         readOnly: widget.readOnly,
         initialValue: _d["accountId"] ?? fund?.accountId,
         onSaved: (value) => _d["accountId"] = value,
-        validator: (value) => value == null ? "Account is required" : null,
+        validator: (value) =>
+            value == null ? "Account is required" : null,
         actions: [
           if (!widget.readOnly)
             ActionChip(
@@ -171,7 +172,10 @@ class _FundEditorState extends State<FundEditor> {
             ),
         ],
         options: accounts.map((account) {
-          return SelectItem(value: account.id, label: account.displayName());
+          return SelectItem(
+            value: account.id,
+            label: account.displayName(),
+          );
         }).toList(),
         decoration: InputStyles.field(
           labelText: "Account",
@@ -234,7 +238,9 @@ class _FundEditorState extends State<FundEditor> {
 
           final accounts = snapshot.data![0] as List<Account>;
           final labels = snapshot.data![1] as List<Label>;
-          final fund = widget.id != null ? (snapshot.data![2] as Fund) : null;
+          final fund = widget.id != null
+              ? (snapshot.data![2] as Fund)
+              : null;
 
           final fields = fieldsBuilder(
             context,

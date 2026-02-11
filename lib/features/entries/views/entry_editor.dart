@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/tags/entities/category.dart';
 import 'package:banda/features/entries/entities/entry.dart';
@@ -78,9 +79,7 @@ class _EditorState extends State<EntryEditor> {
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Edit entry details failed!")),
-        );
+        alert(messenger, "Edit entry details failed");
       }
     }
   }
@@ -171,7 +170,8 @@ class _EditorState extends State<EntryEditor> {
                   spacing: 16,
                   children: [
                     if (!widget.readOnly ||
-                        (entry?.note != null && entry!.note!.isNotEmpty))
+                        (entry?.note != null &&
+                            entry!.note!.isNotEmpty))
                       TextFormField(
                         readOnly: widget.readOnly,
                         decoration: InputStyles.field(
@@ -199,7 +199,8 @@ class _EditorState extends State<EntryEditor> {
                         labelText: "Amount",
                         hintText: "Enter amount...",
                       ),
-                      initialValue: _d["amount"]?.abs() ?? entry?.amount.abs(),
+                      initialValue:
+                          _d["amount"]?.abs() ?? entry?.amount.abs(),
                       onSaved: (value) => _d["amount"] = value,
                       validator: (value) =>
                           value == null ? "Enter amount" : null,
@@ -213,8 +214,9 @@ class _EditorState extends State<EntryEditor> {
                               ? When.specificTime(entry!.issuedAt)
                               : When.now()),
                       onSaved: (value) => _d["issuedAt"] = value,
-                      validator: (value) =>
-                          value == null ? "Date & time are required" : null,
+                      validator: (value) => value == null
+                          ? "Date & time are required"
+                          : null,
                       decoration: InputStyles.field(
                         hintText: "Select date & time...",
                         labelText: "Date & Time",
@@ -231,7 +233,9 @@ class _EditorState extends State<EntryEditor> {
                     SelectFormField<EntryStatus>(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["status"] ?? entry?.status ?? EntryStatus.done,
+                          _d["status"] ??
+                          entry?.status ??
+                          EntryStatus.done,
                       onSaved: (value) => _d["status"] = value,
                       decoration: InputStyles.field(
                         labelText: "Status",
@@ -246,7 +250,8 @@ class _EditorState extends State<EntryEditor> {
                     ),
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
-                      initialValue: _d["categoryId"] ?? entry?.categoryId,
+                      initialValue:
+                          _d["categoryId"] ?? entry?.categoryId,
                       onSaved: (value) => _d["categoryId"] = value,
                       decoration: InputStyles.field(
                         labelText: "Category",
@@ -274,7 +279,10 @@ class _EditorState extends State<EntryEditor> {
                       options: categories
                           .where((c) => widget.readOnly || !c.readonly)
                           .map((c) {
-                            return SelectItem(value: c.id, label: c.name);
+                            return SelectItem(
+                              value: c.id,
+                              label: c.name,
+                            );
                           })
                           .toList(),
                     ),
@@ -338,10 +346,14 @@ class _EditorState extends State<EntryEditor> {
                               },
                             ),
                         ],
-                        initialValue: _d["labelIds"] ?? entry?.labelIds ?? [],
+                        initialValue:
+                            _d["labelIds"] ?? entry?.labelIds ?? [],
                         onSaved: (value) => _d["labelIds"] = value,
                         options: labels.map((l) {
-                          return MultiSelectItem(value: l.id, label: l.name);
+                          return MultiSelectItem(
+                            value: l.id,
+                            label: l.name,
+                          );
                         }).toList(),
                       ),
                   ],

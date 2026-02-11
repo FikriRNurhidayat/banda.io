@@ -1,3 +1,4 @@
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/common/widgets/flash.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/bills/entities/bill.dart';
@@ -101,9 +102,7 @@ Future<bool?> confirmFundTransactionDeletion(
       await fundProvider
           .deleteTransaction(fundId: fund.id, entryId: entry.id)
           .catchError((error) {
-            messenger.showSnackBar(
-              SnackBar(content: Text("Delete fund entry failed")),
-            );
+            alert(messenger, "Delete fund entry failed");
             throw error;
           });
     },
@@ -124,9 +123,7 @@ Future<bool?> confirmFundDeletion(
       final fundProvider = context.read<FundProvider>();
 
       await fundProvider.delete(fund.id).catchError((error) {
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete fund failed")),
-        );
+        alert(messenger, "Delete fund failed");
         throw error;
       });
     },
@@ -155,9 +152,7 @@ Future<bool?> confirmBillDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete bill failed")),
-        );
+        alert(messenger, "Delete bill failed");
         throw error;
       });
     },
@@ -186,9 +181,7 @@ Future<bool?> confirmLoanDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete loan failed")),
-        );
+        alert(messenger, "Delete loan failed");
         throw error;
       });
     },
@@ -217,9 +210,7 @@ Future<bool?> confirmTransferDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete transfer failed")),
-        );
+        alert(messenger, "Delete transfer failed");
         throw error;
       });
     },
@@ -240,9 +231,7 @@ Future<bool?> confirmAccountDeletion(
       final accountProvider = context.read<AccountProvider>();
 
       await accountProvider.delete(account.id).catchError((error) {
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete account failed")),
-        );
+        alert(messenger, "Delete account failed");
         throw error;
       });
     },
@@ -271,9 +260,7 @@ Future<bool?> confirmEntryDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete entry failed")),
-        );
+        alert(messenger, "Delete entry failed");
         throw error;
       });
     },
@@ -303,9 +290,7 @@ Future<bool?> confirmLoanPaymentDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete payment failed")),
-        );
+        alert(messenger, "Delete payment failed");
         throw error;
       });
     },

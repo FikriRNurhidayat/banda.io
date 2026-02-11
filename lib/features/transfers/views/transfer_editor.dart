@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/transfers/entities/transfer.dart';
 import 'package:banda/features/transfers/providers/transfer_provider.dart';
@@ -64,9 +65,7 @@ class _TransferEditorState extends State<TransferEditor> {
         print(stackTrace);
       }
 
-      messenger.showSnackBar(
-        SnackBar(content: Text("Edit transfer details failed")),
-      );
+      alert(messenger, "Edit transfer details failed");
     }
   }
 
@@ -95,7 +94,9 @@ class _TransferEditorState extends State<TransferEditor> {
         ),
         centerTitle: true,
         title: Text(
-          !widget.readOnly ? "Enter transfer details" : "Transfer details",
+          !widget.readOnly
+              ? "Enter transfer details"
+              : "Transfer details",
           style: theme.textTheme.titleLarge,
         ),
         actions: [
@@ -204,15 +205,20 @@ class _TransferEditorState extends State<TransferEditor> {
                           ),
                       ],
                       initialValue:
-                          _d["creditAccountId"] ?? transfer?.creditAccountId,
-                      onSaved: (value) => _d["creditAccountId"] = value ?? '',
+                          _d["creditAccountId"] ??
+                          transfer?.creditAccountId,
+                      onSaved: (value) =>
+                          _d["creditAccountId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "From",
                         hintText: "Select source account...",
                       ),
                       options: accounts.map((i) {
-                        return SelectItem(value: i.id, label: i.displayName());
+                        return SelectItem(
+                          value: i.id,
+                          label: i.displayName(),
+                        );
                       }).toList(),
                     ),
                     SelectFormField(
@@ -237,15 +243,20 @@ class _TransferEditorState extends State<TransferEditor> {
                           ),
                       ],
                       initialValue:
-                          _d["debitAccountId"] ?? transfer?.debitAccountId,
-                      onSaved: (value) => _d["debitAccountId"] = value ?? '',
+                          _d["debitAccountId"] ??
+                          transfer?.debitAccountId,
+                      onSaved: (value) =>
+                          _d["debitAccountId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "To",
                         hintText: "Select target account...",
                       ),
                       options: accounts.map((i) {
-                        return SelectItem(value: i.id, label: i.displayName());
+                        return SelectItem(
+                          value: i.id,
+                          label: i.displayName(),
+                        );
                       }).toList(),
                     ),
                   ],

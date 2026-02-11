@@ -1,4 +1,5 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/entries/entities/entry.dart';
 import 'package:banda/features/tags/entities/label.dart';
 import 'package:banda/features/funds/entities/fund.dart';
@@ -76,9 +77,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
         print(stackTrace);
       }
 
-      messenger.showSnackBar(
-        SnackBar(content: Text("Edit fund entry details failed")),
-      );
+      alert(messenger, "Edit fund entry details failed");
     }
   }
 
@@ -146,7 +145,8 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
         ),
         initialValue: _d["amount"] ?? entry?.amount.abs(),
         onSaved: (value) => _d["amount"] = value,
-        validator: (value) => value == null ? "Amount is required" : null,
+        validator: (value) =>
+            value == null ? "Amount is required" : null,
       ),
       WhenFormField(
         readOnly: widget.readOnly,
@@ -222,7 +222,8 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
         future: Future.wait([
           labelProvider.search(),
           fundProvider.get(widget.fundId),
-          if (widget.entryId != null) entryProvider.get(widget.entryId!),
+          if (widget.entryId != null)
+            entryProvider.get(widget.entryId!),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

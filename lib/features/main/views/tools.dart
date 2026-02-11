@@ -1,8 +1,6 @@
-import 'dart:io';
-
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/common/helpers/dialog_helper.dart';
 import 'package:banda/features/main/providers/tool_provider.dart';
-import 'package:banda/infra/db.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +23,7 @@ class _ToolsState extends State<Tools> {
 
     await toolProvider.resetLedger();
 
-    messenger.showSnackBar(
-      SnackBar(content: const Text("Ledger reset")),
-    );
+    alert(messenger, "Ledger reset");
   }
 
   Future<void> restore(BuildContext context) async {
@@ -44,9 +40,7 @@ class _ToolsState extends State<Tools> {
     final backupPath = pickResult.files.single.path!;
     await toolProvider.restoreLedger(backupPath);
 
-    messenger.showSnackBar(
-      SnackBar(content: const Text("Ledger restored")),
-    );
+    alert(messenger, "Ledger restored");
   }
 
   Future<void> doReset(BuildContext context) async {
@@ -91,9 +85,7 @@ class _ToolsState extends State<Tools> {
       return;
     }
 
-    messenger.showSnackBar(
-      SnackBar(content: const Text("Ledger backup created")),
-    );
+    alert(messenger, "Ledger backed up");
   }
 
   List<Map<String, dynamic>> menuBuilder(BuildContext context) {
