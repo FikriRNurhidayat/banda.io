@@ -72,7 +72,8 @@ class DB {
   }
 
   static Future<Database> connect() async {
-    _db = sqlite3.open(await DB.getPath());
+    final dbPath = await DB.getPath();
+    _db = sqlite3.open(dbPath);
     return await setup(_db!);
   }
 

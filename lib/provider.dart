@@ -5,10 +5,13 @@ import 'package:banda/features/loans/providers/loan_payment_provider.dart';
 import 'package:banda/features/loans/providers/loan_tab_provider.dart';
 import 'package:banda/features/loans/services/loan_payment_service.dart';
 import 'package:banda/features/loans/services/loan_service.dart';
+import 'package:banda/features/main/providers/tool_provider.dart';
+import 'package:banda/features/main/services/tool_service.dart';
 import 'package:banda/features/transfers/providers/transfer_provider.dart';
 import 'package:banda/features/transfers/repositories/transfer_repository.dart';
 import 'package:banda/features/transfers/services/transfer_service.dart';
 import 'package:banda/features/loans/repositories/loan_payment_repository.dart';
+import 'package:banda/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -41,6 +44,8 @@ makeProvider({
   required Widget child,
   required NotificationHandler notificationHandler,
 }) async {
+  final db = await DB().connection;
+
   final notificationRepository = await NotificationRepository.build();
   final categoryRepository = await CategoryRepository.build();
   final entryRepository = await EntryRepository.build();
@@ -111,12 +116,15 @@ makeProvider({
     notificationManager: notificationManager,
   );
 
+  final toolService = ToolService(db);
+
   await notificationManager.init(
     notificationHandler,
     didReceiveBackgroundNotificationResponseCallback,
   );
 
   final providers = [
+    ChangeNotifierProvider(create: (_) => ToolProvider(toolService)),
     ChangeNotifierProvider(
       create: (_) => CategoryProvider(categoryRepository),
     ),

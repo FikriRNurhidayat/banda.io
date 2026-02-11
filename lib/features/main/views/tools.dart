@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:banda/common/helpers/dialog_helper.dart';
+import 'package:banda/features/main/providers/tool_provider.dart';
 import 'package:banda/infra/db.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class Tools extends StatefulWidget {
   const Tools({super.key});
@@ -20,10 +22,13 @@ class _ToolsState extends State<Tools> {
   Future<void> reset(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     await DB.reset();
-    messenger.showSnackBar(SnackBar(content: const Text("Ledger reset")));
+    messenger.showSnackBar(
+      SnackBar(content: const Text("Ledger reset")),
+    );
   }
 
   Future<void> restore(BuildContext context) async {
+    final toolProvider = context.read<ToolProvider>();
     final navigator = Navigator.of(context);
     final pickResult = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -33,11 +38,8 @@ class _ToolsState extends State<Tools> {
       return;
     }
 
-    final dbSourceFile = File(pickResult.files.single.path!);
-    final dbTargetPath = await DB.getPath();
-    final dbTargetFile = File(dbTargetPath);
-
-    await dbSourceFile.copy(dbTargetFile.path);
+    final backupPath = pickResult.files.single.path!;
+    await toolProvider.restoreLedger(backupPath);
 
     await navigateFlash(
       navigator,
@@ -75,24 +77,26 @@ class _ToolsState extends State<Tools> {
   }
 
   Future<void> doBackup(BuildContext context) async {
+    final toolProvider = context.read<ToolProvider>();
+
     final messenger = ScaffoldMessenger.of(context);
     final now = timestampFormat.format(DateTime.now());
-    final dbSourcePath = await DB.getPath();
-    final dbSourceFile = File(dbSourcePath);
-    final dbTargetDir = await FilePicker.platform.getDirectoryPath();
-
-    if (dbTargetDir == null) {
+    final backupDir = await FilePicker.platform.getDirectoryPath();
+    if (backupDir == null) {
       return;
     }
 
-    final dbTargetFile = File('$dbTargetDir/$now.bandha.db');
-    await dbSourceFile.copy(dbTargetFile.path);
+    final backupPath = '$backupDir/$now.bandha.db';
+
+    await toolProvider.backupLedger(backupPath);
 
     if (!mounted) {
       return;
     }
 
-    messenger.showSnackBar(SnackBar(content: const Text("Ledger backed-up")));
+    messenger.showSnackBar(
+      SnackBar(content: const Text("Ledger backed-up")),
+    );
   }
 
   List<Map<String, dynamic>> menuBuilder(BuildContext context) {
@@ -142,8 +146,14 @@ class _ToolsState extends State<Tools> {
         itemBuilder: (context, i) {
           final menu = menus[i];
           return ListTile(
-            title: Text(menu["title"], style: theme.textTheme.titleSmall),
-            subtitle: Text(menu["subtitle"], style: theme.textTheme.bodySmall),
+            title: Text(
+              menu["title"],
+              style: theme.textTheme.titleSmall,
+            ),
+            subtitle: Text(
+              menu["subtitle"],
+              style: theme.textTheme.bodySmall,
+            ),
             onTap: menu["onTap"],
           );
         },
