@@ -1,10 +1,9 @@
-import 'package:banda/common/entities/controlable.dart';
+import 'package:banda/common/entities/entity.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/entries/entities/entry.dart';
 import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/common/types/controller.dart';
 
-class LoanPayment extends Controlable {
+class LoanPayment extends Entity {
   final String loanId;
   final String entryId;
   final String? additionId;
@@ -35,14 +34,14 @@ class LoanPayment extends Controlable {
 
   static String additionNote(Loan loan) {
     if (loan.type.isDebt()) {
-      return loan.status.isSettled()
-          ? "Debt settlement fee"
-          : "Debt payment fee";
+      return loan.status.isSettled
+          ? "Loan settlement fee"
+          : "Loan payment fee";
     }
 
-    return loan.status.isSettled()
-        ? "Receivable settlement fee"
-        : "Receivable payment fee";
+    return loan.status.isSettled
+        ? "Loan settlement fee"
+        : "Loan payment fee";
   }
 
   static double entryAmount(Loan loan, double amount) {
@@ -51,14 +50,14 @@ class LoanPayment extends Controlable {
 
   static String entryNote(Loan loan) {
     if (loan.type.isDebt()) {
-      return loan.status.isSettled()
-          ? "Debt settlement to ${loan.party.name}"
-          : "Debt payment to ${loan.party.name}";
+      return loan.status.isSettled
+          ? "Loan settlement to ${loan.party.name}"
+          : "Loan payment to ${loan.party.name}";
     }
 
-    return loan.status.isSettled()
-        ? "Receivable settlement from ${loan.party.name}"
-        : "Receivable payment from ${loan.party.name}";
+    return loan.status.isSettled
+        ? "Loan settlement from ${loan.party.name}"
+        : "Loan payment from ${loan.party.name}";
   }
 
   factory LoanPayment.create({
@@ -82,7 +81,6 @@ class LoanPayment extends Controlable {
   }
 
   LoanPayment withAddition(Entry? value) {
-    if (value == null) return this;
     addition = value;
     return this;
   }
@@ -107,15 +105,23 @@ class LoanPayment extends Controlable {
     return entry.account;
   }
 
-  List<Entry?> get entries {
-    return [entry, addition];
+  Iterable<Entry> get entries {
+    return [entry, addition].whereType<Entry>();
+  }
+
+  Iterable<String> get entryIds {
+    return entries.map((entry) => entry.id);
   }
 
   bool get hasAddition {
     return addition != null;
   }
 
-  LoanPayment copyWith({double? amount, double? fee, DateTime? issuedAt}) {
+  LoanPayment copyWith({
+    double? amount,
+    double? fee,
+    DateTime? issuedAt,
+  }) {
     return LoanPayment(
       loanId: loanId,
       entryId: entryId,
@@ -139,10 +145,5 @@ class LoanPayment extends Controlable {
       updatedAt: DateTime.parse(row["updated_at"]),
       issuedAt: DateTime.parse(row["issued_at"]),
     );
-  }
-
-  @override
-  Controller toController() {
-    return Controller.loanPayment(loanId);
   }
 }

@@ -51,9 +51,19 @@ class AccountTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(account.name, style: theme.textTheme.titleSmall),
-                    Text(account.holderName, style: theme.textTheme.bodySmall),
-                    Text(account.kind.label, style: theme.textTheme.labelSmall),
+                    Text(
+                      account.name,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    Text(
+                      account.holderName,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    if (account.kind?.label != null)
+                      Text(
+                        account.kind!.label,
+                        style: theme.textTheme.labelSmall,
+                      ),
                   ],
                 ),
               ),

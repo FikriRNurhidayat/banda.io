@@ -5,13 +5,13 @@ class MainMenu extends StatelessWidget {
 
   final Map<String, String> menu = {
     "Accounts": "/accounts",
+    "Bills": "/bills",
     "Entries": "/entries",
     "Funds": "/funds",
     "Info": "/info",
     "Loans": "/loans",
     "Tools": "/tools",
     "Transfers": "/transfers",
-    // "Bills": "/bills",
     // "Budgets": "/budgets",
   };
 

@@ -4,23 +4,9 @@ import 'package:banda/features/accounts/widgets/account_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Accounts extends StatefulWidget {
+class Accounts extends StatelessWidget {
   const Accounts({super.key});
 
-  @override
-  State<StatefulWidget> createState() => _AccountsState();
-
-  Widget fabBuilder(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: () {
-        Navigator.pushNamed(context, "/accounts/new");
-      },
-    );
-  }
-}
-
-class _AccountsState extends State<Accounts> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -36,7 +22,7 @@ class _AccountsState extends State<Accounts> {
         centerTitle: true,
         actionsPadding: EdgeInsets.all(8),
       ),
-      floatingActionButton: widget.fabBuilder(context),
+      floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: accountProvider.search(),
         builder: (context, snapshot) {
@@ -66,6 +52,15 @@ class _AccountsState extends State<Accounts> {
           );
         },
       ),
+    );
+  }
+
+  Widget fabBuilder(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () {
+        Navigator.pushNamed(context, "/accounts/new");
+      },
     );
   }
 }

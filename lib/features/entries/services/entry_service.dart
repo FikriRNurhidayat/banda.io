@@ -26,7 +26,10 @@ class EntryService extends Service {
 
   Future<void> snooze(String id) async {
     return work(() async {
-      final entry = await entryRepository.withAccount().withLabels().get(id);
+      final entry = await entryRepository
+          .withAccount()
+          .withLabels()
+          .get(id);
       await entryRepository.save(
         entry.copyWith(issuedAt: entry.issuedAt.add(Duration(days: 1))),
       );
@@ -35,30 +38,45 @@ class EntryService extends Service {
 
   Future<void> markAsDone(String id) async {
     return work(() async {
-      final entry = await entryRepository.withAccount().withLabels().get(id);
-      await entryRepository.save(entry.copyWith(status: EntryStatus.done));
+      final entry = await entryRepository
+          .withAccount()
+          .withLabels()
+          .get(id);
+      await entryRepository.save(
+        entry.copyWith(status: EntryStatus.done),
+      );
     });
   }
 
   delete(String id) {
     return work(() async {
-      final entry = await entryRepository.withAccount().withLabels().get(id);
-
+      final entry = await entryRepository
+          .withAccount()
+          .withLabels()
+          .get(id);
       final account = entry.account.revokeEntry(entry);
       await entryRepository.delete(id);
       await accountRepository.save(account);
-      await notificationManager.cancelReminder(Controller.entry(entry.id));
+      await notificationManager.cancelReminder(
+        Controller.entry(entry.id),
+      );
     });
   }
 
   get(String id) {
-    return entryRepository.withLabels().withAccount().withCategory().get(id);
+    return entryRepository
+        .withLabels()
+        .withAccount()
+        .withCategory()
+        .get(id);
   }
 
   search({Filter? specification}) {
-    return entryRepository.withLabels().withAccount().withCategory().search(
-      specification,
-    );
+    return entryRepository
+        .withLabels()
+        .withAccount()
+        .withCategory()
+        .search(specification);
   }
 
   Future<Entry> create({
@@ -74,6 +92,9 @@ class EntryService extends Service {
     return work<Entry>(() async {
       final account = await accountRepository.get(accountId);
       final category = await categoryRepository.get(categoryId);
+      final labels = (labelIds != null && labelIds.isNotEmpty)
+          ? await labelRepository.getByIds(labelIds)
+          : [];
 
       final entry = Entry.writeable(
         note: note,
@@ -82,13 +103,9 @@ class EntryService extends Service {
         issuedAt: timestamp,
         categoryId: categoryId,
         accountId: accountId,
-      );
+      ).withLabels(labels).withAccount(account).withCategory(category);
 
-      await entryRepository.save(entry);
-      if (labelIds != null && labelIds.isNotEmpty) {
-        await entryRepository.setLabels(entry.id, labelIds);
-      }
-
+      await entryRepository.withLabels().withAnnotations().save(entry);
       await accountRepository.save(account.applyEntry(entry));
 
       if (entry.status.isPending()) {
@@ -130,18 +147,27 @@ class EntryService extends Service {
         notificationManager.cancelReminder(Controller.entry(entry.id));
       }
 
-      final newEntry = entry.copyWith(
-        note: note,
-        amount: Entry.compute(type, amount),
-        status: status,
-        issuedAt: timestamp,
-        categoryId: categoryId,
-        accountId: accountId,
-      );
       final newAccount = await accountRepository.get(accountId);
       final newCategory = await categoryRepository.get(categoryId);
+      final newLabels = (labelIds != null && labelIds.isNotEmpty)
+          ? await labelRepository.getByIds(labelIds)
+          : [];
+      final newEntry = entry
+          .copyWith(
+            note: note,
+            amount: Entry.compute(type, amount),
+            status: status,
+            issuedAt: timestamp,
+            categoryId: categoryId,
+            accountId: accountId,
+          )
+          .withLabels(newLabels)
+          .withAccount(newAccount)
+          .withCategory(newCategory);
 
-      await entryRepository.save(newEntry);
+      await entryRepository.withLabels().withAnnotations().save(
+        newEntry,
+      );
       await accountRepository.save(newAccount.applyEntry(newEntry));
 
       if (newEntry.status.isPending()) {
@@ -162,7 +188,8 @@ class EntryService extends Service {
 
     notificationManager.setReminder(
       title: entry.category.name,
-      body: "Reminder: One of your ledger entries is still pending settlement.",
+      body:
+          "Reminder: One of your ledger entries is still pending settlement.",
       sentAt: DateTime.now().add(Duration(seconds: 3)),
       controller: Controller.entry(entry.id),
       actions: [

@@ -1,9 +1,17 @@
+import 'package:banda/features/bills/providers/bill_provider.dart';
+import 'package:banda/features/bills/repositories/bill_repository.dart';
+import 'package:banda/features/bills/services/bill_service.dart';
+import 'package:banda/features/loans/providers/loan_payment_provider.dart';
 import 'package:banda/features/loans/providers/loan_tab_provider.dart';
+import 'package:banda/features/loans/services/loan_payment_service.dart';
 import 'package:banda/features/loans/services/loan_service.dart';
+import 'package:banda/features/main/providers/tool_provider.dart';
+import 'package:banda/features/main/services/tool_service.dart';
 import 'package:banda/features/transfers/providers/transfer_provider.dart';
 import 'package:banda/features/transfers/repositories/transfer_repository.dart';
 import 'package:banda/features/transfers/services/transfer_service.dart';
 import 'package:banda/features/loans/repositories/loan_payment_repository.dart';
+import 'package:banda/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,16 +44,19 @@ makeProvider({
   required Widget child,
   required NotificationHandler notificationHandler,
 }) async {
-  final notificationRepository = await NotificationRepository.build();
-  final categoryRepository = await CategoryRepository.build();
-  final entryRepository = await EntryRepository.build();
-  final accountRepository = await AccountRepository.build();
-  final transferRepository = await TransferRepository.build();
-  final loanRepository = await LoanRepository.build();
-  final loanPaymentRepository = await LoanPaymentRepository.build();
-  final labelRepository = await LabelRepository.build();
-  final partyRepository = await PartyRepository.build();
-  final fundRepository = await FundRepository.build();
+  final dbManager = DatabaseManager();
+
+  final notificationRepository = NotificationRepository(dbManager);
+  final categoryRepository = CategoryRepository(dbManager);
+  final entryRepository = EntryRepository(dbManager);
+  final accountRepository = AccountRepository(dbManager);
+  final transferRepository = TransferRepository(dbManager);
+  final loanRepository = LoanRepository(dbManager);
+  final loanPaymentRepository = LoanPaymentRepository(dbManager);
+  final labelRepository = LabelRepository(dbManager);
+  final partyRepository = PartyRepository(dbManager);
+  final fundRepository = FundRepository(dbManager);
+  final billRepository = BillRepository(dbManager);
 
   final notificationManager = NotificationManager(
     notificationRepository: notificationRepository,
@@ -64,10 +75,11 @@ makeProvider({
     categoryRepository: categoryRepository,
   );
   final transferService = TransferService(
-    categoryRepository: categoryRepository,
-    transferRepository: transferRepository,
-    entryRepository: entryRepository,
     accountRepository: accountRepository,
+    categoryRepository: categoryRepository,
+    entryRepository: entryRepository,
+    labelRepository: labelRepository,
+    transferRepository: transferRepository,
   );
   final loanService = LoanService(
     accountRepository: accountRepository,
@@ -86,40 +98,60 @@ makeProvider({
     labelRepository: labelRepository,
   );
 
+  final billService = BillService(
+    accountRepository: accountRepository,
+    billRepository: billRepository,
+    categoryRepository: categoryRepository,
+    entryRepository: entryRepository,
+    labelRepository: labelRepository,
+  );
+
+  final loanPaymentService = LoanPaymentService(
+    accountRepository: accountRepository,
+    entryRepository: entryRepository,
+    categoryRepository: categoryRepository,
+    loanRepository: loanRepository,
+    loanPaymentRepository: loanPaymentRepository,
+    partyRepository: partyRepository,
+    notificationManager: notificationManager,
+  );
+
+  final toolService = ToolService(dbManager);
+
   await notificationManager.init(
     notificationHandler,
     didReceiveBackgroundNotificationResponseCallback,
   );
 
-  return MultiProvider(
-    providers: [
-      ChangeNotifierProvider(
-        create: (context) => CategoryProvider(categoryRepository),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => AccountProvider(accountService: accountService),
-      ),
-      ChangeNotifierProvider(create: (context) => EntryProvider(entryService)),
-      ChangeNotifierProvider(
-        create: (context) => TransferProvider(transferService: transferService),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => FundProvider(fundService: fundService),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => LoanProvider(loanService: loanService),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => LabelProvider(labelRepository),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => PartyProvider(partyRepository),
-      ),
-      ChangeNotifierProvider(create: (context) => EntryFilterProvider()),
-      ChangeNotifierProvider(create: (context) => LoanFilterProvider()),
-      ChangeNotifierProvider(create: (context) => LoanTabProvider()),
-      ChangeNotifierProvider(create: (context) => FundFilterProvider()),
-    ],
-    child: child,
-  );
+  final providers = [
+    ChangeNotifierProvider(create: (_) => ToolProvider(toolService)),
+    ChangeNotifierProvider(
+      create: (_) => CategoryProvider(categoryRepository),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => AccountProvider(accountService),
+    ),
+    ChangeNotifierProvider(create: (_) => EntryProvider(entryService)),
+    ChangeNotifierProvider(
+      create: (_) => TransferProvider(transferService),
+    ),
+    ChangeNotifierProvider(create: (_) => FundProvider(fundService)),
+    ChangeNotifierProvider(create: (_) => LoanProvider(loanService)),
+    ChangeNotifierProvider(
+      create: (_) => LoanPaymentProvider(loanPaymentService),
+    ),
+    ChangeNotifierProvider(create: (_) => BillProvider(billService)),
+    ChangeNotifierProvider(
+      create: (_) => LabelProvider(labelRepository),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => PartyProvider(partyRepository),
+    ),
+    ChangeNotifierProvider(create: (_) => EntryFilterProvider()),
+    ChangeNotifierProvider(create: (_) => LoanFilterProvider()),
+    ChangeNotifierProvider(create: (_) => LoanTabProvider()),
+    ChangeNotifierProvider(create: (_) => FundFilterProvider()),
+  ];
+
+  return MultiProvider(providers: providers, child: child);
 }

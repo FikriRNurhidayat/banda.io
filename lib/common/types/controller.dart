@@ -40,4 +40,8 @@ class Controller {
   factory Controller.entry(String id) {
     return Controller(ControllerType.entry, id);
   }
+
+  factory Controller.purchase(String id) {
+    return Controller(ControllerType.purchase, id);
+  }
 }

@@ -2,6 +2,10 @@ import 'package:banda/features/accounts/views/account_editor.dart';
 import 'package:banda/features/accounts/views/account_entries.dart';
 import 'package:banda/features/accounts/views/account_menu.dart';
 import 'package:banda/features/accounts/views/accounts.dart';
+import 'package:banda/features/bills/views/bill_editor.dart';
+import 'package:banda/features/bills/views/bill_history.dart';
+import 'package:banda/features/bills/views/bill_menu.dart';
+import 'package:banda/features/bills/views/bills.dart';
 import 'package:banda/features/entries/views/entries.dart';
 import 'package:banda/features/entries/views/entry_editor.dart';
 import 'package:banda/features/entries/views/entry_filter.dart';
@@ -52,6 +56,21 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => EntryFilter(),
+        );
+      case '/bills':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Bills(),
+        );
+      case '/bills/new':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => BillEditor(),
+        );
+      case '/bills/filter':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => LoanFilter(),
         );
       case '/loans':
         return MaterialPageRoute(
@@ -135,6 +154,11 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
+        case 'bills':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => BillEditor(id: id),
+          );
         case 'entries':
           return MaterialPageRoute(
             settings: settings,
@@ -182,6 +206,11 @@ class Routes {
             settings: settings,
             builder: (context) => LoanMenu(id: id),
           );
+        case 'bills':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => BillMenu(id: id),
+          );
         case 'transfers':
           return MaterialPageRoute(
             settings: settings,
@@ -220,6 +249,18 @@ class Routes {
       }
     }
 
+    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "history") {
+      final id = uri.pathSegments[1];
+
+      switch (uri.pathSegments.first) {
+        case 'bills':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => BillHistory(id: id),
+          );
+      }
+    }
+
     if (uri.pathSegments.length == 3 && uri.pathSegments.last == "entries") {
       final id = uri.pathSegments[1];
 
@@ -246,6 +287,11 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
+        case 'bills':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => BillEditor(id: id, readOnly: true),
+          );
         case 'entries':
           return MaterialPageRoute(
             settings: settings,

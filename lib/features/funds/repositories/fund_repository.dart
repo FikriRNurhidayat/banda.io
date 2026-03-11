@@ -9,12 +9,8 @@ import 'package:sqlite3/sqlite3.dart';
 class FundRepository extends Repository {
   final WithArgs withArgs;
 
-  FundRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
-
-  static Future<FundRepository> build() async {
-    final db = await Repository.connect();
-    return FundRepository(db);
-  }
+  FundRepository(super.db, {WithArgs? withArgs})
+    : withArgs = withArgs ?? {};
 
   FundRepository withAccount() {
     withArgs.add("account");
@@ -27,7 +23,9 @@ class FundRepository extends Repository {
   }
 
   save(Fund fund) async {
-    db.execute(
+    final client = await getClient();
+
+    client.execute(
       "INSERT INTO funds (id, note, goal, balance, status, account_id, created_at, updated_at, released_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, goal = excluded.goal, balance = excluded.balance, account_id = excluded.account_id, updated_at = excluded.updated_at, status = excluded.status, released_at = excluded.released_at",
       [
         fund.id,
@@ -44,25 +42,30 @@ class FundRepository extends Repository {
   }
 
   Future<List<Fund>> search(Filter? spec) async {
-    final rows = db.select("SELECT funds.* FROM funds");
+    final client = await getClient();
+    final rows = client.select("SELECT funds.* FROM funds");
     return entities(rows);
   }
 
   Future<Fund> get(String id) async {
-    final rows = db.select("SELECT * FROM funds WHERE id = ?", [id]);
+    final client = await getClient();
+    final rows = client.select("SELECT * FROM funds WHERE id = ?", [
+      id,
+    ]);
     return entities(rows).then((fund) => fund.first);
   }
 
   sync(String id) async {
     return Repository.work<void>(() async {
-      final ResultSet rows = db.select(
+      final client = await getClient();
+      final ResultSet rows = client.select(
         "SELECT SUM(entries.amount) AS balance FROM fund_transactions JOIN entries ON entries.id = fund_transactions.entry_id WHERE fund_transactions.fund_id = ? AND entries.status = ?",
         [id, EntryStatus.done.label],
       );
 
       final balance = (rows.first["balance"] ?? 0);
 
-      db.execute("UPDATE funds SET balance = ? WHERE id = ?", [
+      client.execute("UPDATE funds SET balance = ? WHERE id = ?", [
         balance * -1,
         id,
       ]);
@@ -70,35 +73,39 @@ class FundRepository extends Repository {
   }
 
   saveTransaction(Fund fund, Entry entry) async {
+    final client = await getClient();
     final now = DateTime.now().toIso8601String();
 
-    db.execute(
+    client.execute(
       "INSERT INTO fund_transactions (fund_id, entry_id, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET updated_at = excluded.updated_at",
       [fund.id, entry.id, now, now],
     );
   }
 
   removeTransaction(Fund fund, Entry entry) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "DELETE FROM fund_transactions WHERE fund_id = ? AND entry_id = ?",
       [fund.id, entry.id],
     );
 
-    db.execute("DELETE FROM entries WHERE id = ?", [entry.id]);
+    client.execute("DELETE FROM entries WHERE id = ?", [entry.id]);
   }
 
   removeTransactions(Fund fund) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "DELETE FROM entries WHERE id IN (SELECT fund_transactions.entry_id FROM fund_transactions WHERE fund_transactions.fund_id = ?)",
       [fund.id],
     );
   }
 
   delete(String id) async {
-    db.execute("DELETE FROM fund WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM fund WHERE id = ?", [id]);
   }
 
-  setLabels(String fundId, List<String> labelIds) {
+  saveLabels(String fundId, List<String> labelIds) {
     return setEntityLabels(
       entityId: fundId,
       labelIds: labelIds,

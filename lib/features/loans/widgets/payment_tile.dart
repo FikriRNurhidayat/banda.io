@@ -20,7 +20,11 @@ class PaymentTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return await confirmLoanPaymentDeletion(context, loan, payment.entry);
+      return await confirmLoanPaymentDeletion(
+        context,
+        loan,
+        payment.entry,
+      );
     }
 
     Navigator.pushNamed(
@@ -65,6 +69,24 @@ class PaymentTile extends StatelessWidget {
     return MoneyText(payment.amount.abs(), useSymbol: false);
   }
 
+  headerBuilder(BuildContext context, LoanPayment payment) {
+    final theme = Theme.of(context);
+
+    return Row(
+      spacing: 8,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          payment.entry.category.name,
+          style: theme.textTheme.titleSmall,
+        ),
+        if (loan.status.isSettled)
+          Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
+      ],
+    );
+  }
+
   paymentBuilder(BuildContext context, LoanPayment payment) {
     return tileBuilder(
       context,
@@ -75,7 +97,14 @@ class PaymentTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          infoBuilder(context, payment),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              headerBuilder(context, payment),
+              infoBuilder(context, payment),
+            ],
+          ),
           amountBuilder(context, payment),
         ],
       ),
@@ -87,7 +116,7 @@ class PaymentTile extends StatelessWidget {
     return dismissibleBuilder(
       context,
       key: payment.entry.id,
-      dismissable: !loan.status.isSettled(),
+      dismissable: !loan.status.isSettled,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);
       },

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS transfers (
     id TEXT PRIMARY KEY,
-    note TEXT NOT NULL,
+    note TEXT,
     amount REAL NOT NULL,
     fee REAL,
     issued_at TEXT NOT NULL,

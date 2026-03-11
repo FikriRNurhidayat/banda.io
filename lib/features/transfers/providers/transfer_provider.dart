@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class TransferProvider extends ChangeNotifier {
   final TransferService transferService;
 
-  TransferProvider({required this.transferService});
+  TransferProvider(this.transferService);
 
   Future<List<Transfer>> search() async {
     return transferService.search();

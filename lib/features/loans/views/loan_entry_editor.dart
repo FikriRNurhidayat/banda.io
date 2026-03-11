@@ -1,8 +1,10 @@
 import 'package:banda/common/decorations/input_styles.dart';
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/loans/entities/loan_payment.dart';
 import 'package:banda/common/helpers/type_helper.dart';
 import 'package:banda/features/accounts/providers/account_provider.dart';
+import 'package:banda/features/loans/providers/loan_payment_provider.dart';
 import 'package:banda/features/loans/providers/loan_provider.dart';
 import 'package:banda/common/types/form_data.dart';
 import 'package:banda/common/widgets/amount_form_field.dart';
@@ -44,12 +46,12 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final loanProvider = context.read<LoanProvider>();
+    final loanPaymentProvider = context.read<LoanPaymentProvider>();
 
     if (form.currentState!.validate()) {
       try {
         if (isNull(widget.entryId)) {
-          await loanProvider.createPayment(
+          await loanPaymentProvider.create(
             widget.loanId,
             amount: d["amount"],
             fee: d["fee"],
@@ -59,7 +61,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
         }
 
         if (!isNull(widget.entryId)) {
-          await loanProvider.updatePayment(
+          await loanPaymentProvider.update(
             widget.loanId,
             widget.entryId!,
             amount: d["amount"],
@@ -76,9 +78,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Edit loan payment details failed!")),
-        );
+        alert(messenger, "Edit loan payment details failed!");
       }
     }
   }
@@ -93,6 +93,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
     final theme = Theme.of(context);
     final accountProvider = context.watch<AccountProvider>();
     final loanProvider = context.watch<LoanProvider>();
+    final loanPaymentProvider = context.watch<LoanPaymentProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -128,7 +129,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
               accountProvider.search(),
               loanProvider.get(widget.loanId),
               if (widget.entryId != null)
-                loanProvider.getPayment(widget.loanId, widget.entryId!),
+                loanPaymentProvider.get(widget.loanId, widget.entryId!),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -159,7 +160,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                         labelText: "Amount",
                         hintText: "Enter amount...",
                       ),
-                      initialValue: d["amount"]?.abs() ?? payment?.amount,
+                      initialValue:
+                          d["amount"]?.abs() ?? payment?.amount,
                       onSaved: (value) => d["amount"] = value,
                       validator: (value) =>
                           value == null ? "Enter amount" : null,
@@ -173,17 +175,17 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                         ),
                         initialValue: d["fee"]?.abs() ?? payment?.fee,
                         onSaved: (value) => d["fee"] = value,
-                        validator: (value) =>
-                            value == null ? "Enter fee" : null,
                       ),
                     WhenFormField(
                       readOnly: widget.readOnly,
                       options: WhenOption.min,
                       initialValue:
-                          d["issuedAt"] ?? When.specificTime(payment?.issuedAt),
+                          d["issuedAt"] ??
+                          When.specificTime(payment?.issuedAt),
                       onSaved: (value) => d["issuedAt"] = value,
-                      validator: (value) =>
-                          value == null ? "Date & time are required" : null,
+                      validator: (value) => value == null
+                          ? "Date & time are required"
+                          : null,
                       decoration: InputStyles.field(
                         hintText: "Select date & time...",
                         labelText: "Date & Time",
@@ -228,7 +230,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: d["accountId"] ?? payment?.entry.accountId,
+                      initialValue:
+                          d["accountId"] ?? payment?.entry.accountId,
                       onSaved: (value) => d["accountId"] = value,
                     ),
                   ],

@@ -3,8 +3,7 @@ import 'package:banda/features/entries/entities/entry.dart';
 
 enum AccountKind {
   bankAccount('Bank Account'),
-  ewallet('E-Wallet'),
-  cash('Cash');
+  ewallet('E-Wallet');
 
   final String label;
   const AccountKind(this.label);
@@ -14,7 +13,7 @@ class Account {
   final String id;
   final String name;
   final String holderName;
-  final AccountKind kind;
+  final AccountKind? kind;
   final double balance;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -28,6 +27,13 @@ class Account {
     required this.updatedAt,
     required this.balance,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Account && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 
   Account copyWith({
     String? id,
@@ -55,7 +61,9 @@ class Account {
 
   Account applyDelta(EntryType type, double delta) {
     return copyWith(
-      balance: type == EntryType.income ? balance + delta : balance - delta,
+      balance: type == EntryType.income
+          ? balance + delta
+          : balance - delta,
     );
   }
 
@@ -63,7 +71,7 @@ class Account {
     return copyWith(balance: balance + entry.amount);
   }
 
-  Account applyEntries(List<Entry?> entries) {
+  Account applyEntries(Iterable<Entry?> entries) {
     double newBalance = balance;
 
     for (var entry in entries) {
@@ -75,7 +83,7 @@ class Account {
     return copyWith(balance: newBalance);
   }
 
-  Account revokeEntries(List<Entry?> entries) {
+  Account revokeEntries(Iterable<Entry?> entries) {
     double newBalance = balance;
 
     for (var entry in entries) {
@@ -117,7 +125,10 @@ class Account {
       id: row["id"],
       name: row["name"],
       holderName: row["holder_name"],
-      kind: AccountKind.values.firstWhere((e) => e.label == row["kind"]),
+      kind: AccountKind.values.cast<AccountKind?>().firstWhere(
+        (kind) => kind!.label == row["kind"],
+        orElse: () => null,
+      ),
       balance: row["balance"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
@@ -127,7 +138,7 @@ class Account {
   factory Account.create({
     required String name,
     required String holderName,
-    required AccountKind kind,
+    required AccountKind? kind,
     required double balance,
   }) {
     return Account(

@@ -6,6 +6,7 @@ enum ControllerType {
   loan('Loan'),
   loanPayment('Loan Payment'),
   bill('Bill'),
+  purchase('Purchase'),
   unknown('Unknown');
 
   static parse(String name) {

@@ -5,8 +5,9 @@ import 'package:banda/features/entries/entities/entry.dart';
 import 'package:banda/common/types/controller.dart';
 
 class Transfer extends Controlable {
+  @override
   final String id;
-  final String note;
+  final String? note;
   final double amount;
   final double? fee;
   final String debitId;
@@ -26,9 +27,9 @@ class Transfer extends Controlable {
 
   Transfer({
     required this.id,
-    required this.note,
+    this.note,
     required this.amount,
-    required this.fee,
+    this.fee,
     required this.debitId,
     required this.debitAccountId,
     this.exchangeId,
@@ -38,6 +39,26 @@ class Transfer extends Controlable {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  Iterable<Entry> get credits {
+    return [credit, exchange].whereType<Entry>();
+  }
+
+  Iterable<Entry> get entries {
+    return [debit, credit, exchange].whereType<Entry>();
+  }
+
+  Iterable<String> get entryIds {
+    return entries.map((entry) => entry.id);
+  }
+
+  Iterable<Account> get accounts {
+    return [debitAccount, creditAccount].whereType<Account>();
+  }
+
+  Iterable<String> get accountIds {
+    return accounts.map((account) => account.id);
+  }
 
   toMap() {
     return {
@@ -78,9 +99,9 @@ class Transfer extends Controlable {
   }
 
   factory Transfer.create({
-    required String note,
+    String? note,
     required double amount,
-    required double? fee,
+    double? fee,
     required String debitId,
     required String debitAccountId,
     String? exchangeId,
@@ -104,28 +125,47 @@ class Transfer extends Controlable {
     );
   }
 
-  Transfer withDebit(Entry? value) {
-    if (value != null) debit = value;
+  Transfer setExchangeId(String? exchangeId) {
+    return Transfer(
+      id: id,
+      note: note,
+      amount: amount,
+      fee: fee,
+      debitId: debitId,
+      debitAccountId: debitAccountId,
+      exchangeId: exchangeId,
+      creditId: creditId,
+      creditAccountId: creditAccountId,
+      issuedAt: issuedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+
+  Transfer withDebit(Entry? debit) {
+    if (debit != null) this.debit = debit;
     return this;
   }
 
-  Transfer withExchange(Entry? value) {
-    if (value != null) exchange = value;
+  Transfer withExchange(Entry? exchange) {
+    this.exchange = exchange;
     return this;
   }
 
-  Transfer withCredit(Entry? value) {
-    if (value != null) credit = value;
+  Transfer withCredit(Entry? credit) {
+    if (credit != null) this.credit = credit;
     return this;
   }
 
-  Transfer withDebitAccount(Account? value) {
-    if (value != null) debitAccount = value;
+  Transfer withDebitAccount(Account? debitAccount) {
+    if (debitAccount != null) this.debitAccount = debitAccount;
     return this;
   }
 
-  Transfer withCreditAccount(Account? value) {
-    if (value != null) creditAccount = value;
+  Transfer withCreditAccount(Account? creditAccount) {
+    if (creditAccount != null) {
+      this.creditAccount = creditAccount;
+    }
     return this;
   }
 
@@ -154,6 +194,10 @@ class Transfer extends Controlable {
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );
+  }
+
+  get hasExchange {
+    return exchangeId != null;
   }
 
   @override

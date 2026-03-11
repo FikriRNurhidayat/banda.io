@@ -7,6 +7,7 @@ import 'package:banda/common/types/controller.dart';
 import 'package:banda/common/types/transaction_type.dart';
 
 class Fund extends Controlable {
+  @override
   final String id;
   final String? note;
   final double goal;

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class FundProvider extends ChangeNotifier {
   final FundService fundService;
 
-  FundProvider({required this.fundService});
+  FundProvider(this.fundService);
 
   Future<List<Fund>> search(Filter? specification) async {
     return await fundService.search(specification);

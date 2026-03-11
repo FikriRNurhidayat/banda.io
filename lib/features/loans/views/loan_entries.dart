@@ -4,6 +4,7 @@ import 'package:banda/features/entries/widgets/entry_tile.dart';
 import 'package:banda/features/loans/entities/loan.dart';
 import 'package:banda/features/loans/entities/loan_payment.dart';
 import 'package:banda/common/helpers/future_helper.dart';
+import 'package:banda/features/loans/providers/loan_payment_provider.dart';
 import 'package:banda/features/loans/providers/loan_provider.dart';
 import 'package:banda/features/loans/widgets/payment_tile.dart';
 import 'package:banda/features/loans/widgets/loan_tile.dart';
@@ -41,11 +42,13 @@ class _LoanEntriesState extends State<LoanEntries>
   }
 
   fabBuilder(BuildContext context, Loan loan) {
-    if (loan.status.isSettled()) return null;
+    if (loan.status.isSettled) return null;
 
     return FloatingActionButton(
       onPressed: () {
-        Navigator.of(context).pushNamed("/loans/${widget.id}/payments/new");
+        Navigator.of(
+          context,
+        ).pushNamed("/loans/${widget.id}/payments/new");
       },
       child: Icon(Icons.add),
     );
@@ -74,7 +77,7 @@ class _LoanEntriesState extends State<LoanEntries>
   }
 
   tabBuilder(Loan loan) {
-    final loanProvider = context.watch<LoanProvider>();
+    final loanPaymentProvider = context.watch<LoanPaymentProvider>();
     final entryProvider = context.watch<EntryProvider>();
 
     return [
@@ -90,7 +93,7 @@ class _LoanEntriesState extends State<LoanEntries>
           controller: tabController,
           children: [
             FutureBuilder(
-              future: loanProvider.searchPayments(widget.id),
+              future: loanPaymentProvider.search(widget.id),
               builder: futureBuilder((context, snapshot) {
                 final payments = snapshot.data as List<LoanPayment>;
 
@@ -136,7 +139,10 @@ class _LoanEntriesState extends State<LoanEntries>
           appBar: appBarBuilder(context),
           floatingActionButton: fabBuilder(context, loan),
           body: Column(
-            children: [LoanTile(loan, readOnly: true), ...tabBuilder(loan)],
+            children: [
+              LoanTile(loan, readOnly: true),
+              ...tabBuilder(loan),
+            ],
           ),
         );
       }),

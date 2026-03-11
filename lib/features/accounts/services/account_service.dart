@@ -21,7 +21,7 @@ class AccountService extends Service {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind kind,
+    required AccountKind? kind,
   }) {
     return work<Account>(() async {
       final account = Account.create(
@@ -56,7 +56,7 @@ class AccountService extends Service {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind kind,
+    required AccountKind? kind,
   }) {
     return work(() async {
       final account = await accountRepository.get(id);

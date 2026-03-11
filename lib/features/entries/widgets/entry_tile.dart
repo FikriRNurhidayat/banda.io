@@ -43,7 +43,7 @@ class EntryTile extends StatelessWidget {
         );
         break;
       case ControllerType.bill:
-        Navigator.pushNamed(context, "/bills/${entry.controller!.id}/detail");
+        Navigator.pushNamed(context, "/bills/${entry.controller!.id}/history");
         break;
       case ControllerType.loan:
         Navigator.pushNamed(context, "/loans/${entry.controller!.id}/payments");
@@ -89,7 +89,7 @@ class EntryTile extends StatelessWidget {
       children: [
         AccountText(entry.account),
         DateTimeText(entry.issuedAt),
-        if (!isNull(entry.note))
+        if (!isNull(entry.note) && entry.note!.isNotEmpty)
           Text(
             entry.note!,
             overflow: TextOverflow.ellipsis,

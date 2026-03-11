@@ -1,4 +1,3 @@
-import 'package:banda/common/entities/annotation.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/tags/entities/category.dart';
 import 'package:banda/common/entities/controlable.dart';
@@ -21,10 +20,10 @@ class Entry extends Entity {
   final DateTime updatedAt;
   final Controller? controller;
 
-  late List<Label> labels;
+  List<Label> labels = [];
   late Category category;
   late Account account;
-  List<Annotation> annotations = [];
+  Map<String, dynamic>? annotations = {};
 
   @override
   bool operator ==(Object other) =>
@@ -45,10 +44,12 @@ class Entry extends Entity {
     required this.createdAt,
     required this.updatedAt,
     this.controller,
+    this.annotations,
   });
 
-  Entry annotate(Annotations name, dynamic value) {
-    annotations.add(Annotation(entryId: id, name: name, value: value));
+  Entry annotate(String name, dynamic value) {
+    annotations ??= {};
+    annotations![name] = value is String ? value : value.toString();
     return this;
   }
 
@@ -88,7 +89,7 @@ class Entry extends Entity {
     return labels.map((l) => l.id).toList();
   }
 
-  Entry withAnnotations(List<Annotation>? annotations) {
+  Entry withAnnotations(Map<String, dynamic>? annotations) {
     if (annotations != null) this.annotations = annotations;
     return this;
   }
@@ -108,7 +109,7 @@ class Entry extends Entity {
     return this;
   }
 
-  controlledBy(Controlable controlable) {
+  Entry controlledBy(Controlable controlable) {
     return copyWith(controller: controlable.toController());
   }
 
@@ -137,6 +138,7 @@ class Entry extends Entity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       controller: controller ?? this.controller,
+      annotations: annotations,
     );
   }
 

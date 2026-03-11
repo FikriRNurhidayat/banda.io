@@ -5,12 +5,16 @@ import 'package:uuid/uuid.dart';
 typedef WithArgs = Set<String>;
 
 class Repository {
-  final Database db;
+  final DatabaseManager db;
+
   Repository(this.db);
-  static Future<Database> connect() => DB().connection;
 
   static String getId() {
     return Uuid().v4();
+  }
+
+  getClient() async {
+    return db.current;
   }
 
   populateCategory(List<Map> mainRows) async {
@@ -50,7 +54,9 @@ class Repository {
     String junctionTable,
     String junctionKey,
   ) async {
-    final List<String> ids = rows.map((row) => row["id"] as String).toList();
+    final List<String> ids = rows
+        .map((row) => row["id"] as String)
+        .toList();
 
     final labelRows = await getEntityLabels(
       entityIds: ids,
@@ -69,35 +75,68 @@ class Repository {
   }
 
   getLoanByIds(List<String> ids) async {
-    return db.select(
+    final client = await getClient();
+    return client.select(
       "SELECT * FROM loans WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }
 
   getAccountByIds(List<String> ids) async {
-    return db.select(
+    final client = await getClient();
+    return client.select(
       "SELECT * FROM accounts WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }
 
   Future<ResultSet> getEntryByIds(List<String> ids) async {
-    return db.select(
+    final client = await getClient();
+    return client.select(
       "SELECT * FROM entries WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }
 
+  Future<ResultSet> getAnnotations(List<String> ids) async {
+    final client = await getClient();
+    return client.select(
+      "SELECT * FROM entry_annotations WHERE entry_id IN (${ids.map((_) => "?").join(", ")})",
+      ids,
+    );
+  }
+
+  Future<Iterable<Map>> getAnnotatedEntriesByIds(
+    List<String> ids,
+  ) async {
+    final entryRows = await getEntryByIds(ids);
+    final annotationRows = await getAnnotations(ids);
+
+    return entryRows.map((entry) {
+      final annotations = <String, dynamic>{};
+      for (var annotation in annotationRows.where(
+        (annotation) => annotation["entry_id"] == entry["id"],
+      )) {
+        final key = annotation["name"] as String;
+        final value = annotation["value"];
+        annotations[key] = value;
+      }
+
+      return {...entry, "annotations": annotations};
+    });
+  }
+
   getPartyByIds(List<String> ids) async {
-    return db.select(
+    final client = await getClient();
+    return client.select(
       "SELECT * FROM parties WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }
 
   getCategoryByIds(List<String> ids) async {
-    return db.select(
+    final client = await getClient();
+    return client.select(
       "SELECT * FROM categories WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
@@ -108,7 +147,8 @@ class Repository {
     required String junctionTable,
     required String junctionKey,
   }) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "DELETE FROM $junctionTable WHERE $junctionTable.$junctionKey = ?",
       [entityId],
     );
@@ -119,7 +159,9 @@ class Repository {
     required String junctionTable,
     required String junctionKey,
   }) async {
-    if (entityIds == null || entityIds.isEmpty) return ResultSet([], [], []);
+    if (entityIds == null || entityIds.isEmpty) {
+      return ResultSet([], [], []);
+    }
 
     final idsPlaceholder = entityIds.map((_) => "?").join(", ");
     final labelsQuery =
@@ -130,7 +172,8 @@ class Repository {
       ORDER BY labels.name ASC;
     """;
 
-    final ResultSet rows = db.select(labelsQuery, entityIds);
+    final client = await getClient();
+    final ResultSet rows = client.select(labelsQuery, entityIds);
     return rows;
   }
 
@@ -140,15 +183,19 @@ class Repository {
     required String junctionTable,
     required String junctionKey,
   }) async {
-    if (labelIds == null || labelIds.isEmpty) return;
-
     await resetEntityLabels(
       entityId: entityId,
       junctionTable: junctionTable,
       junctionKey: junctionKey,
     );
 
-    db.execute(
+    if (labelIds == null || labelIds.isEmpty) {
+      return;
+    }
+
+    final client = await getClient();
+
+    client.execute(
       "INSERT INTO $junctionTable ($junctionKey, label_id) VALUES ${labelIds.map((_) => '(?, ?)').join(",")}",
       labelIds
           .map((labelId) => [entityId, labelId])
@@ -162,15 +209,21 @@ class Repository {
   }
 
   static begin() async {
-    DB.beginTransaction();
+    final connection = DatabaseManager();
+    final client = await connection.current;
+    client.execute("BEGIN TRANSACTION");
   }
 
   static commit() async {
-    DB.commit();
+    final connection = DatabaseManager.getSingleton();
+    final client = await connection.current;
+    client.execute("COMMIT");
   }
 
   static rollback() async {
-    DB.rollback();
+    final connection = DatabaseManager.getSingleton();
+    final client = await connection.current;
+    client.execute("ROLLBACK");
   }
 
   static Future<T> work<T>(Future<T> Function() callback) async {

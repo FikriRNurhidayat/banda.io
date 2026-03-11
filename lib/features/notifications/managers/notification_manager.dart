@@ -44,7 +44,6 @@ class NotificationManager {
             AndroidFlutterLocalNotificationsPlugin
           >()!
           .requestExactAlarmsPermission();
-      // await notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!.requestNotificationPolicyAccess();
       await notificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin

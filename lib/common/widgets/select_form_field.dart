@@ -1,3 +1,4 @@
+import 'package:banda/common/types/widget_list_builder.dart';
 import 'package:flutter/material.dart';
 
 class SelectItem<T> {
@@ -21,6 +22,7 @@ class SelectFormField<T> extends FormField<T> {
     super.initialValue,
     InputDecoration? decoration,
     List<Widget>? actions,
+    WidgetListBuilder? actionsBuilder,
     super.autovalidateMode,
     super.enabled,
     super.onSaved,
@@ -53,6 +55,11 @@ class SelectFormField<T> extends FormField<T> {
                  }).toList();
 
            if (actions != null) {
+             chips.addAll(actions);
+           }
+
+           if (actionsBuilder != null) {
+             final actions = actionsBuilder(state.context);
              chips.addAll(actions);
            }
 

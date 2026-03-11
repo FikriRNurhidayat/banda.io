@@ -25,7 +25,7 @@ class MoneyText extends StatelessWidget {
 
   String formatAmount(double value) {
     return value
-        .toStringAsFixed(3)
+        .toStringAsFixed(2)
         .replaceFirst(RegExp(r'\.?0+$'), ''); // trims .000 / .100 etc.
   }
 

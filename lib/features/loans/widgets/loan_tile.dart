@@ -15,11 +15,16 @@ class LoanTile extends StatelessWidget {
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/loans/${loan.id}/detail" : "/loans/${loan.id}/payments",
+      readOnly
+          ? "/loans/${loan.id}/detail"
+          : "/loans/${loan.id}/payments",
     );
   }
 
-  handleDismiss(BuildContext context, DismissDirection direction) async {
+  handleDismiss(
+    BuildContext context,
+    DismissDirection direction,
+  ) async {
     if (direction == DismissDirection.startToEnd) {
       return confirmLoanDeletion(context, loan);
     }
@@ -44,64 +49,74 @@ class LoanTile extends StatelessWidget {
           size: 8,
         );
       case LoanStatus.settled:
-        return Icon(Icons.check, color: theme.colorScheme.primary, size: 8);
+        return Icon(
+          Icons.check,
+          color: theme.colorScheme.primary,
+          size: 8,
+        );
     }
   }
 
   infoBuilder(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(loan.type.label, style: theme.textTheme.titleSmall),
-            statusBuilder(context),
-          ],
-        ),
-        DateTimeText(loan.issuedAt),
-        AccountText(loan.account),
-        Text(loan.party.name, style: theme.textTheme.bodySmall),
-      ],
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            spacing: 8,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(loan.type.label, style: theme.textTheme.titleSmall),
+              statusBuilder(context),
+            ],
+          ),
+          DateTimeText(loan.issuedAt),
+          AccountText(loan.account),
+          Text(loan.party.name, style: theme.textTheme.bodySmall),
+        ],
+      ),
     );
   }
 
   progressBuilder(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 8,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MoneyText(
-              loan.paid,
-              useSymbol: false,
-              style: theme.textTheme.bodySmall,
-            ),
-            Text("/"),
-            MoneyText(
-              loan.amount,
-              useSymbol: false,
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        ),
-        Badge(
-          padding: EdgeInsets.all(0),
-          label: Text(loan.status.label),
-          textColor: theme.colorScheme.onSurface,
-          backgroundColor: Colors.transparent,
-        ),
-      ],
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 8,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MoneyText(
+                loan.paid,
+                useSymbol: false,
+                style: theme.textTheme.bodySmall,
+              ),
+              Text("/"),
+              MoneyText(
+                loan.amount,
+                useSymbol: false,
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
+          Badge(
+            padding: EdgeInsets.all(0),
+            label: Text(loan.status.label),
+            textColor: theme.colorScheme.onSurface,
+            backgroundColor: Colors.transparent,
+          ),
+        ],
+      ),
     );
   }
 

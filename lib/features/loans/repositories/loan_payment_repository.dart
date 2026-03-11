@@ -35,13 +35,9 @@ class LoanPaymentRepository extends Repository {
     return this;
   }
 
-  static Future<LoanPaymentRepository> build() async {
-    final db = await Repository.connect();
-    return LoanPaymentRepository(db);
-  }
-
   save(LoanPayment entity) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO loan_payments (loan_id, entry_id, addition_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET addition_id = excluded.addition_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, loan_id = excluded.loan_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         entity.loanId,
@@ -56,28 +52,31 @@ class LoanPaymentRepository extends Repository {
     );
   }
 
-  Future<List<LoanPayment>> search({Filter? specification}) async {
+  Future<List<LoanPayment>> search({Filter? filter}) async {
     var baseQuery = "SELECT loan_payments.* FROM loan_payments";
 
-    final query = _defineQuery(baseQuery, specification);
-    final sqlString = "${query.first} ORDER BY loan_payments.created_at DESC";
+    final query = _defineQuery(baseQuery, filter);
+    final sqlString =
+        "${query.first} ORDER BY loan_payments.created_at DESC";
     final sqlArgs = query.second;
 
-    final loanRows = db.select(sqlString, sqlArgs);
+    final client = await getClient();
+    final loanRows = client.select(sqlString, sqlArgs);
 
     return await _entities(loanRows);
   }
 
-  Future<List<LoanPayment>> of(Loan loan) {
+  Future<List<LoanPayment>> getByLoanId(String loanId) {
     return search(
-      specification: {
-        "loan_in": [loan.id],
+      filter: {
+        "loan_in": [loanId],
       },
     );
   }
 
   Future<LoanPayment> get(String loanId, String entryId) async {
-    final rows = db.select(
+    final client = await getClient();
+    final rows = client.select(
       "SELECT * FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
       [loanId, entryId],
     );
@@ -85,10 +84,11 @@ class LoanPaymentRepository extends Repository {
   }
 
   delete(String loanId, String entryId) async {
-    db.execute("DELETE FROM loan_payments WHERE loan_id = ? AND entry_id = ?", [
-      loanId,
-      entryId,
-    ]);
+    final client = await getClient();
+    client.execute(
+      "DELETE FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
+      [loanId, entryId],
+    );
   }
 
   _defineQuery(String baseQuery, Filter? spec) {
@@ -168,9 +168,12 @@ class LoanPaymentRepository extends Repository {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .map(
-            (row) => [row["entry_id"] as String, row["addition_id"] as String],
+            (row) => [
+              row["entry_id"],
+              row["addition_id"],
+            ].whereType<String>(),
           )
-          .expand((id) => id)
+          .expand((i) => i)
           .toList();
       final entryRows = await getEntryByIds(entryIds);
       rows = rows.map((row) {
@@ -197,7 +200,8 @@ class LoanPaymentRepository extends Repository {
           return {
             ...row,
             "category": categoryRows.firstWhere(
-              (categoryRow) => categoryRow["id"] == row["entry"]["category_id"],
+              (categoryRow) =>
+                  categoryRow["id"] == row["entry"]["category_id"],
             ),
           };
         }).toList();
@@ -213,7 +217,8 @@ class LoanPaymentRepository extends Repository {
           return {
             ...row,
             "account": accountRows.firstWhere(
-              (accountRow) => accountRow["id"] == row["entry"]["account_id"],
+              (accountRow) =>
+                  accountRow["id"] == row["entry"]["account_id"],
             ),
           };
         }).toList();
@@ -221,7 +226,9 @@ class LoanPaymentRepository extends Repository {
     }
 
     if (withArgs.contains("loan")) {
-      final loanIds = rows.map((row) => row["loan_id"] as String).toList();
+      final loanIds = rows
+          .map((row) => row["loan_id"] as String)
+          .toList();
       final loanRows = await getLoanByIds(loanIds);
 
       rows = rows.map((row) {

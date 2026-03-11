@@ -1,8 +1,12 @@
+import 'package:banda/common/helpers/alert_helper.dart';
 import 'package:banda/common/widgets/flash.dart';
 import 'package:banda/features/accounts/entities/account.dart';
+import 'package:banda/features/bills/entities/bill.dart';
+import 'package:banda/features/bills/providers/bill_provider.dart';
 import 'package:banda/features/entries/entities/entry.dart';
 import 'package:banda/features/loans/entities/loan.dart';
 import 'package:banda/features/funds/entities/fund.dart';
+import 'package:banda/features/loans/providers/loan_payment_provider.dart';
 import 'package:banda/features/transfers/entities/transfer.dart';
 import 'package:banda/features/transfers/providers/transfer_provider.dart';
 import 'package:banda/features/accounts/providers/account_provider.dart';
@@ -44,7 +48,12 @@ flash(
   required Future<void> Function(BuildContext context)? onTap,
 }) async {
   final navigator = Navigator.of(context);
-  return navigateFlash(navigator, title: title, content: content, onTap: onTap);
+  return navigateFlash(
+    navigator,
+    title: title,
+    content: content,
+    onTap: onTap,
+  );
 }
 
 Future<bool?> ask(
@@ -93,16 +102,17 @@ Future<bool?> confirmFundTransactionDeletion(
       await fundProvider
           .deleteTransaction(fundId: fund.id, entryId: entry.id)
           .catchError((error) {
-            messenger.showSnackBar(
-              SnackBar(content: Text("Delete fund entry failed")),
-            );
+            alert(messenger, "Delete fund entry failed");
             throw error;
           });
     },
   );
 }
 
-Future<bool?> confirmFundDeletion(BuildContext context, Fund fund) async {
+Future<bool?> confirmFundDeletion(
+  BuildContext context,
+  Fund fund,
+) async {
   return ask(
     context,
     title: "Delete fund",
@@ -113,14 +123,46 @@ Future<bool?> confirmFundDeletion(BuildContext context, Fund fund) async {
       final fundProvider = context.read<FundProvider>();
 
       await fundProvider.delete(fund.id).catchError((error) {
-        messenger.showSnackBar(SnackBar(content: Text("Delete fund failed")));
+        alert(messenger, "Delete fund failed");
         throw error;
       });
     },
   );
 }
 
-Future<bool?> confirmLoanDeletion(BuildContext context, Loan loan) async {
+Future<bool?> confirmBillDeletion(
+  BuildContext context,
+  Bill bill,
+) async {
+  return ask(
+    context,
+    title: "Delete bill",
+    content:
+        "You're about to delete this bill, this action cannot be reversed. Are you sure?",
+    onConfirm: (context) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final billProvider = context.read<BillProvider>();
+
+      await billProvider.delete(bill.id).catchError((
+        error,
+        stackTrace,
+      ) {
+        if (kDebugMode) {
+          print(error);
+          print(stackTrace);
+        }
+
+        alert(messenger, "Delete bill failed");
+        throw error;
+      });
+    },
+  );
+}
+
+Future<bool?> confirmLoanDeletion(
+  BuildContext context,
+  Loan loan,
+) async {
   return ask(
     context,
     title: "Delete loan",
@@ -130,13 +172,16 @@ Future<bool?> confirmLoanDeletion(BuildContext context, Loan loan) async {
       final messenger = ScaffoldMessenger.of(context);
       final loanProvider = context.read<LoanProvider>();
 
-      await loanProvider.delete(loan.id).catchError((error, stackTrace) {
+      await loanProvider.delete(loan.id).catchError((
+        error,
+        stackTrace,
+      ) {
         if (kDebugMode) {
           print(error);
           print(stackTrace);
         }
 
-        messenger.showSnackBar(SnackBar(content: Text("Delete loan failed")));
+        alert(messenger, "Delete loan failed");
         throw error;
       });
     },
@@ -165,9 +210,7 @@ Future<bool?> confirmTransferDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete transfer failed")),
-        );
+        alert(messenger, "Delete transfer failed");
         throw error;
       });
     },
@@ -188,16 +231,17 @@ Future<bool?> confirmAccountDeletion(
       final accountProvider = context.read<AccountProvider>();
 
       await accountProvider.delete(account.id).catchError((error) {
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete account failed")),
-        );
+        alert(messenger, "Delete account failed");
         throw error;
       });
     },
   );
 }
 
-Future<bool?> confirmEntryDeletion(BuildContext context, Entry entry) async {
+Future<bool?> confirmEntryDeletion(
+  BuildContext context,
+  Entry entry,
+) async {
   return ask(
     context,
     title: "Delete entry",
@@ -207,13 +251,16 @@ Future<bool?> confirmEntryDeletion(BuildContext context, Entry entry) async {
       final messenger = ScaffoldMessenger.of(context);
       final entryProvider = context.read<EntryProvider>();
 
-      await entryProvider.delete(entry.id).catchError((error, stackTrace) {
+      await entryProvider.delete(entry.id).catchError((
+        error,
+        stackTrace,
+      ) {
         if (kDebugMode) {
           print(error);
           print(stackTrace);
         }
 
-        messenger.showSnackBar(SnackBar(content: Text("Delete entry failed")));
+        alert(messenger, "Delete entry failed");
         throw error;
       });
     },
@@ -232,9 +279,9 @@ Future<bool?> confirmLoanPaymentDeletion(
         "You're about to delete this payment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final loanProvider = context.read<LoanProvider>();
+      final loanPaymentProvider = context.read<LoanPaymentProvider>();
 
-      await loanProvider.deletePayment(loan.id, entry.id).catchError((
+      await loanPaymentProvider.delete(loan.id, entry.id).catchError((
         error,
         stackTrace,
       ) {
@@ -243,9 +290,7 @@ Future<bool?> confirmLoanPaymentDeletion(
           print(stackTrace);
         }
 
-        messenger.showSnackBar(
-          SnackBar(content: Text("Delete payment failed")),
-        );
+        alert(messenger, "Delete payment failed");
         throw error;
       });
     },

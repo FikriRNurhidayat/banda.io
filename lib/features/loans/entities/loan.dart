@@ -8,6 +8,7 @@ import 'package:banda/common/helpers/type_helper.dart';
 import 'package:banda/common/types/controller.dart';
 
 class Loan extends Controlable {
+  @override
   final String id;
   final LoanType type;
   final LoanStatus status;
@@ -28,19 +29,19 @@ class Loan extends Controlable {
   late final Entry? addition;
   late final Account account;
 
-  static additionAmount(double fee) {
+  static double additionAmount(double fee) {
     return fee * -1;
   }
 
-  static additionNote(LoanType type) {
+  static String additionNote(LoanType type) {
     return "${type.label} fee";
   }
 
-  static entryNote(LoanType type, Party party) {
+  static String entryNote(LoanType type, Party party) {
     return "${type.label} from ${party.name}";
   }
 
-  static entryAmount(
+  static double entryAmount(
     LoanType type, {
     required double amount,
     required double? fee,
@@ -65,8 +66,12 @@ class Loan extends Controlable {
     required this.updatedAt,
   });
 
-  List<Entry?> get entries {
-    return [entry, addition];
+  Iterable<Entry> get entries {
+    return [entry, addition].whereType<Entry>();
+  }
+
+  Iterable<String> get entryIds {
+    return entries.map((entry) => entry.id);
   }
 
   Loan withEntry(Entry? value) {
@@ -214,7 +219,9 @@ class Loan extends Controlable {
     return Loan(
       id: row["id"],
       type: LoanType.values.firstWhere((e) => e.label == row["kind"]),
-      status: LoanStatus.values.firstWhere((e) => e.label == row["status"]),
+      status: LoanStatus.values.firstWhere(
+        (e) => e.label == row["status"],
+      ),
       amount: row["amount"],
       fee: row["fee"],
       remainder: row["remainder"],
@@ -234,11 +241,11 @@ enum LoanType {
   debt('Debt'),
   receiveable('Receivable');
 
-  isDebt() {
+  bool isDebt() {
     return this == LoanType.debt;
   }
 
-  isReceiveable() {
+  bool isReceiveable() {
     return this == LoanType.receiveable;
   }
 
@@ -254,11 +261,11 @@ enum LoanStatus {
   final String label;
   const LoanStatus(this.label);
 
-  isSettled() {
+  bool get isSettled {
     return this == LoanStatus.settled;
   }
 
-  get entryStatus {
+  EntryStatus get entryStatus {
     switch (this) {
       case LoanStatus.settled:
         return EntryStatus.done;

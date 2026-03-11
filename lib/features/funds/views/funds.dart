@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Funds extends StatefulWidget {
+class Funds extends StatelessWidget {
   const Funds({super.key});
 
   List<Widget> actionsBuilder(BuildContext context) {
@@ -36,20 +36,6 @@ class Funds extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => _FundsState();
-
-  Widget fabBuilder(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: () {
-        Navigator.pushNamed(context, "/funds/new");
-      },
-    );
-  }
-}
-
-class _FundsState extends State<Funds> {
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fundProvider = context.watch<FundProvider>();
@@ -63,10 +49,10 @@ class _FundsState extends State<Funds> {
           textAlign: TextAlign.center,
         ),
         centerTitle: true,
-        actions: widget.actionsBuilder(context),
+        actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),
-      floatingActionButton: widget.fabBuilder(context),
+      floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: fundProvider.search(filterProvider.get()),
         builder: (context, snapshot) {
@@ -103,6 +89,15 @@ class _FundsState extends State<Funds> {
           );
         },
       ),
+    );
+  }
+
+  Widget fabBuilder(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () {
+        Navigator.pushNamed(context, "/funds/new");
+      },
     );
   }
 }

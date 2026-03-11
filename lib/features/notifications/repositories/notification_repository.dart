@@ -8,22 +8,22 @@ class NotificationRepository extends Repository {
   NotificationRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  static Future<NotificationRepository> build() async {
-    final db = await Repository.connect();
-    return NotificationRepository(db);
-  }
-
   Future<Notification?> getByController(Controller controller) async {
-    final rows = db.select(
+    final client = await getClient();
+    final rows = client.select(
       "SELECT notifications.* FROM notifications WHERE notifications.controller_id = ? AND notifications.controller_type = ?",
       [controller.id, controller.type.label],
     );
 
-    return rows.map((row) => Notification.fromRow(row)).toList().firstOrNull;
+    return rows
+        .map((row) => Notification.fromRow(row))
+        .toList()
+        .firstOrNull;
   }
 
   Future<void> save(Notification notification) async {
-    final rows = db.select(
+    final client = await getClient();
+    final rows = client.select(
       "INSERT INTO notifications (title, body, sent_at, controller_id, controller_type) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET title = excluded.title, body = excluded.body, sent_at = excluded.sent_at, controller_id = excluded.controller_id, controller_type = excluded.controller_type RETURNING id",
       [
         notification.title,
@@ -38,6 +38,7 @@ class NotificationRepository extends Repository {
   }
 
   Future<void> delete(int id) async {
-    db.execute("DELETE FROM notifications WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM notifications WHERE id = ?", [id]);
   }
 }

@@ -1,11 +1,11 @@
-isNull(dynamic value) {
+bool isNull(dynamic value) {
   return value == null;
 }
 
-isZero(dynamic) {
-  return isNull(dynamic) || dynamic == 0;
+bool isZero(dynamic value) {
+  return isNull(value) || value == 0;
 }
 
-isEmpty(List<dynamic>? value) {
+bool isEmpty(List<dynamic>? value) {
   return isNull(value) || value!.isEmpty;
 }

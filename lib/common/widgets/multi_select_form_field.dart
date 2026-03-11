@@ -1,3 +1,4 @@
+import 'package:banda/common/types/widget_list_builder.dart';
 import 'package:flutter/material.dart';
 
 class MultiSelectItem<T> {
@@ -19,6 +20,7 @@ class MultiSelectFormField<T> extends FormField<List<T>> {
     super.initialValue,
     InputDecoration? decoration,
     List<Widget>? actions,
+    WidgetListBuilder? actionsBuilder,
     super.autovalidateMode,
     super.enabled,
     super.onSaved,
@@ -65,6 +67,11 @@ class MultiSelectFormField<T> extends FormField<List<T>> {
                      .toList();
 
            if (actions != null) {
+             chips.addAll(actions);
+           }
+
+           if (actionsBuilder != null) {
+             final actions = actionsBuilder(state.context);
              chips.addAll(actions);
            }
 

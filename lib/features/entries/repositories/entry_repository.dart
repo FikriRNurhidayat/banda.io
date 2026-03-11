@@ -1,3 +1,4 @@
+import 'package:banda/common/entities/controlable.dart';
 import 'package:banda/features/accounts/entities/account.dart';
 import 'package:banda/features/tags/entities/category.dart';
 import 'package:banda/features/entries/entities/entry.dart';
@@ -11,70 +12,90 @@ import 'package:sqlite3/sqlite3.dart';
 class EntryRepository extends Repository {
   WithArgs withArgs;
 
-  EntryRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
+  EntryRepository(super.db, {WithArgs? withArgs})
+    : withArgs = withArgs ?? {};
 
-  static Future<EntryRepository> build() async {
-    final db = await Repository.connect();
-    return EntryRepository(db);
+  EntryRepository withAnnotations() {
+    return EntryRepository(db, withArgs: {...withArgs, "annotations"});
   }
 
   EntryRepository withLabels() {
-    withArgs.add("labels");
-    return EntryRepository(db, withArgs: withArgs);
+    return EntryRepository(db, withArgs: {...withArgs, "labels"});
   }
 
   EntryRepository withAccount() {
-    withArgs.add("account");
-    return EntryRepository(db, withArgs: withArgs);
+    return EntryRepository(db, withArgs: {...withArgs, "account"});
   }
 
   EntryRepository withCategory() {
-    withArgs.add("category");
-    return EntryRepository(db, withArgs: withArgs);
+    return EntryRepository(db, withArgs: {...withArgs, "category"});
+  }
+
+  bulkSave(Iterable<Entry> entries) async {
+    final client = await getClient();
+    client.execute(
+      "INSERT INTO entries (id, note, amount, readonly, status, category_id, account_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES ${entries.map((_) => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, account_id = excluded.account_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
+      entries
+          .map(
+            (entry) => [
+              entry.id,
+              entry.note,
+              entry.amount,
+              entry.readonly ? 1 : 0,
+              entry.status.label,
+              entry.categoryId,
+              entry.accountId,
+              entry.controller?.id,
+              entry.controller?.type.label,
+              entry.issuedAt.toIso8601String(),
+              entry.createdAt.toIso8601String(),
+              entry.updatedAt.toIso8601String(),
+            ],
+          )
+          .expand((i) => i)
+          .toList(),
+    );
+
+    if (_include("annotations")) {
+      await _saveAnnotations(entries);
+    }
+
+    if (_include("labels")) {
+      await _saveLabels(entries);
+    }
   }
 
   save(Entry entry) async {
-    db.execute(
-      "INSERT INTO entries (id, note, amount, readonly, status, category_id, account_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, account_id = excluded.account_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
-      [
-        entry.id,
-        entry.note,
-        entry.amount,
-        entry.readonly ? 1 : 0,
-        entry.status.label,
-        entry.categoryId,
-        entry.accountId,
-        entry.controller?.id,
-        entry.controller?.type.label,
-        entry.issuedAt.toIso8601String(),
-        entry.createdAt.toIso8601String(),
-        entry.updatedAt.toIso8601String(),
-      ],
-    );
-
-    if (entry.annotations.isNotEmpty) setAnnotations(entry);
+    return bulkSave([entry]);
   }
 
-  setAnnotations(Entry entry) {
-    final annotations = entry.annotations;
-    final arguments = entry.annotations
+  saveAnnotations(
+    String entryId,
+    Map<String, dynamic>? annotations,
+  ) async {
+    final client = await getClient();
+    client.execute("DELETE FROM entry_annotations WHERE entry_id = ?", [
+      entryId,
+    ]);
+
+    if (annotations == null || annotations.isEmpty) {
+      return;
+    }
+
+    final arguments = annotations.entries
         .map(
-          (annotation) => [
-            annotation.entryId,
-            annotation.name.name,
-            annotation.value,
-          ],
+          (annotation) => [entryId, annotation.key, annotation.value],
         )
         .expand((i) => i)
         .toList();
 
-    db.execute(
-      "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${annotations.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
+    client.execute(
+      "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${annotations.entries.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
       arguments,
     );
   }
 
-  setLabels(String entryId, List<String> labelIds) {
+  saveLabels(String entryId, List<String> labelIds) {
     return setEntityLabels(
       entityId: entryId,
       labelIds: labelIds,
@@ -92,7 +113,8 @@ class EntryRepository extends Repository {
   }
 
   Future<Entry> get(String id) async {
-    final ResultSet entryRows = db.select(
+    final client = await getClient();
+    final ResultSet entryRows = client.select(
       "SELECT entries.* FROM entries WHERE id = ?",
       [id],
     );
@@ -100,20 +122,53 @@ class EntryRepository extends Repository {
     return entities(entryRows).then((entries) => entries.first);
   }
 
-  Future<List<Entry>> search(Filter? specification) async {
+  Future<void> deleteByController(Controlable controlable) async {
+    final client = await getClient();
+    final controller = controlable.toController();
+    client.execute(
+      "DELETE FROM entries WHERE controller_id = ? AND controller_type = ?",
+      [controller.id, controller.type.label],
+    );
+  }
+
+  Future<void> deleteByIds(Iterable<String> ids) async {
+    if (ids.isEmpty) {
+      return;
+    }
+
+    final client = await getClient();
+
+    client.execute(
+      "DELETE FROM entries WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      ids.toList(),
+    );
+  }
+
+  Future<List<Entry>> controlledBy(Controlable controlable) async {
+    final controller = controlable.toController();
+
+    return await search({
+      "controller_id_is": controller.id,
+      "controller_type_is": controller.type.label,
+    });
+  }
+
+  Future<List<Entry>> search(Filter? filter) async {
     var baseQuery = "SELECT entries.* FROM entries";
 
-    final query = defineQuery(baseQuery, specification);
+    final query = defineQuery(baseQuery, filter);
     final sqlString = "${query.first} ORDER BY entries.issued_at DESC";
     final sqlArgs = query.second;
 
-    final ResultSet entryRows = db.select(sqlString, sqlArgs);
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
 
     return await entities(entryRows);
   }
 
   delete(String id) async {
-    db.execute("DELETE FROM entries WHERE entries.id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM entries WHERE entries.id = ?", [id]);
   }
 
   populateLabels(List<Map> rows) {
@@ -121,6 +176,23 @@ class EntryRepository extends Repository {
   }
 
   Future<List<Entry>> entities(List<Map> entryRows) async {
+    if (withArgs.contains("annotations")) {
+      final entryIds = entryRows.map((e) => e["id"] as String).toList();
+      final annotationRows = await getAnnotations(entryIds);
+      entryRows = entryRows.map((entry) {
+        final annotations = <String, dynamic>{};
+
+        for (var annotation in annotationRows.where(
+          (annotation) => annotation["entry_id"] == entry["id"],
+        )) {
+          annotations[annotation["name"] as String] =
+              annotation["value"];
+        }
+
+        return {...entry, "annotations": annotations};
+      }).toList();
+    }
+
     if (withArgs.contains("labels")) {
       entryRows = await populateLabels(entryRows);
     }
@@ -137,11 +209,12 @@ class EntryRepository extends Repository {
       return Entry.row(e)
           .withLabels(Label.tryRows(e["labels"]))
           .withAccount(Account.tryRow(e["account"]))
-          .withCategory(Category.tryRow(e["category"]));
+          .withCategory(Category.tryRow(e["category"]))
+          .withAnnotations(e["annotations"]);
     }).toList();
   }
 
-  defineQuery(String baseQuery, Map? spec) {
+  Pair<String, List<dynamic>> defineQuery(String baseQuery, Map? spec) {
     var args = <dynamic>[];
 
     final join = joinQuery(spec);
@@ -161,7 +234,10 @@ class EntryRepository extends Repository {
   joinQuery(Map? spec) {
     if (spec == null) return null;
 
-    final Map<String, dynamic> join = {"query": <String>[], "sql": null};
+    final Map<String, dynamic> join = {
+      "query": <String>[],
+      "sql": null,
+    };
 
     if (spec.containsKey("label_in")) {
       final value = spec["label_in"] as List<String>;
@@ -313,5 +389,56 @@ class EntryRepository extends Repository {
 
     where["sql"] = where["query"].join(" AND ");
     return where;
+  }
+
+  _saveAnnotations(Iterable<Entry> entries) async {
+    final client = await getClient();
+    final args = entries
+        .where(
+          (e) => e.annotations != null && e.annotations!.isNotEmpty,
+        )
+        .expand(
+          (e) =>
+              e.annotations!.entries.map((a) => [e.id, a.key, a.value]),
+        );
+
+    if (args.isEmpty) {
+      return;
+    }
+
+    client.execute(
+      "DELETE FROM entry_annotations WHERE entry_id IN (${entries.map((_) => "?").join(", ")})",
+      entries.map((entry) => entry.id).toList(),
+    );
+
+    client.execute(
+      "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${args.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
+      args.expand((a) => a).toList(),
+    );
+  }
+
+  _saveLabels(Iterable<Entry> entries) async {
+    final client = await getClient();
+    final args = entries
+        .where((e) => e.labelIds.isNotEmpty)
+        .expand((e) => e.labelIds.map((labelId) => [e.id, labelId]));
+
+    if (args.isEmpty) {
+      return;
+    }
+
+    client.execute(
+      "DELETE FROM entry_labels WHERE entry_id IN (${entries.map((_) => "?").join(", ")})",
+      entries.map((entry) => entry.id).toList(),
+    );
+
+    client.execute(
+      "INSERT INTO entry_labels (entry_id, label_id) VALUES ${args.map((_) => "(?, ?)").join(", ")} ON CONFLICT (entry_id, label_id) DO NOTHING",
+      args.expand((a) => a).toList(),
+    );
+  }
+
+  _include(String value) {
+    return withArgs.contains(value);
   }
 }

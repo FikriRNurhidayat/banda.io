@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 class LoanRepository extends Repository {
   WithArgs withArgs;
 
-  LoanRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
+  LoanRepository(super.db, {WithArgs? withArgs})
+    : withArgs = withArgs ?? {};
 
   LoanRepository withAccount() {
     withArgs.add("account");
@@ -28,13 +29,9 @@ class LoanRepository extends Repository {
     return this;
   }
 
-  static Future<LoanRepository> build() async {
-    final db = await Repository.connect();
-    return LoanRepository(db);
-  }
-
   save(Loan loan) async {
-    db.execute(
+    final client = await getClient();
+    client.execute(
       "INSERT INTO loans (id, kind, status, amount, fee, remainder, party_id, account_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET kind = excluded.kind, status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, party_id = excluded.party_id, account_id = excluded.account_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
       [
         loan.id,
@@ -56,16 +53,17 @@ class LoanRepository extends Repository {
   }
 
   Future<Loan> sync(String id) async {
-    final rows = db.select(
+    final client = await getClient();
+    final rows = client.select(
       "SELECT SUM(amount) as paid FROM loan_payments WHERE loan_id = ?",
       [id],
     );
     final paid = rows.first["paid"] ?? 0;
 
-    db.execute("UPDATE loans SET remainder = amount - ? WHERE id = ?", [
-      paid,
-      id,
-    ]);
+    client.execute(
+      "UPDATE loans SET remainder = amount - ? WHERE id = ?",
+      [paid, id],
+    );
 
     return get(id);
   }
@@ -77,18 +75,23 @@ class LoanRepository extends Repository {
     final sqlString = "${query.first} ORDER BY loans.issued_at DESC";
     final sqlArgs = query.second;
 
-    final loanRows = db.select(sqlString, sqlArgs);
+    final client = await getClient();
+    final loanRows = client.select(sqlString, sqlArgs);
 
     return await _entities(loanRows);
   }
 
   Future<Loan> get(String id) async {
-    final rows = db.select("SELECT * FROM loans WHERE id = ?", [id]);
+    final client = await getClient();
+    final rows = client.select("SELECT * FROM loans WHERE id = ?", [
+      id,
+    ]);
     return _entities(rows).then((loans) => loans.first);
   }
 
   delete(String id) async {
-    db.execute("DELETE FROM loans WHERE id = ?", [id]);
+    final client = await getClient();
+    client.execute("DELETE FROM loans WHERE id = ?", [id]);
   }
 
   _defineQuery(String baseQuery, Filter? spec) {
@@ -180,11 +183,14 @@ class LoanRepository extends Repository {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .map(
-            (row) => [row["entry_id"] as String, row["addition_id"] as String],
+            (row) => [
+              row["entry_id"] as String,
+              row["addition_id"] as String,
+            ],
           )
           .expand((id) => id)
           .toList();
-      final entryRows = await getEntryByIds(entryIds);
+      final entryRows = await getAnnotatedEntriesByIds(entryIds);
       rows = rows.map((row) {
         return {
           ...row,
@@ -216,7 +222,9 @@ class LoanRepository extends Repository {
     }
 
     if (withArgs.contains("party")) {
-      final partyIds = rows.map((row) => row["party_id"] as String).toList();
+      final partyIds = rows
+          .map((row) => row["party_id"] as String)
+          .toList();
       final partyRows = await getPartyByIds(partyIds);
       rows = rows.map((row) {
         return {
