@@ -2,8 +2,7 @@ enum ReadOnlyCategory {
   adjustment('Adjustment'),
   transfer('Transfer'),
   pool('Pool'),
-  debt('Debt'),
-  receivable('Receivable');
+  commitment('Commitment');
 
   final String label;
   const ReadOnlyCategory(this.label);

@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/loans/providers/loan_filter_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/types/specification.dart';
@@ -12,18 +12,18 @@ import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class LoanFilter extends StatefulWidget {
+class CommitmentFilter extends StatefulWidget {
   final Filter? specs;
 
-  const LoanFilter({super.key, this.specs});
+  const CommitmentFilter({super.key, this.specs});
 
   @override
   State<StatefulWidget> createState() {
-    return _LoanFilterState();
+    return _CommitmentFilterState();
   }
 }
 
-class _LoanFilterState extends State<LoanFilter> {
+class _CommitmentFilterState extends State<CommitmentFilter> {
   final _formKey = GlobalKey<FormState>();
   final FormData _formData = {};
 
@@ -82,7 +82,7 @@ class _LoanFilterState extends State<LoanFilter> {
         query["issued_between"] = _formData["issued_between"];
       }
 
-      context.read<LoanFilterProvider>().set(query);
+      context.read<CommitmentFilterProvider>().set(query);
       Navigator.pop(context);
     }
   }
@@ -100,7 +100,7 @@ class _LoanFilterState extends State<LoanFilter> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          "Filter loans",
+          "Filter commitments",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
         actions: [
@@ -144,24 +144,13 @@ class _LoanFilterState extends State<LoanFilter> {
                       initialValue: _formData["issued_between"],
                       onSaved: (value) => _formData["issued_between"] = value,
                     ),
-                    MultiSelectFormField<LoanType>(
-                      decoration: InputStyles.field(
-                        labelText: "Type",
-                        hintText: "Select type...",
-                      ),
-                      initialValue: _formData["type_in"] ?? [],
-                      options: LoanType.values
-                          .map((i) => MultiSelectItem(value: i, label: i.label))
-                          .toList(),
-                      onSaved: (value) => _formData["type_in"] = value,
-                    ),
-                    MultiSelectFormField<LoanStatus>(
+                    MultiSelectFormField<CommitmentStatus>(
                       decoration: InputStyles.field(
                         labelText: "Status",
                         hintText: "Select status...",
                       ),
                       initialValue: _formData["status_in"] ?? [],
-                      options: LoanStatus.values
+                      options: CommitmentStatus.values
                           .map((i) => MultiSelectItem(value: i, label: i.label))
                           .toList(),
                       onSaved: (value) => _formData["status_in"] = value,

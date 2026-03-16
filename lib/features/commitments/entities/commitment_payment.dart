@@ -1,10 +1,10 @@
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 
-class LoanPayment extends Entity {
-  final String loanId;
+class CommitmentPayment extends Entity {
+  final String commitmentId;
   final String entryId;
   final String? additionId;
   final double amount;
@@ -15,10 +15,10 @@ class LoanPayment extends Entity {
 
   late final Entry? addition;
   late final Entry entry;
-  late final Loan loan;
+  late final Commitment commitment;
 
-  LoanPayment({
-    required this.loanId,
+  CommitmentPayment({
+    required this.commitmentId,
     required this.entryId,
     this.additionId,
     required this.amount,
@@ -28,48 +28,48 @@ class LoanPayment extends Entity {
     required this.issuedAt,
   });
 
-  static double additionAmount(Loan loan, double? fee) {
+  static double additionAmount(Commitment commitment, double? fee) {
     return (fee ?? 0) * -1;
   }
 
-  static String additionNote(Loan loan) {
-    if (loan.type.isDebt()) {
-      return loan.status.isSettled
-          ? "Loan settlement fee"
-          : "Loan payment fee";
+  static String additionNote(Commitment commitment) {
+    if (commitment.isIncome) {
+      return commitment.status.isSettled
+          ? "Commitment settlement fee"
+          : "Commitment payment fee";
     }
 
-    return loan.status.isSettled
-        ? "Loan settlement fee"
-        : "Loan payment fee";
+    return commitment.status.isSettled
+        ? "Commitment settlement fee"
+        : "Commitment payment fee";
   }
 
-  static double entryAmount(Loan loan, double amount) {
-    return amount * (loan.type.isDebt() ? -1 : 1);
+  static double entryAmount(Commitment commitment, double amount) {
+    return amount * (commitment.isIncome ? -1 : 1);
   }
 
-  static String entryNote(Loan loan) {
-    if (loan.type.isDebt()) {
-      return loan.status.isSettled
-          ? "Loan settlement to ${loan.party.name}"
-          : "Loan payment to ${loan.party.name}";
+  static String entryNote(Commitment commitment) {
+    if (commitment.isIncome) {
+      return commitment.status.isSettled
+          ? "Commitment settlement to ${commitment.party.name}"
+          : "Commitment payment to ${commitment.party.name}";
     }
 
-    return loan.status.isSettled
-        ? "Loan settlement from ${loan.party.name}"
-        : "Loan payment from ${loan.party.name}";
+    return commitment.status.isSettled
+        ? "Commitment settlement from ${commitment.party.name}"
+        : "Commitment payment from ${commitment.party.name}";
   }
 
-  factory LoanPayment.create({
+  factory CommitmentPayment.create({
     required double amount,
     double? fee,
-    required String loanId,
+    required String commitmentId,
     required String entryId,
     String? additionId,
     required DateTime issuedAt,
   }) {
-    return LoanPayment(
-      loanId: loanId,
+    return CommitmentPayment(
+      commitmentId: commitmentId,
       amount: amount,
       fee: fee,
       entryId: entryId,
@@ -80,20 +80,20 @@ class LoanPayment extends Entity {
     );
   }
 
-  LoanPayment withAddition(Entry? value) {
+  CommitmentPayment withAddition(Entry? value) {
     addition = value;
     return this;
   }
 
-  LoanPayment withEntry(Entry? value) {
+  CommitmentPayment withEntry(Entry? value) {
     if (value == null) return this;
     entry = value;
     return this;
   }
 
-  LoanPayment withLoan(Loan? value) {
+  CommitmentPayment withCommitment(Commitment? value) {
     if (value == null) return this;
-    loan = value;
+    commitment = value;
     return this;
   }
 
@@ -117,13 +117,13 @@ class LoanPayment extends Entity {
     return addition != null;
   }
 
-  LoanPayment copyWith({
+  CommitmentPayment copyWith({
     double? amount,
     double? fee,
     DateTime? issuedAt,
   }) {
-    return LoanPayment(
-      loanId: loanId,
+    return CommitmentPayment(
+      commitmentId: commitmentId,
       entryId: entryId,
       additionId: additionId,
       amount: amount ?? this.amount,
@@ -134,9 +134,9 @@ class LoanPayment extends Entity {
     );
   }
 
-  factory LoanPayment.fromRow(Map row) {
-    return LoanPayment(
-      loanId: row["loan_id"],
+  factory CommitmentPayment.fromRow(Map row) {
+    return CommitmentPayment(
+      commitmentId: row["commitment_id"],
       entryId: row["entry_id"],
       additionId: row["addition_id"],
       amount: row["amount"],

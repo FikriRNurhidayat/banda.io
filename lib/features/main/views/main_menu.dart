@@ -4,10 +4,10 @@ class MainMenu extends StatelessWidget {
   MainMenu({super.key});
 
   final Map<String, String> menu = {
+    "Commitments": "/commitments",
     "Entries": "/entries",
-    "Pools": "/pools",
     "Info": "/info",
-    "Loans": "/loans",
+    "Pools": "/pools",
     "Schedules": "/schedules",
     "Tools": "/tools",
     "Transfers": "/transfers",

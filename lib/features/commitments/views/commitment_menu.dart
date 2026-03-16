@@ -1,18 +1,18 @@
-import 'package:bandha/features/loans/entities/loan.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class LoanMenu extends StatelessWidget {
+class CommitmentMenu extends StatelessWidget {
   final String id;
 
-  const LoanMenu({super.key, required this.id});
+  const CommitmentMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Loan loan) {
+  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Commitment commitment) {
     final navigator = Navigator.of(context);
-    final loanProvider = context.read<LoanProvider>();
+    final commitmentProvider = context.read<CommitmentProvider>();
 
     final menu = {
       "Share": () {
@@ -21,24 +21,24 @@ class LoanMenu extends StatelessWidget {
             uri: Uri(
               scheme: "app",
               host: "bandha.id",
-              pathSegments: ["loans", loan.id, "detail"],
+              pathSegments: ["commitments", commitment.id, "detail"],
             ),
           ),
         );
       },
       "Edit": () {
         navigator.pop();
-        navigator.pushNamed("/loans/$id/edit");
+        navigator.pushNamed("/commitments/$id/edit");
       },
       "Balance": () async {
-        await loanProvider.sync(id);
+        await commitmentProvider.sync(id);
         navigator.pop();
       },
     };
 
     if (kDebugMode) {
       menu["Debug Reminder"] = () async {
-        loanProvider.debugReminder(id);
+        commitmentProvider.debugReminder(id);
       };
     }
 
@@ -51,11 +51,11 @@ class LoanMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loanProvider = context.read<LoanProvider>();
+    final commitmentProvider = context.read<CommitmentProvider>();
 
     return Scaffold(
       body: FutureBuilder(
-        future: loanProvider.get(id),
+        future: commitmentProvider.get(id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -69,8 +69,8 @@ class LoanMenu extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final loan = snapshot.data!;
-          final menu = menuBuilder(context, loan);
+          final commitment = snapshot.data!;
+          final menu = menuBuilder(context, commitment);
 
           return Center(
             child: ListView.builder(

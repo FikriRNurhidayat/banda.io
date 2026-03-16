@@ -1,19 +1,20 @@
-import 'package:bandha/features/loans/entities/loan.dart';
-import 'package:bandha/features/loans/services/loan_service.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/commitments/services/commitment_service.dart';
 import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:flutter/material.dart';
 
-class LoanProvider extends ChangeNotifier {
-  final LoanService loanService;
+class CommitmentProvider extends ChangeNotifier {
+  final CommitmentService commitmentService;
 
-  LoanProvider(this.loanService);
+  CommitmentProvider(this.commitmentService);
 
-  Future<List<Loan>> search(Filter? spec) async {
-    return loanService.search(spec);
+  Future<List<Commitment>> search(Filter? spec) async {
+    return commitmentService.search(spec);
   }
 
   Future<void> sync(String id) async {
-    await loanService.sync(id);
+    await commitmentService.sync(id);
     notifyListeners();
   }
 
@@ -22,15 +23,17 @@ class LoanProvider extends ChangeNotifier {
     double? fee,
     required DateTime issuedAt,
     DateTime? settledAt,
-    required LoanType type,
-    required LoanStatus status,
+    required EntryType type,
+    required CommitmentStatus status,
+    required String categoryId,
     required String partyId,
     required String vaultId,
   }) async {
-    await loanService.create(
+    await commitmentService.create(
       amount: amount,
       type: type,
       status: status,
+      categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
       fee: fee ?? 0,
@@ -47,16 +50,18 @@ class LoanProvider extends ChangeNotifier {
     double? fee,
     required DateTime issuedAt,
     DateTime? settledAt,
-    required LoanType type,
-    required LoanStatus status,
+    required EntryType type,
+    required CommitmentStatus status,
+    required String categoryId,
     required String partyId,
     required String vaultId,
   }) async {
-    await loanService.update(
+    await commitmentService.update(
       id,
       amount: amount,
       type: type,
       status: status,
+      categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
       fee: fee,
@@ -67,16 +72,16 @@ class LoanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Loan?> get(String id) async {
-    return loanService.get(id);
+  Future<Commitment?> get(String id) async {
+    return commitmentService.get(id);
   }
 
   Future<void> delete(String id) async {
-    await loanService.delete(id);
+    await commitmentService.delete(id);
     notifyListeners();
   }
 
   debugReminder(String id) {
-    return loanService.debugReminder(id);
+    return commitmentService.debugReminder(id);
   }
 }

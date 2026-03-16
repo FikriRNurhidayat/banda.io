@@ -20,13 +20,28 @@ class MoneyText extends StatelessWidget {
 
   Color getColor(BuildContext context) {
     final theme = Theme.of(context);
-    return amount >= 0 ? theme.colorScheme.onSurface : theme.colorScheme.error;
+    return amount >= 0
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.error;
   }
 
-  String formatAmount(double value) {
-    return value
-        .toStringAsFixed(2)
-        .replaceFirst(RegExp(r'\.?0+$'), ''); // trims .000 / .100 etc.
+  String formatAmount(double value, [int precision = 3]) {
+    final s = value.toString();
+    final parts = s.split('.');
+
+    if (parts.length == 1) return s;
+
+    final decimals = parts[1].substring(
+      0,
+      parts[1].length < precision ? parts[1].length : precision,
+    );
+
+    final result = "${parts[0]}.$decimals".replaceFirst(
+      RegExp(r'\.?0+$'),
+      '',
+    );
+
+    return result;
   }
 
   String getAmount() {

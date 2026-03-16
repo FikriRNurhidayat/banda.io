@@ -45,8 +45,8 @@ class EntryTile extends StatelessWidget {
       case ControllerType.schedule:
         Navigator.pushNamed(context, "/schedules/${entry.controller!.id}/history");
         break;
-      case ControllerType.loan:
-        Navigator.pushNamed(context, "/loans/${entry.controller!.id}/payments");
+      case ControllerType.commitment:
+        Navigator.pushNamed(context, "/commitments/${entry.controller!.id}/payments");
         break;
       default:
         Navigator.pushNamed(context, "/entries/${entry.id}/detail");

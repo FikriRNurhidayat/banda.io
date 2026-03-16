@@ -1,4 +1,4 @@
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/features/vaults/widgets/vault_text.dart';
@@ -6,18 +6,22 @@ import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
-class LoanTile extends StatelessWidget {
-  final Loan loan;
+class CommitmentTile extends StatelessWidget {
+  final Commitment commitment;
   final bool readOnly;
 
-  const LoanTile(this.loan, {super.key, this.readOnly = false});
+  const CommitmentTile(
+    this.commitment, {
+    super.key,
+    this.readOnly = false,
+  });
 
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
       readOnly
-          ? "/loans/${loan.id}/detail"
-          : "/loans/${loan.id}/payments",
+          ? "/commitments/${commitment.id}/detail"
+          : "/commitments/${commitment.id}/payments",
     );
   }
 
@@ -26,29 +30,29 @@ class LoanTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmLoanDeletion(context, loan);
+      return confirmCommitmentDeletion(context, commitment);
     }
 
-    Navigator.pushNamed(context, "/loans/${loan.id}/edit");
+    Navigator.pushNamed(context, "/commitments/${commitment.id}/edit");
     return Future.value(false);
   }
 
   Widget statusBuilder(BuildContext context) {
     final theme = Theme.of(context);
-    switch (loan.status) {
-      case LoanStatus.active:
+    switch (commitment.status) {
+      case CommitmentStatus.active:
         return Icon(
           Icons.hourglass_empty,
           color: theme.colorScheme.primary,
           size: 8,
         );
-      case LoanStatus.overdue:
+      case CommitmentStatus.overdue:
         return Icon(
           Icons.hourglass_full,
           color: theme.colorScheme.primary,
           size: 8,
         );
-      case LoanStatus.settled:
+      case CommitmentStatus.settled:
         return Icon(
           Icons.check,
           color: theme.colorScheme.primary,
@@ -70,13 +74,16 @@ class LoanTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(loan.type.label, style: theme.textTheme.titleSmall),
+              Text(
+                commitment.category.name,
+                style: theme.textTheme.titleSmall,
+              ),
               statusBuilder(context),
             ],
           ),
-          DateTimeText(loan.issuedAt),
-          VaultText(loan.vault),
-          Text(loan.party.name, style: theme.textTheme.bodySmall),
+          DateTimeText(commitment.issuedAt),
+          VaultText(commitment.vault),
+          Text(commitment.party.name, style: theme.textTheme.bodySmall),
         ],
       ),
     );
@@ -97,13 +104,13 @@ class LoanTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               MoneyText(
-                loan.paid,
+                commitment.paid,
                 useSymbol: false,
                 style: theme.textTheme.bodySmall,
               ),
               Text("/"),
               MoneyText(
-                loan.amount,
+                commitment.amount,
                 useSymbol: false,
                 style: theme.textTheme.bodySmall,
               ),
@@ -111,7 +118,7 @@ class LoanTile extends StatelessWidget {
           ),
           Badge(
             padding: EdgeInsets.all(0),
-            label: Text(loan.status.label),
+            label: Text(commitment.status.label),
             textColor: theme.colorScheme.onSurface,
             backgroundColor: Colors.transparent,
           ),
@@ -129,7 +136,7 @@ class LoanTile extends StatelessWidget {
         SizedBox(
           height: 8,
           child: LinearProgressIndicator(
-            value: loan.completion,
+            value: commitment.completion,
             backgroundColor: theme.colorScheme.surfaceContainer,
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
@@ -137,25 +144,16 @@ class LoanTile extends StatelessWidget {
         ),
         Row(
           spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            MoneyText(
-              loan.paid,
-              useSymbol: false,
-              style: theme.textTheme.labelSmall,
-            ),
-            MoneyText(
-              loan.amount,
-              useSymbol: false,
-              style: theme.textTheme.labelSmall,
-            ),
+            Text("${(commitment.completion * 100).floor()}%", style: theme.textTheme.labelSmall),
           ],
         ),
       ],
     );
   }
 
-  loanBuilder(BuildContext context) {
+  commitmentBuilder(BuildContext context) {
     return tileBuilder(
       context,
       onTap: () {
@@ -181,8 +179,8 @@ class LoanTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return dismissibleBuilder(
       context,
-      key: loan.id,
-      child: loanBuilder(context),
+      key: commitment.id,
+      child: commitmentBuilder(context),
       dismissable: !readOnly,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);

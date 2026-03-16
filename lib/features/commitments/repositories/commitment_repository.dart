@@ -1,6 +1,7 @@
+import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/common/repositories/repository.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
@@ -8,90 +9,97 @@ import 'package:bandha/common/types/pair.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
-class LoanRepository extends Repository {
+class CommitmentRepository extends Repository {
   WithArgs withArgs;
 
-  LoanRepository(super.db, {WithArgs? withArgs})
+  CommitmentRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  LoanRepository withVault() {
+  CommitmentRepository withVault() {
     withArgs.add("vault");
     return this;
   }
 
-  LoanRepository withEntries() {
+  CommitmentRepository withEntries() {
     withArgs.add("entries");
     return this;
   }
 
-  LoanRepository withParty() {
+  CommitmentRepository withCategory() {
+    withArgs.add("category");
+    return this;
+  }
+
+  CommitmentRepository withParty() {
     withArgs.add("party");
     return this;
   }
 
-  save(Loan loan) async {
+  save(Commitment commitment) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO loans (id, kind, status, amount, fee, remainder, party_id, vault_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET kind = excluded.kind, status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, party_id = excluded.party_id, vault_id = excluded.vault_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
+      "INSERT INTO commitments (id, status, amount, fee, remainder, category_id, party_id, vault_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, category_id = excluded.category_id, party_id = excluded.party_id, vault_id = excluded.vault_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
       [
-        loan.id,
-        loan.type.label,
-        loan.status.label,
-        loan.amount,
-        loan.fee,
-        loan.remainder,
-        loan.partyId,
-        loan.vaultId,
-        loan.entryId,
-        loan.additionId,
-        loan.issuedAt.toIso8601String(),
-        loan.settledAt?.toIso8601String(),
-        loan.createdAt.toIso8601String(),
-        loan.updatedAt.toIso8601String(),
+        commitment.id,
+        commitment.status.label,
+        commitment.amount,
+        commitment.fee,
+        commitment.remainder,
+        commitment.categoryId,
+        commitment.partyId,
+        commitment.vaultId,
+        commitment.entryId,
+        commitment.additionId,
+        commitment.issuedAt.toIso8601String(),
+        commitment.settledAt?.toIso8601String(),
+        commitment.createdAt.toIso8601String(),
+        commitment.updatedAt.toIso8601String(),
       ],
     );
   }
 
-  Future<Loan> sync(String id) async {
+  Future<Commitment> sync(String id) async {
     final client = await getClient();
     final rows = client.select(
-      "SELECT SUM(amount) as paid FROM loan_payments WHERE loan_id = ?",
+      "SELECT SUM(amount) as paid FROM commitment_payments WHERE commitment_id = ?",
       [id],
     );
     final paid = rows.first["paid"] ?? 0;
 
     client.execute(
-      "UPDATE loans SET remainder = amount - ? WHERE id = ?",
+      "UPDATE commitments SET remainder = amount - ? WHERE id = ?",
       [paid, id],
     );
 
     return get(id);
   }
 
-  Future<List<Loan>> search(Filter? specification) async {
-    var baseQuery = "SELECT loans.* FROM loans";
+  Future<List<Commitment>> search(Filter? specification) async {
+    var baseQuery = "SELECT commitments.* FROM commitments";
 
     final query = _defineQuery(baseQuery, specification);
-    final sqlString = "${query.first} ORDER BY loans.issued_at DESC";
+    final sqlString =
+        "${query.first} ORDER BY commitments.issued_at DESC";
     final sqlArgs = query.second;
 
     final client = await getClient();
-    final loanRows = client.select(sqlString, sqlArgs);
+    final commitmentRows = client.select(sqlString, sqlArgs);
 
-    return await _entities(loanRows);
+    return await _entities(commitmentRows);
   }
 
-  Future<Loan> get(String id) async {
+  Future<Commitment> get(String id) async {
     final client = await getClient();
-    final rows = client.select("SELECT * FROM loans WHERE id = ?", [
-      id,
-    ]);
-    return _entities(rows).then((loans) => loans.first);
+    final rows = client.select(
+      "SELECT * FROM commitments WHERE id = ?",
+      [id],
+    );
+    return _entities(rows).then((commitments) => commitments.first);
   }
 
   delete(String id) async {
     final client = await getClient();
-    client.execute("DELETE FROM loans WHERE id = ?", [id]);
+    client.execute("DELETE FROM commitments WHERE id = ?", [id]);
   }
 
   _defineQuery(String baseQuery, Filter? spec) {
@@ -118,7 +126,7 @@ class LoanRepository extends Repository {
 
     if (spec.containsKey("issued_between")) {
       final value = spec["issued_between"] as DateTimeRange;
-      where["query"].add("(loans.issued_at BETWEEN ? AND ?)");
+      where["query"].add("(commitments.issued_at BETWEEN ? AND ?)");
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -129,29 +137,29 @@ class LoanRepository extends Repository {
       final value = spec["vault_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.vault_id IN (${value.map((_) => '?').join(', ')}))",
+          "(commitments.vault_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
     }
 
-    if (spec.containsKey("type_in")) {
-      final value = spec["type_in"] as List<LoanType>;
+    if (spec.containsKey("status_in")) {
+      final value = spec["status_in"] as List<CommitmentStatus>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.kind IN (${value.map((_) => '?').join(', ')}))",
+          "(commitments.status IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value.map((v) => v.label).toList());
       }
     }
 
-    if (spec.containsKey("status_in")) {
-      final value = spec["status_in"] as List<LoanStatus>;
+    if (spec.containsKey("category_in")) {
+      final value = spec["category_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.status IN (${value.map((_) => '?').join(', ')}))",
+          "(commitments.category_id IN (${value.map((_) => '?').join(', ')}))",
         );
-        where["args"].addAll(value.map((v) => v.label).toList());
+        where["args"].addAll(value);
       }
     }
 
@@ -159,7 +167,7 @@ class LoanRepository extends Repository {
       final value = spec["party_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.party_id IN (${value.map((_) => '?').join(', ')}))",
+          "(commitments.party_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -169,7 +177,7 @@ class LoanRepository extends Repository {
       final value = spec["party_nin"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.party_id NOT IN (${value.map((_) => '?').join(', ')}))",
+          "(commitments.party_id NOT IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -179,16 +187,17 @@ class LoanRepository extends Repository {
     return where;
   }
 
-  Future<List<Loan>> _entities(List<Map> rows) async {
+  Future<List<Commitment>> _entities(List<Map> rows) async {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .map(
             (row) => [
               row["entry_id"] as String,
-              row["addition_id"] as String,
+              row["addition_id"] as String?,
             ],
           )
           .expand((id) => id)
+          .whereType<String>()
           .toList();
       final entryRows = await getAnnotatedEntriesByIds(entryIds);
       rows = rows.map((row) {
@@ -221,6 +230,21 @@ class LoanRepository extends Repository {
       }).toList();
     }
 
+    if (withArgs.contains("category")) {
+      final categoryIds = rows
+          .map((row) => row["category_id"] as String)
+          .toList();
+      final categoryRows = await getCategoryByIds(categoryIds);
+      rows = rows.map((row) {
+        return {
+          ...row,
+          "category": categoryRows.firstWhere(
+            (categoryRow) => categoryRow["id"] == row["category_id"],
+          ),
+        };
+      }).toList();
+    }
+
     if (withArgs.contains("party")) {
       final partyIds = rows
           .map((row) => row["party_id"] as String)
@@ -237,9 +261,10 @@ class LoanRepository extends Repository {
     }
 
     return rows.map((row) {
-      return Loan.parse(row)
+      return Commitment.parse(row)
           .withAddition(Entry.tryRow(row["addition"]))
           .withEntry(Entry.tryRow(row["entry"]))
+          .withCategory(Category.tryRow(row["category"]))
           .withParty(Party.tryRow(row["party"]))
           .withVault(Vault.tryRow(row["vault"]));
     }).toList();

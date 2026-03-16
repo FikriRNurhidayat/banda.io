@@ -1,16 +1,16 @@
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/schedules/services/schedule_service.dart';
-import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
-import 'package:bandha/features/loans/providers/loan_tab_provider.dart';
-import 'package:bandha/features/loans/services/loan_payment_service.dart';
-import 'package:bandha/features/loans/services/loan_service.dart';
+import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_tab_provider.dart';
+import 'package:bandha/features/commitments/services/commitment_payment_service.dart';
+import 'package:bandha/features/commitments/services/commitment_service.dart';
 import 'package:bandha/features/main/providers/tool_provider.dart';
 import 'package:bandha/features/main/services/tool_service.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/features/transfers/services/transfer_service.dart';
-import 'package:bandha/features/loans/repositories/loan_payment_repository.dart';
+import 'package:bandha/features/commitments/repositories/commitment_payment_repository.dart';
 import 'package:bandha/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,9 +26,9 @@ import 'package:bandha/features/entries/services/entry_service.dart';
 import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/features/pools/repositories/pool_repository.dart';
 import 'package:bandha/features/pools/services/pool_service.dart';
-import 'package:bandha/features/loans/providers/loan_filter_provider.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
-import 'package:bandha/features/loans/repositories/loan_repository.dart';
+import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
+import 'package:bandha/features/commitments/repositories/commitment_repository.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
@@ -51,8 +51,8 @@ makeProvider({
   final entryRepository = EntryRepository(dbManager);
   final vaultRepository = VaultRepository(dbManager);
   final transferRepository = TransferRepository(dbManager);
-  final loanRepository = LoanRepository(dbManager);
-  final loanPaymentRepository = LoanPaymentRepository(dbManager);
+  final commitmentRepository = CommitmentRepository(dbManager);
+  final commitmentPaymentRepository = CommitmentPaymentRepository(dbManager);
   final labelRepository = LabelRepository(dbManager);
   final partyRepository = PartyRepository(dbManager);
   final poolRepository = PoolRepository(dbManager);
@@ -81,12 +81,12 @@ makeProvider({
     labelRepository: labelRepository,
     transferRepository: transferRepository,
   );
-  final loanService = LoanService(
+  final commitmentService = CommitmentService(
     vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
-    loanRepository: loanRepository,
-    paymentRepository: loanPaymentRepository,
+    commitmentRepository: commitmentRepository,
+    paymentRepository: commitmentPaymentRepository,
     partyRepository: partyRepository,
     notificationManager: notificationManager,
   );
@@ -106,12 +106,12 @@ makeProvider({
     labelRepository: labelRepository,
   );
 
-  final loanPaymentService = LoanPaymentService(
+  final commitmentPaymentService = CommitmentPaymentService(
     vaultRepository: vaultRepository,
     entryRepository: entryRepository,
     categoryRepository: categoryRepository,
-    loanRepository: loanRepository,
-    loanPaymentRepository: loanPaymentRepository,
+    commitmentRepository: commitmentRepository,
+    commitmentPaymentRepository: commitmentPaymentRepository,
     partyRepository: partyRepository,
     notificationManager: notificationManager,
   );
@@ -136,9 +136,9 @@ makeProvider({
       create: (_) => TransferProvider(transferService),
     ),
     ChangeNotifierProvider(create: (_) => PoolProvider(poolService)),
-    ChangeNotifierProvider(create: (_) => LoanProvider(loanService)),
+    ChangeNotifierProvider(create: (_) => CommitmentProvider(commitmentService)),
     ChangeNotifierProvider(
-      create: (_) => LoanPaymentProvider(loanPaymentService),
+      create: (_) => CommitmentPaymentProvider(commitmentPaymentService),
     ),
     ChangeNotifierProvider(create: (_) => ScheduleProvider(scheduleService)),
     ChangeNotifierProvider(
@@ -148,8 +148,8 @@ makeProvider({
       create: (_) => PartyProvider(partyRepository),
     ),
     ChangeNotifierProvider(create: (_) => EntryFilterProvider()),
-    ChangeNotifierProvider(create: (_) => LoanFilterProvider()),
-    ChangeNotifierProvider(create: (_) => LoanTabProvider()),
+    ChangeNotifierProvider(create: (_) => CommitmentFilterProvider()),
+    ChangeNotifierProvider(create: (_) => CommitmentTabProvider()),
     ChangeNotifierProvider(create: (_) => PoolFilterProvider()),
   ];
 

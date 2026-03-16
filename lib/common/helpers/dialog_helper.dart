@@ -4,14 +4,14 @@ import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/pools/entities/pool.dart';
-import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/common/widgets/verdict.dart';
 import 'package:flutter/foundation.dart';
@@ -159,20 +159,20 @@ Future<bool?> confirmScheduleDeletion(
   );
 }
 
-Future<bool?> confirmLoanDeletion(
+Future<bool?> confirmCommitmentDeletion(
   BuildContext context,
-  Loan loan,
+  Commitment commitment,
 ) async {
   return ask(
     context,
-    title: "Delete loan",
+    title: "Delete commitment",
     content:
-        "You're about to delete this loan, this action cannot be reversed. Are you sure?",
+        "You're about to delete this commitment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final loanProvider = context.read<LoanProvider>();
+      final commitmentProvider = context.read<CommitmentProvider>();
 
-      await loanProvider.delete(loan.id).catchError((
+      await commitmentProvider.delete(commitment.id).catchError((
         error,
         stackTrace,
       ) {
@@ -181,7 +181,7 @@ Future<bool?> confirmLoanDeletion(
           print(stackTrace);
         }
 
-        alert(messenger, "Delete loan failed");
+        alert(messenger, "Delete commitment failed");
         throw error;
       });
     },
@@ -267,9 +267,9 @@ Future<bool?> confirmEntryDeletion(
   );
 }
 
-Future<bool?> confirmLoanPaymentDeletion(
+Future<bool?> confirmCommitmentPaymentDeletion(
   BuildContext context,
-  Loan loan,
+  Commitment commitment,
   Entry entry,
 ) async {
   return ask(
@@ -279,9 +279,9 @@ Future<bool?> confirmLoanPaymentDeletion(
         "You're about to delete this payment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final loanPaymentProvider = context.read<LoanPaymentProvider>();
+      final commitmentPaymentProvider = context.read<CommitmentPaymentProvider>();
 
-      await loanPaymentProvider.delete(loan.id, entry.id).catchError((
+      await commitmentPaymentProvider.delete(commitment.id, entry.id).catchError((
         error,
         stackTrace,
       ) {

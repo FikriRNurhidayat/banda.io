@@ -24,12 +24,12 @@ import 'package:bandha/features/transfers/views/transfers.dart';
 import 'package:bandha/features/tags/views/category_selector.dart';
 import 'package:bandha/features/main/views/information.dart';
 import 'package:bandha/features/tags/views/label_selector.dart';
-import 'package:bandha/features/loans/views/loan_editor.dart';
-import 'package:bandha/features/loans/views/loan_filter.dart';
-import 'package:bandha/features/loans/views/loan_menu.dart';
-import 'package:bandha/features/loans/views/loan_entry_editor.dart';
-import 'package:bandha/features/loans/views/loan_entries.dart';
-import 'package:bandha/features/loans/views/loans.dart';
+import 'package:bandha/features/commitments/views/commitment_editor.dart';
+import 'package:bandha/features/commitments/views/commitment_filter.dart';
+import 'package:bandha/features/commitments/views/commitment_menu.dart';
+import 'package:bandha/features/commitments/views/commitment_entry_editor.dart';
+import 'package:bandha/features/commitments/views/commitment_entries.dart';
+import 'package:bandha/features/commitments/views/commitments.dart';
 import 'package:bandha/features/main/views/main_menu.dart';
 import 'package:bandha/features/main/views/tools.dart';
 import 'package:flutter/material.dart';
@@ -70,22 +70,22 @@ class Routes {
       case '/schedules/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanFilter(),
+          builder: (context) => CommitmentFilter(),
         );
-      case '/loans':
+      case '/commitments':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Loans(),
+          builder: (context) => Commitments(),
         );
-      case '/loans/new':
+      case '/commitments/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanEditor(),
+          builder: (context) => CommitmentEditor(),
         );
-      case '/loans/filter':
+      case '/commitments/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanFilter(),
+          builder: (context) => CommitmentFilter(),
         );
       case '/pools':
         return MaterialPageRoute(
@@ -164,10 +164,10 @@ class Routes {
             settings: settings,
             builder: (context) => EntryEditor(id: id),
           );
-        case 'loans':
+        case 'commitments':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => LoanEditor(id: id),
+            builder: (context) => CommitmentEditor(id: id),
           );
         case 'vaults':
           return MaterialPageRoute(
@@ -201,10 +201,10 @@ class Routes {
             settings: settings,
             builder: (context) => VaultMenu(id: id),
           );
-        case 'loans':
+        case 'commitments':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => LoanMenu(id: id),
+            builder: (context) => CommitmentMenu(id: id),
           );
         case 'schedules':
           return MaterialPageRoute(
@@ -228,10 +228,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'loans':
+        case 'commitments':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => LoanEntries(id: id),
+            builder: (context) => CommitmentEntries(id: id),
           );
       }
     }
@@ -297,10 +297,10 @@ class Routes {
             settings: settings,
             builder: (context) => EntryEditor(id: id, readOnly: true),
           );
-        case 'loans':
+        case 'commitments':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => LoanEditor(id: id, readOnly: true),
+            builder: (context) => CommitmentEditor(id: id, readOnly: true),
           );
         case 'vaults':
           return MaterialPageRoute(
@@ -332,37 +332,37 @@ class Routes {
     }
 
     if (uri.pathSegments.length == 4) {
-      if (uri.pathSegments.first == "loans" &&
+      if (uri.pathSegments.first == "commitments" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanEntryEditor(loanId: uri.pathSegments[1]),
+          builder: (context) => CommitmentEntryEditor(commitmentId: uri.pathSegments[1]),
         );
       }
     }
 
     if (uri.pathSegments.length == 5) {
-      if (uri.pathSegments.first == "loans" &&
+      if (uri.pathSegments.first == "commitments" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments.last == "edit") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanEntryEditor(
-            loanId: uri.pathSegments[1],
+          builder: (context) => CommitmentEntryEditor(
+            commitmentId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: false,
           ),
         );
       }
 
-      if (uri.pathSegments.first == "loans" &&
+      if (uri.pathSegments.first == "commitments" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments.last == "detail") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => LoanEntryEditor(
-            loanId: uri.pathSegments[1],
+          builder: (context) => CommitmentEntryEditor(
+            commitmentId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: true,
           ),

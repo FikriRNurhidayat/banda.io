@@ -26,7 +26,7 @@ VALUES
 ),
 (
     '774bafab-8b48-490a-a9dc-115ac1557391',
-    'Receivable',
+    'Commitment',
     1,
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),
@@ -35,14 +35,6 @@ VALUES
 (
     '8497d4d3-377d-405e-84ea-52c96e36548e',
     'Adjustment',
-    1,
-    strftime('%Y-%m-%dT%H:%M:%S', 'now'),
-    strftime('%Y-%m-%dT%H:%M:%S', 'now'),
-    NULL
-),
-(
-    '483e12c0-4070-4d60-8815-5891bd73e2db',
-    'Debt',
     1,
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),

@@ -1,26 +1,27 @@
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/entries/widgets/entry_tile.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
-import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/commitments/entities/commitment_payment.dart';
 import 'package:bandha/common/helpers/future_helper.dart';
-import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
-import 'package:bandha/features/loans/widgets/payment_tile.dart';
-import 'package:bandha/features/loans/widgets/loan_tile.dart';
+import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
+import 'package:bandha/features/commitments/widgets/payment_tile.dart';
+import 'package:bandha/features/commitments/widgets/commitment_tile.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class LoanEntries extends StatefulWidget {
+class CommitmentEntries extends StatefulWidget {
   final String id;
 
-  const LoanEntries({super.key, required this.id});
+  const CommitmentEntries({super.key, required this.id});
 
   @override
-  State<LoanEntries> createState() => _LoanEntriesState();
+  State<CommitmentEntries> createState() => _CommitmentEntriesState();
 }
 
-class _LoanEntriesState extends State<LoanEntries>
+class _CommitmentEntriesState extends State<CommitmentEntries>
     with TickerProviderStateMixin {
   late TabController tabController;
 
@@ -38,17 +39,17 @@ class _LoanEntriesState extends State<LoanEntries>
   }
 
   handleMore(BuildContext context) {
-    Navigator.of(context).pushNamed("/loans/${widget.id}/menu");
+    Navigator.of(context).pushNamed("/commitments/${widget.id}/menu");
   }
 
-  fabBuilder(BuildContext context, Loan loan) {
-    if (loan.status.isSettled) return null;
+  fabBuilder(BuildContext context, Commitment commitment) {
+    if (commitment.status.isSettled) return null;
 
     return FloatingActionButton(
       onPressed: () {
         Navigator.of(
           context,
-        ).pushNamed("/loans/${widget.id}/payments/new");
+        ).pushNamed("/commitments/${widget.id}/payments/new");
       },
       child: Icon(Icons.add),
     );
@@ -62,7 +63,7 @@ class _LoanEntriesState extends State<LoanEntries>
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Loan", style: theme.textTheme.titleLarge),
+      title: Text("Commitment", style: theme.textTheme.titleLarge),
       centerTitle: true,
       actions: [
         IconButton(
@@ -76,8 +77,8 @@ class _LoanEntriesState extends State<LoanEntries>
     );
   }
 
-  tabBuilder(Loan loan) {
-    final loanPaymentProvider = context.watch<LoanPaymentProvider>();
+  tabBuilder(Commitment commitment) {
+    final commitmentPaymentProvider = context.watch<CommitmentPaymentProvider>();
     final entryProvider = context.watch<EntryProvider>();
 
     return [
@@ -93,21 +94,21 @@ class _LoanEntriesState extends State<LoanEntries>
           controller: tabController,
           children: [
             FutureBuilder(
-              future: loanPaymentProvider.search(widget.id),
+              future: commitmentPaymentProvider.search(widget.id),
               builder: futureBuilder((context, snapshot) {
-                final payments = snapshot.data as List<LoanPayment>;
+                final payments = snapshot.data as List<CommitmentPayment>;
 
                 return ListView.builder(
                   itemCount: payments.length,
                   itemBuilder: (BuildContext context, int index) {
                     final payment = payments[index];
-                    return PaymentTile(payment: payment, loan: loan);
+                    return PaymentTile(payment: payment, commitment: commitment);
                   },
                 );
               }),
             ),
             FutureBuilder(
-              future: entryProvider.getByController(loan),
+              future: entryProvider.getByController(commitment),
               builder: futureBuilder((context, snapshot) {
                 final entries = snapshot.data as List<Entry>;
 
@@ -128,20 +129,25 @@ class _LoanEntriesState extends State<LoanEntries>
 
   @override
   Widget build(BuildContext context) {
-    final loanProvider = context.watch<LoanProvider>();
+    final commitmentProvider = context.watch<CommitmentProvider>();
 
     return FutureBuilder(
-      future: loanProvider.get(widget.id),
+      future: commitmentProvider.get(widget.id),
       builder: futureBuilder((context, snapshot) {
-        final loan = snapshot.data as Loan;
+        final commitment = snapshot.data as Commitment;
+
+        if (kDebugMode) {
+          print("commitment.amount: ${commitment.amount}");
+          print("commitment.remainder: ${commitment.remainder}");
+        }
 
         return Scaffold(
           appBar: appBarBuilder(context),
-          floatingActionButton: fabBuilder(context, loan),
+          floatingActionButton: fabBuilder(context, commitment),
           body: Column(
             children: [
-              LoanTile(loan, readOnly: true),
-              ...tabBuilder(loan),
+              CommitmentTile(commitment, readOnly: true),
+              ...tabBuilder(commitment),
             ],
           ),
         );

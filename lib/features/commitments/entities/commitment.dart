@@ -1,20 +1,21 @@
+import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/commitments/entities/commitment_payment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/types/controller.dart';
 
-class Loan extends Controlable {
+class Commitment extends Controlable {
   @override
   final String id;
-  final LoanType type;
-  final LoanStatus status;
+  final CommitmentStatus status;
   final double amount;
   final double? fee;
   final double remainder;
+  final String categoryId;
   final String partyId;
   final String vaultId;
   final String entryId;
@@ -25,6 +26,7 @@ class Loan extends Controlable {
   final DateTime updatedAt;
 
   late final Party party;
+  late final Category category;
   late final Entry entry;
   late final Entry? addition;
   late final Vault vault;
@@ -33,31 +35,28 @@ class Loan extends Controlable {
     return fee * -1;
   }
 
-  static String additionNote(LoanType type) {
-    return "${type.label} fee";
+  static String additionNote(EntryType type) {
+    return "Commitment fee";
   }
 
-  static String entryNote(LoanType type, Party party) {
-    return "${type.label} from ${party.name}";
+  static String entryNote(EntryType type, Party party) {
+    final preposition = type.isIncome ? "for" : "from";
+    return "Commitment $preposition ${party.name}";
   }
 
-  static double entryAmount(
-    LoanType type, {
-    required double amount,
-    required double? fee,
-  }) {
-    return amount * (type.isDebt() ? 1 : -1);
+  static double entryAmount(EntryType type, {required double amount}) {
+    return amount * (type.isIncome ? 1 : -1);
   }
 
-  Loan({
+  Commitment({
     required this.id,
-    required this.type,
     required this.status,
     required this.amount,
     this.fee,
     required this.remainder,
     required this.partyId,
     required this.entryId,
+    required this.categoryId,
     this.additionId,
     required this.vaultId,
     required this.issuedAt,
@@ -65,6 +64,18 @@ class Loan extends Controlable {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  get isIncome {
+    return amount >= 0;
+  }
+
+  get isExpense {
+    return amount < 0;
+  }
+
+  get entryType {
+    return isIncome ? EntryType.income : EntryType.expense;
+  }
 
   Iterable<Entry> get entries {
     return [entry, addition].whereType<Entry>();
@@ -74,47 +85,60 @@ class Loan extends Controlable {
     return entries.map((entry) => entry.id);
   }
 
-  Loan withEntry(Entry? value) {
+  Commitment withEntry(Entry? value) {
     if (value != null) entry = value;
     return this;
   }
 
-  Loan withAddition(Entry? value) {
-    if (value != null) addition = value;
+  Commitment withAddition(Entry? value) {
+    addition = value;
     return this;
   }
 
-  Loan withVault(Vault? value) {
+  Commitment withVault(Vault? value) {
     if (value != null) vault = value;
     return this;
   }
 
-  Loan withParty(Party? value) {
+  Commitment withParty(Party? value) {
     if (value != null) party = value;
     return this;
   }
 
-  Loan pay(double paymentAmount) {
+  Commitment withCategory(Category? value) {
+    if (value != null) category = value;
+    return this;
+  }
+
+  Commitment pay(double paymentAmount) {
     final newRemainder = remainder - paymentAmount;
+    final isSettled = amount >= 0
+        ? newRemainder <= 0
+        : newRemainder >= 0;
     return copyWith(
       remainder: newRemainder,
-      status: newRemainder <= 0 ? LoanStatus.settled : status,
+      status: isSettled ? CommitmentStatus.settled : status,
     );
   }
 
   revoke(double paymentAmount) {
     final newRemainder = remainder + paymentAmount;
+
+    final isSettled = amount >= 0
+        ? newRemainder <= 0
+        : newRemainder >= 0;
+
     return copyWith(
       remainder: newRemainder,
-      status: newRemainder <= 0 ? LoanStatus.settled : status,
+      status: isSettled ? CommitmentStatus.settled : status,
     );
   }
 
-  Loan applyPayment(LoanPayment payment) {
+  Commitment applyPayment(CommitmentPayment payment) {
     return pay(payment.amount);
   }
 
-  Loan revokePayment(LoanPayment payment) {
+  Commitment revokePayment(CommitmentPayment payment) {
     return revoke(payment.amount);
   }
 
@@ -123,13 +147,12 @@ class Loan extends Controlable {
   }
 
   double get completion {
-    return (paid / amount);
+    return (paid / amount).abs();
   }
 
   Map<String, dynamic> toMap() {
     return {
       "id": id,
-      "type": type,
       "status": status,
       "amount": amount,
       "fee": fee,
@@ -143,12 +166,12 @@ class Loan extends Controlable {
     };
   }
 
-  Loan copyWith({
-    LoanType? type,
-    LoanStatus? status,
+  Commitment copyWith({
+    CommitmentStatus? status,
     double? amount,
     double? fee,
     double? remainder,
+    String? categoryId,
     String? partyId,
     String? vaultId,
     String? entryId,
@@ -156,13 +179,13 @@ class Loan extends Controlable {
     DateTime? issuedAt,
     DateTime? settledAt,
   }) {
-    return Loan(
+    return Commitment(
       id: id,
-      type: type ?? this.type,
       status: status ?? this.status,
       amount: amount ?? this.amount,
       fee: fee ?? this.fee,
       remainder: remainder ?? this.remainder,
+      categoryId: categoryId ?? this.categoryId,
       partyId: partyId ?? this.partyId,
       vaultId: vaultId ?? this.vaultId,
       entryId: entryId ?? this.entryId,
@@ -174,12 +197,12 @@ class Loan extends Controlable {
     );
   }
 
-  factory Loan.create({
-    required LoanType type,
-    required LoanStatus status,
+  factory Commitment.create({
+    required CommitmentStatus status,
     required double amount,
     required double? fee,
     double? remainder,
+    required String categoryId,
     required String partyId,
     required String vaultId,
     required String entryId,
@@ -187,13 +210,13 @@ class Loan extends Controlable {
     required DateTime issuedAt,
     DateTime? settledAt,
   }) {
-    return Loan(
+    return Commitment(
       id: Entity.getId(),
-      type: type,
       status: status,
       amount: amount,
       fee: fee,
       remainder: remainder ?? amount,
+      categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
       entryId: entryId,
@@ -207,24 +230,24 @@ class Loan extends Controlable {
 
   @override
   Controller toController() {
-    return Controller.loan(id);
+    return Controller.commitment(id);
   }
 
-  static Loan? tryParse(Map<dynamic, dynamic>? row) {
+  static Commitment? tryParse(Map<dynamic, dynamic>? row) {
     if (isNull(row)) return null;
-    return Loan.parse(row!);
+    return Commitment.parse(row!);
   }
 
-  factory Loan.parse(Map<dynamic, dynamic> row) {
-    return Loan(
+  factory Commitment.parse(Map<dynamic, dynamic> row) {
+    return Commitment(
       id: row["id"],
-      type: LoanType.values.firstWhere((e) => e.label == row["kind"]),
-      status: LoanStatus.values.firstWhere(
+      status: CommitmentStatus.values.firstWhere(
         (e) => e.label == row["status"],
       ),
       amount: row["amount"],
       fee: row["fee"],
       remainder: row["remainder"],
+      categoryId: row["category_id"],
       partyId: row["party_id"],
       vaultId: row["vault_id"],
       entryId: row["entry_id"],
@@ -237,40 +260,24 @@ class Loan extends Controlable {
   }
 }
 
-enum LoanType {
-  debt('Debt'),
-  receiveable('Receivable');
-
-  bool isDebt() {
-    return this == LoanType.debt;
-  }
-
-  bool isReceiveable() {
-    return this == LoanType.receiveable;
-  }
-
-  final String label;
-  const LoanType(this.label);
-}
-
-enum LoanStatus {
+enum CommitmentStatus {
   overdue('Overdue'),
   settled('Settled'),
   active('Active');
 
   final String label;
-  const LoanStatus(this.label);
+  const CommitmentStatus(this.label);
 
   bool get isSettled {
-    return this == LoanStatus.settled;
+    return this == CommitmentStatus.settled;
   }
 
   EntryStatus get entryStatus {
     switch (this) {
-      case LoanStatus.settled:
+      case CommitmentStatus.settled:
         return EntryStatus.done;
-      case LoanStatus.overdue:
-      case LoanStatus.active:
+      case CommitmentStatus.overdue:
+      case CommitmentStatus.active:
         return EntryStatus.pending;
     }
   }

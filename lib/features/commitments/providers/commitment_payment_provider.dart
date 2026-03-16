@@ -1,30 +1,30 @@
-import 'package:bandha/features/loans/entities/loan_payment.dart';
-import 'package:bandha/features/loans/services/loan_payment_service.dart';
+import 'package:bandha/features/commitments/entities/commitment_payment.dart';
+import 'package:bandha/features/commitments/services/commitment_payment_service.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
-class LoanPaymentProvider extends ChangeNotifier {
-  final LoanPaymentService paymentService;
+class CommitmentPaymentProvider extends ChangeNotifier {
+  final CommitmentPaymentService paymentService;
 
-  LoanPaymentProvider(this.paymentService);
+  CommitmentPaymentProvider(this.paymentService);
 
-  Future<List<LoanPayment>> search(String loanId) {
+  Future<List<CommitmentPayment>> search(String commitmentId) {
     final Filter filter = {
-      "loan_in": [loanId],
+      "commitment_in": [commitmentId],
     };
 
     return paymentService.search(filter: filter);
   }
 
   Future<void> create(
-    String loanId, {
+    String commitmentId, {
     required double amount,
     double? fee,
     required String vaultId,
     required DateTime issuedAt,
   }) async {
     await paymentService.create(
-      loanId,
+      commitmentId,
       amount: amount,
       fee: fee,
       vaultId: vaultId,
@@ -35,7 +35,7 @@ class LoanPaymentProvider extends ChangeNotifier {
   }
 
   Future<void> update(
-    String loanId,
+    String commitmentId,
     String entryId, {
     required double amount,
     double? fee,
@@ -43,7 +43,7 @@ class LoanPaymentProvider extends ChangeNotifier {
     required DateTime issuedAt,
   }) async {
     await paymentService.update(
-      loanId,
+      commitmentId,
       entryId,
       amount: amount,
       fee: fee,
@@ -54,12 +54,12 @@ class LoanPaymentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<LoanPayment> get(String loanId, String entryId) async {
-    return paymentService.get(loanId, entryId);
+  Future<CommitmentPayment> get(String commitmentId, String entryId) async {
+    return paymentService.get(commitmentId, entryId);
   }
 
-  Future<void> delete(String loanId, String entryId) async {
-    await paymentService.delete(loanId, entryId);
+  Future<void> delete(String commitmentId, String entryId) async {
+    await paymentService.delete(commitmentId, entryId);
 
     notifyListeners();
   }

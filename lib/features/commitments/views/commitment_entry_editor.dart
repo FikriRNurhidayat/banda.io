@@ -1,11 +1,11 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/commitments/entities/commitment_payment.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/select_form_field.dart';
@@ -14,30 +14,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class LoanEntryEditor extends StatefulWidget {
-  final String loanId;
+class CommitmentEntryEditor extends StatefulWidget {
+  final String commitmentId;
   final String? entryId;
   final bool readOnly;
 
-  const LoanEntryEditor({
+  const CommitmentEntryEditor({
     super.key,
-    required this.loanId,
+    required this.commitmentId,
     this.entryId,
     this.readOnly = false,
   });
 
   @override
-  State<LoanEntryEditor> createState() => LoanEntryEditorState();
+  State<CommitmentEntryEditor> createState() => CommitmentEntryEditorState();
 }
 
-class LoanEntryEditorState extends State<LoanEntryEditor> {
+class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
   final form = GlobalKey<FormState>();
   final FormData d = {};
 
   void handleMoreTap(BuildContext context) async {
     Navigator.pushNamed(
       context,
-      "/loans/${widget.loanId}/payments/${widget.entryId!}/menu",
+      "/commitments/${widget.commitmentId}/payments/${widget.entryId!}/menu",
     );
   }
 
@@ -46,13 +46,13 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final loanPaymentProvider = context.read<LoanPaymentProvider>();
+    final commitmentPaymentProvider = context.read<CommitmentPaymentProvider>();
 
     if (form.currentState!.validate()) {
       try {
         if (isNull(widget.entryId)) {
-          await loanPaymentProvider.create(
-            widget.loanId,
+          await commitmentPaymentProvider.create(
+            widget.commitmentId,
             amount: d["amount"],
             fee: d["fee"],
             vaultId: d["vaultId"],
@@ -61,8 +61,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
         }
 
         if (!isNull(widget.entryId)) {
-          await loanPaymentProvider.update(
-            widget.loanId,
+          await commitmentPaymentProvider.update(
+            widget.commitmentId,
             widget.entryId!,
             amount: d["amount"],
             fee: d["fee"],
@@ -78,7 +78,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
           print(stackTrace);
         }
 
-        alert(messenger, "Edit loan payment details failed!");
+        alert(messenger, "Edit commitment payment details failed!");
       }
     }
   }
@@ -92,8 +92,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final vaultProvider = context.watch<VaultProvider>();
-    final loanProvider = context.watch<LoanProvider>();
-    final loanPaymentProvider = context.watch<LoanPaymentProvider>();
+    final commitmentProvider = context.watch<CommitmentProvider>();
+    final commitmentPaymentProvider = context.watch<CommitmentPaymentProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -127,9 +127,9 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
           child: FutureBuilder(
             future: Future.wait([
               vaultProvider.search(),
-              loanProvider.get(widget.loanId),
+              commitmentProvider.get(widget.commitmentId),
               if (widget.entryId != null)
-                loanPaymentProvider.get(widget.loanId, widget.entryId!),
+                commitmentPaymentProvider.get(widget.commitmentId, widget.entryId!),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -145,8 +145,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
               }
 
               final vaults = snapshot.data![0] as List<Vault>;
-              final LoanPayment? payment = !isNull(widget.entryId)
-                  ? snapshot.data![2] as LoanPayment
+              final CommitmentPayment? payment = !isNull(widget.entryId)
+                  ? snapshot.data![2] as CommitmentPayment
                   : null;
 
               return Form(

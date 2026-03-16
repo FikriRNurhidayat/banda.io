@@ -1,60 +1,64 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/select_form_field.dart';
 import 'package:bandha/common/widgets/when_form_field.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class LoanEditor extends StatefulWidget {
+class CommitmentEditor extends StatefulWidget {
   final String? id;
   final bool readOnly;
-  const LoanEditor({super.key, this.id, this.readOnly = false});
+  const CommitmentEditor({super.key, this.id, this.readOnly = false});
 
   @override
-  State<LoanEditor> createState() => _LoanEditorState();
+  State<CommitmentEditor> createState() => _CommitmentEditorState();
 }
 
-class _LoanEditorState extends State<LoanEditor> {
+class _CommitmentEditorState extends State<CommitmentEditor> {
   final _form = GlobalKey<FormState>();
   final FormData _d = {};
 
   void handleMoreTap(BuildContext context) async {
-    Navigator.pushNamed(context, "/loans/${widget.id!}/menu");
+    Navigator.pushNamed(context, "/commitments/${widget.id!}/menu");
   }
 
   void handleSubmit() {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final loanProvider = context.read<LoanProvider>();
+    final commitmentProvider = context.read<CommitmentProvider>();
 
     if (_form.currentState!.validate()) {
       _form.currentState!.save();
 
       Future(() async {
         if (widget.id == null) {
-          await loanProvider.create(
+          await commitmentProvider.create(
             fee: _d["fee"],
             amount: _d["amount"],
             issuedAt: _d["issuedAt"].dateTime,
             settledAt: _d["settledAt"]?.dateTime,
             type: _d["type"],
             status: _d["status"],
+            categoryId: _d["categoryId"],
             partyId: _d["partyId"],
             vaultId: _d["vaultId"],
           );
         }
 
         if (widget.id != null) {
-          await loanProvider.update(
+          await commitmentProvider.update(
             widget.id!,
             fee: _d["fee"],
             amount: _d["amount"],
@@ -62,6 +66,7 @@ class _LoanEditorState extends State<LoanEditor> {
             settledAt: _d["settledAt"]?.dateTime,
             type: _d["type"],
             status: _d["status"],
+            categoryId: _d["categoryId"],
             partyId: _d["partyId"],
             vaultId: _d["vaultId"],
           );
@@ -72,7 +77,7 @@ class _LoanEditorState extends State<LoanEditor> {
           print(stackTrace);
         }
 
-        alert(messenger, "Edit loan details failed");
+        alert(messenger, "Edit commitment details failed");
       });
     }
   }
@@ -85,7 +90,8 @@ class _LoanEditorState extends State<LoanEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final loanProvider = context.watch<LoanProvider>();
+    final commitmentProvider = context.watch<CommitmentProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
     final partyProvider = context.watch<PartyProvider>();
     final vaultProvider = context.watch<VaultProvider>();
 
@@ -97,7 +103,9 @@ class _LoanEditorState extends State<LoanEditor> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          !widget.readOnly ? "Enter loan details" : "Loan details",
+          !widget.readOnly
+              ? "Enter commitment details"
+              : "Commitment details",
           style: theme.textTheme.titleLarge,
         ),
         actions: [
@@ -131,7 +139,8 @@ class _LoanEditorState extends State<LoanEditor> {
             future: Future.wait([
               partyProvider.search(),
               vaultProvider.search(),
-              if (widget.id != null) loanProvider.get(widget.id!),
+              categoryProvider.search(),
+              if (widget.id != null) commitmentProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -144,8 +153,9 @@ class _LoanEditorState extends State<LoanEditor> {
 
               final parties = snapshot.data![0] as List<Party>;
               final vaults = snapshot.data![1] as List<Vault>;
-              final loan = widget.id != null
-                  ? (snapshot.data![2] as Loan)
+              final categories = snapshot.data![2] as List<Category>;
+              final commitment = widget.id != null
+                  ? (snapshot.data![3] as Commitment)
                   : null;
 
               return Form(
@@ -155,7 +165,7 @@ class _LoanEditorState extends State<LoanEditor> {
                   children: [
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["amount"] ?? loan?.amount,
+                      initialValue: _d["amount"] ?? commitment?.amount.abs(),
                       decoration: InputStyles.field(
                         hintText: "Enter amount...",
                         labelText: "Amount",
@@ -166,46 +176,81 @@ class _LoanEditorState extends State<LoanEditor> {
                     ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["fee"] ?? loan?.fee,
+                      initialValue: _d["fee"] ?? commitment?.fee,
                       decoration: InputStyles.field(
                         hintText: "Enter fee...",
                         labelText: "Fee",
                       ),
                       onSaved: (value) => _d["fee"] = value,
                     ),
-                    SelectFormField<LoanType>(
+                    SelectFormField<EntryType>(
                       readOnly: widget.readOnly,
+                      initialValue: _d["type"] ?? commitment?.entryType,
                       onSaved: (value) => _d["type"] = value,
-                      initialValue:
-                          _d["type"] ??
-                          loan?.type ??
-                          LoanType.receiveable,
                       validator: (value) =>
                           value == null ? "Type is required" : null,
-                      options: LoanType.values.map((v) {
+                      options: EntryType.values.map((v) {
                         return SelectItem(value: v, label: v.label);
                       }).toList(),
                       decoration: InputStyles.field(
                         labelText: "Type",
-                        hintText: "Select loan type...",
+                        hintText: "Select commitment type...",
                       ),
                     ),
-                    SelectFormField<LoanStatus>(
+                    SelectFormField<CommitmentStatus>(
                       readOnly: widget.readOnly,
                       onSaved: (value) => _d["status"] = value,
                       initialValue:
                           _d["status"] ??
-                          loan?.status ??
-                          LoanStatus.active,
+                          commitment?.status ??
+                          CommitmentStatus.active,
                       validator: (value) =>
                           value == null ? "Status is required" : null,
-                      options: LoanStatus.values.map((v) {
+                      options: CommitmentStatus.values.map((v) {
                         return SelectItem(value: v, label: v.label);
                       }).toList(),
                       decoration: InputStyles.field(
                         labelText: "Status",
                         hintText: "Select status type...",
                       ),
+                    ),
+                    SelectFormField<String>(
+                      readOnly: widget.readOnly,
+                      initialValue:
+                          _d["categoryId"] ?? commitment?.categoryId,
+                      onSaved: (value) => _d["categoryId"] = value,
+                      decoration: InputStyles.field(
+                        labelText: "Category",
+                        hintText: "Select category...",
+                      ),
+                      actions: [
+                        if (!widget.readOnly)
+                          ActionChip(
+                            avatar: Icon(
+                              Icons.add,
+                              color: theme.colorScheme.outline,
+                            ),
+                            label: Text(
+                              "New category",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w100,
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                            onPressed: () {
+                              redirect(context, "/categories/edit");
+                            },
+                          ),
+                      ],
+                      options: categories
+                          .where((c) => widget.readOnly || !c.readonly)
+                          .map((c) {
+                            return SelectItem(
+                              value: c.id,
+                              label: c.name,
+                            );
+                          })
+                          .toList(),
                     ),
                     WhenFormField(
                       readOnly: widget.readOnly,
@@ -227,8 +272,8 @@ class _LoanEditorState extends State<LoanEditor> {
                       ),
                       initialValue:
                           _d["issuedAt"] ??
-                          (loan?.issuedAt != null
-                              ? When.specificTime(loan!.issuedAt)
+                          (commitment?.issuedAt != null
+                              ? When.specificTime(commitment!.issuedAt)
                               : When.now()),
                       onSaved: (value) => _d["issuedAt"] = value,
                       validator: (value) => value == null
@@ -256,8 +301,10 @@ class _LoanEditorState extends State<LoanEditor> {
                       ),
                       initialValue:
                           _d["settledAt"] ??
-                          (loan?.settledAt != null
-                              ? When.specificTime(loan!.settledAt!)
+                          (commitment?.settledAt != null
+                              ? When.specificTime(
+                                  commitment!.settledAt!,
+                                )
                               : When.whenever()),
                       onSaved: (value) => _d["settledAt"] = value,
                       validator: (value) => value == null
@@ -266,7 +313,8 @@ class _LoanEditorState extends State<LoanEditor> {
                     ),
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
-                      initialValue: _d["vaultId"] ?? loan?.vaultId,
+                      initialValue:
+                          _d["vaultId"] ?? commitment?.vaultId,
                       onSaved: (value) => _d["vaultId"] = value,
                       validator: (value) =>
                           value == null ? "Vault is required" : null,
@@ -302,7 +350,8 @@ class _LoanEditorState extends State<LoanEditor> {
                     ),
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
-                      initialValue: _d["partyId"] ?? loan?.partyId,
+                      initialValue:
+                          _d["partyId"] ?? commitment?.partyId,
                       onSaved: (value) => _d["partyId"] = value,
                       validator: (value) =>
                           value == null ? "Party is required" : null,

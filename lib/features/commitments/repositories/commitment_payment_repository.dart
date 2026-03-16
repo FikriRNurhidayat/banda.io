@@ -1,46 +1,46 @@
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/loans/entities/loan.dart';
-import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/commitments/entities/commitment_payment.dart';
 import 'package:bandha/common/repositories/repository.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/types/pair.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
-class LoanPaymentRepository extends Repository {
+class CommitmentPaymentRepository extends Repository {
   WithArgs withArgs;
 
-  LoanPaymentRepository(super.db, {WithArgs? withArgs})
+  CommitmentPaymentRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  LoanPaymentRepository withVault() {
+  CommitmentPaymentRepository withVault() {
     withArgs.add("vault");
     return this;
   }
 
-  LoanPaymentRepository withEntries() {
+  CommitmentPaymentRepository withEntries() {
     withArgs.add("entries");
     return this;
   }
 
-  LoanPaymentRepository withLoan() {
-    withArgs.add("loan");
+  CommitmentPaymentRepository withCommitment() {
+    withArgs.add("commitment");
     return this;
   }
 
-  LoanPaymentRepository withCategory() {
+  CommitmentPaymentRepository withCategory() {
     withArgs.add("category");
     return this;
   }
 
-  save(LoanPayment entity) async {
+  save(CommitmentPayment entity) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO loan_payments (loan_id, entry_id, addition_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET addition_id = excluded.addition_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, loan_id = excluded.loan_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO commitment_payments (commitment_id, entry_id, addition_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET addition_id = excluded.addition_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, commitment_id = excluded.commitment_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
-        entity.loanId,
+        entity.commitmentId,
         entity.entryId,
         entity.additionId,
         entity.amount,
@@ -52,42 +52,42 @@ class LoanPaymentRepository extends Repository {
     );
   }
 
-  Future<List<LoanPayment>> search({Filter? filter}) async {
-    var baseQuery = "SELECT loan_payments.* FROM loan_payments";
+  Future<List<CommitmentPayment>> search({Filter? filter}) async {
+    var baseQuery = "SELECT commitment_payments.* FROM commitment_payments";
 
     final query = _defineQuery(baseQuery, filter);
     final sqlString =
-        "${query.first} ORDER BY loan_payments.created_at DESC";
+        "${query.first} ORDER BY commitment_payments.created_at DESC";
     final sqlArgs = query.second;
 
     final client = await getClient();
-    final loanRows = client.select(sqlString, sqlArgs);
+    final commitmentRows = client.select(sqlString, sqlArgs);
 
-    return await _entities(loanRows);
+    return await _entities(commitmentRows);
   }
 
-  Future<List<LoanPayment>> getByLoanId(String loanId) {
+  Future<List<CommitmentPayment>> getByCommitmentId(String commitmentId) {
     return search(
       filter: {
-        "loan_in": [loanId],
+        "commitment_in": [commitmentId],
       },
     );
   }
 
-  Future<LoanPayment> get(String loanId, String entryId) async {
+  Future<CommitmentPayment> get(String commitmentId, String entryId) async {
     final client = await getClient();
     final rows = client.select(
-      "SELECT * FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
-      [loanId, entryId],
+      "SELECT * FROM commitment_payments WHERE commitment_id = ? AND entry_id = ?",
+      [commitmentId, entryId],
     );
     return _entities(rows).then((entity) => entity.first);
   }
 
-  delete(String loanId, String entryId) async {
+  delete(String commitmentId, String entryId) async {
     final client = await getClient();
     client.execute(
-      "DELETE FROM loan_payments WHERE loan_id = ? AND entry_id = ?",
-      [loanId, entryId],
+      "DELETE FROM commitment_payments WHERE commitment_id = ? AND entry_id = ?",
+      [commitmentId, entryId],
     );
   }
 
@@ -113,11 +113,11 @@ class LoanPaymentRepository extends Repository {
       "sql": null,
     };
 
-    if (specification.containsKey("loan_in")) {
-      final value = specification["loan_in"] as List<String>;
+    if (specification.containsKey("commitment_in")) {
+      final value = specification["commitment_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loan_payments.loan_id IN (${value.map((_) => "?").join(", ")}))",
+          "(commitment_payments.commitment_id IN (${value.map((_) => "?").join(", ")}))",
         );
         where["args"].addAll(value);
       }
@@ -127,7 +127,7 @@ class LoanPaymentRepository extends Repository {
       final value = specification["entry_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loan_payments.entry_id IN (${value.map((_) => "?").join(", ")}))",
+          "(commitment_payments.entry_id IN (${value.map((_) => "?").join(", ")}))",
         );
         where["args"].addAll(value);
       }
@@ -135,7 +135,7 @@ class LoanPaymentRepository extends Repository {
 
     if (specification.containsKey("created_between")) {
       final value = specification["created_between"] as DateTimeRange;
-      where["query"].add("(loan_payments.created_at BETWEEN ? AND ?)");
+      where["query"].add("(commitment_payments.created_at BETWEEN ? AND ?)");
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -144,7 +144,7 @@ class LoanPaymentRepository extends Repository {
 
     if (specification.containsKey("updated_between")) {
       final value = specification["updated_between"] as DateTimeRange;
-      where["query"].add("(loan_payments.updated_at BETWEEN ? AND ?)");
+      where["query"].add("(commitment_payments.updated_at BETWEEN ? AND ?)");
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -153,7 +153,7 @@ class LoanPaymentRepository extends Repository {
 
     if (specification.containsKey("issued_between")) {
       final value = specification["issued_between"] as DateTimeRange;
-      where["query"].add("(loan_payments.issued_at BETWEEN ? AND ?)");
+      where["query"].add("(commitment_payments.issued_at BETWEEN ? AND ?)");
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -164,7 +164,7 @@ class LoanPaymentRepository extends Repository {
     return where;
   }
 
-  Future<List<LoanPayment>> _entities(List<Map> rows) async {
+  Future<List<CommitmentPayment>> _entities(List<Map> rows) async {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .map(
@@ -225,24 +225,24 @@ class LoanPaymentRepository extends Repository {
       }
     }
 
-    if (withArgs.contains("loan")) {
-      final loanIds = rows
-          .map((row) => row["loan_id"] as String)
+    if (withArgs.contains("commitment")) {
+      final commitmentIds = rows
+          .map((row) => row["commitment_id"] as String)
           .toList();
-      final loanRows = await getLoanByIds(loanIds);
+      final commitmentRows = await getCommitmentByIds(commitmentIds);
 
       rows = rows.map((row) {
         return {
           ...row,
-          "loan": loanRows.firstWhere(
-            (loanRow) => loanRow["id"] == row["loan_id"],
+          "commitment": commitmentRows.firstWhere(
+            (commitmentRow) => commitmentRow["id"] == row["commitment_id"],
           ),
         };
       }).toList();
     }
 
     return rows.map((row) {
-      final loan = Loan.tryParse(row["loan"]);
+      final commitment = Commitment.tryParse(row["commitment"]);
       final category = Category.tryRow(row["category"]);
       final vault = Vault.tryRow(row["vault"]);
       final addition = Entry.tryRow(
@@ -252,9 +252,9 @@ class LoanPaymentRepository extends Repository {
         row["entry"],
       )?.withCategory(category).withVault(vault);
 
-      return LoanPayment.fromRow(
+      return CommitmentPayment.fromRow(
         row,
-      ).withAddition(addition).withLoan(loan).withEntry(entry);
+      ).withAddition(addition).withCommitment(commitment).withEntry(entry);
     }).toList();
   }
 }
