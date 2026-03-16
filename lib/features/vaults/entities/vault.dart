@@ -1,28 +1,18 @@
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 
-enum AccountKind {
-  bankAccount('Bank Account'),
-  ewallet('E-Wallet');
-
-  final String label;
-  const AccountKind(this.label);
-}
-
-class Account {
+class Vault {
   final String id;
   final String name;
   final String holderName;
-  final AccountKind? kind;
   final double balance;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Account({
+  Vault({
     required this.id,
     required this.name,
     required this.holderName,
-    required this.kind,
     required this.createdAt,
     required this.updatedAt,
     required this.balance,
@@ -30,36 +20,34 @@ class Account {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is Account && other.id == id;
+      identical(this, other) || other is Vault && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
 
-  Account copyWith({
+  Vault copyWith({
     String? id,
     String? name,
     String? holderName,
-    AccountKind? kind,
     double? balance,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Account(
+    return Vault(
       id: id ?? this.id,
       name: name ?? this.name,
       holderName: holderName ?? this.holderName,
-      kind: kind ?? this.kind,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       balance: balance ?? this.balance,
     );
   }
 
-  Account applyAmount(double amount) {
+  Vault applyAmount(double amount) {
     return copyWith(balance: balance + amount);
   }
 
-  Account applyDelta(EntryType type, double delta) {
+  Vault applyDelta(EntryType type, double delta) {
     return copyWith(
       balance: type == EntryType.income
           ? balance + delta
@@ -67,11 +55,11 @@ class Account {
     );
   }
 
-  Account applyEntry(Entry entry) {
+  Vault applyEntry(Entry entry) {
     return copyWith(balance: balance + entry.amount);
   }
 
-  Account applyEntries(Iterable<Entry?> entries) {
+  Vault applyEntries(Iterable<Entry?> entries) {
     double newBalance = balance;
 
     for (var entry in entries) {
@@ -83,7 +71,7 @@ class Account {
     return copyWith(balance: newBalance);
   }
 
-  Account revokeEntries(Iterable<Entry?> entries) {
+  Vault revokeEntries(Iterable<Entry?> entries) {
     double newBalance = balance;
 
     for (var entry in entries) {
@@ -95,7 +83,7 @@ class Account {
     return copyWith(balance: newBalance);
   }
 
-  Account revokeEntry(Entry entry) {
+  Vault revokeEntry(Entry entry) {
     return copyWith(balance: balance - entry.amount);
   }
 
@@ -108,44 +96,37 @@ class Account {
       "id": id,
       "name": name,
       "holderName": holderName,
-      "kind": kind,
       "balance": balance,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
     };
   }
 
-  static Account? tryRow(Map<dynamic, dynamic>? row) {
+  static Vault? tryRow(Map<dynamic, dynamic>? row) {
     if (row == null) return null;
-    return Account.row(row);
+    return Vault.row(row);
   }
 
-  factory Account.row(Map<dynamic, dynamic> row) {
-    return Account(
+  factory Vault.row(Map<dynamic, dynamic> row) {
+    return Vault(
       id: row["id"],
       name: row["name"],
       holderName: row["holder_name"],
-      kind: AccountKind.values.cast<AccountKind?>().firstWhere(
-        (kind) => kind!.label == row["kind"],
-        orElse: () => null,
-      ),
       balance: row["balance"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
     );
   }
 
-  factory Account.create({
+  factory Vault.create({
     required String name,
     required String holderName,
-    required AccountKind? kind,
     required double balance,
   }) {
-    return Account(
+    return Vault(
       id: Entity.getId(),
       name: name,
       holderName: holderName,
-      kind: kind,
       balance: balance,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

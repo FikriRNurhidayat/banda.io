@@ -2,7 +2,7 @@ import 'package:bandha/features/funds/entities/fund.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/money_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
-import 'package:bandha/features/accounts/widgets/account_text.dart';
+import 'package:bandha/features/vaults/widgets/vault_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +49,7 @@ class FundTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AccountText(fund.account),
+        VaultText(fund.vault),
         Row(
           spacing: 8,
           children: [

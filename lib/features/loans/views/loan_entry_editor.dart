@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/loans/entities/loan_payment.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
 import 'package:bandha/features/loans/providers/loan_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
@@ -55,7 +55,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
             widget.loanId,
             amount: d["amount"],
             fee: d["fee"],
-            accountId: d["accountId"],
+            vaultId: d["vaultId"],
             issuedAt: d["issuedAt"]?.dateTime,
           );
         }
@@ -66,7 +66,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
             widget.entryId!,
             amount: d["amount"],
             fee: d["fee"],
-            accountId: d["accountId"],
+            vaultId: d["vaultId"],
             issuedAt: d["issuedAt"]?.dateTime,
           );
         }
@@ -91,7 +91,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final loanProvider = context.watch<LoanProvider>();
     final loanPaymentProvider = context.watch<LoanPaymentProvider>();
 
@@ -126,7 +126,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
             future: Future.wait([
-              accountProvider.search(),
+              vaultProvider.search(),
               loanProvider.get(widget.loanId),
               if (widget.entryId != null)
                 loanPaymentProvider.get(widget.loanId, widget.entryId!),
@@ -144,7 +144,7 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data![0] as List<Account>;
+              final vaults = snapshot.data![0] as List<Vault>;
               final LoanPayment? payment = !isNull(widget.entryId)
                   ? snapshot.data![2] as LoanPayment
                   : null;
@@ -202,8 +202,8 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                     SelectFormField(
                       readOnly: widget.readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Account",
-                        hintText: "Select account...",
+                        labelText: "Vault",
+                        hintText: "Select vault...",
                       ),
                       actions: [
                         if (!widget.readOnly)
@@ -213,26 +213,26 @@ class LoanEntryEditorState extends State<LoanEntryEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New vault",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect("/accounts/new");
+                              redirect("/vaults/new");
                             },
                           ),
                       ],
-                      options: accounts.map((i) {
+                      options: vaults.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
                       initialValue:
-                          d["accountId"] ?? payment?.entry.accountId,
-                      onSaved: (value) => d["accountId"] = value,
+                          d["vaultId"] ?? payment?.entry.vaultId,
+                      onSaved: (value) => d["vaultId"] = value,
                     ),
                   ],
                 ),

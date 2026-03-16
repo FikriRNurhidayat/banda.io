@@ -1,7 +1,7 @@
 import 'package:bandha/common/services/service.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/funds/entities/fund.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
@@ -15,14 +15,14 @@ class FundService extends Service {
   final FundRepository fundRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
-  final AccountRepository accountRepository;
+  final VaultRepository vaultRepository;
   final LabelRepository labelRepository;
 
   FundService({
     required this.fundRepository,
     required this.categoryRepository,
     required this.entryRepository,
-    required this.accountRepository,
+    required this.vaultRepository,
     required this.labelRepository,
   });
 
@@ -34,7 +34,7 @@ class FundService extends Service {
     return work(() async {
       final now = DateTime.now();
       final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withAccount().get(id);
+      final fund = await fundRepository.withVault().get(id);
 
       await fundRepository.save(fund.copyWith(releasedAt: null, status: FundStatus.active));
 
@@ -43,12 +43,12 @@ class FundService extends Service {
         amount: fund.balance * -1,
         status: EntryStatus.done,
         issuedAt: now,
-        accountId: fund.accountId,
+        vaultId: fund.vaultId,
         categoryId: category.id,
       );
 
       await entryRepository.save(entry.controlledBy(fund));
-      await accountRepository.save(fund.account.applyEntry(entry));
+      await vaultRepository.save(fund.vault.applyEntry(entry));
     });
   }
 
@@ -56,7 +56,7 @@ class FundService extends Service {
     return work(() async {
       final now = DateTime.now();
       final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withAccount().get(id);
+      final fund = await fundRepository.withVault().get(id);
       await fundRepository.save(fund.copyWith(releasedAt: now, status: FundStatus.released));
 
       final entry = Entry.readOnly(
@@ -64,18 +64,18 @@ class FundService extends Service {
         amount: fund.balance,
         status: EntryStatus.done,
         issuedAt: now,
-        accountId: fund.accountId,
+        vaultId: fund.vaultId,
         categoryId: category.id,
       );
 
       await entryRepository.save(entry.controlledBy(fund));
-      await accountRepository.save(fund.account.applyEntry(entry));
+      await vaultRepository.save(fund.vault.applyEntry(entry));
     });
   }
 
-  Future<Fund> create({String? note, required double goal, required String accountId, List<String>? labelIds}) async {
+  Future<Fund> create({String? note, required double goal, required String vaultId, List<String>? labelIds}) async {
     return await work<Fund>(() async {
-      final fund = Fund.create(note: note, goal: goal, balance: 0, accountId: accountId, status: FundStatus.active);
+      final fund = Fund.create(note: note, goal: goal, balance: 0, vaultId: vaultId, status: FundStatus.active);
 
       await fundRepository.save(fund);
       if (labelIds != null) {
@@ -98,24 +98,24 @@ class FundService extends Service {
 
   delete(String id) {
     return work(() async {
-      final fund = await fundRepository.withAccount().get(id);
-      final account = fund.account;
+      final fund = await fundRepository.withVault().get(id);
+      final vault = fund.vault;
       await fundRepository.removeTransactions(fund);
       await fundRepository.delete(fund.id);
-      await accountRepository.sync(account.id);
+      await vaultRepository.sync(vault.id);
     });
   }
 
   search(Filter? specification) {
-    return fundRepository.withLabels().withAccount().search(specification);
+    return fundRepository.withLabels().withVault().search(specification);
   }
 
   get(String id) {
-    return fundRepository.withLabels().withAccount().get(id);
+    return fundRepository.withLabels().withVault().get(id);
   }
 
   searchTransactions({required String fundId, Filter? specification}) {
-    return entryRepository.withLabels().withAccount().search({
+    return entryRepository.withLabels().withVault().search({
       "fund_in": [fundId],
       ...?specification,
     });
@@ -130,7 +130,7 @@ class FundService extends Service {
   }) async {
     return await work(() async {
       final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withLabels().withAccount().get(fundId);
+      final fund = await fundRepository.withLabels().withVault().get(fundId);
 
       final labels = <Label>[];
 
@@ -147,13 +147,13 @@ class FundService extends Service {
         amount: Fund.entryAmount(type, amount),
         status: EntryStatus.done,
         issuedAt: issuedAt,
-        accountId: fund.accountId,
+        vaultId: fund.vaultId,
         categoryId: category.id,
-      ).controlledBy(fund).withLabels(labels).withAccount(fund.account).withCategory(category);
+      ).controlledBy(fund).withLabels(labels).withVault(fund.vault).withCategory(category);
 
       await entryRepository.save(entry);
       await entryRepository.saveLabels(entry.id, entry.labelIds);
-      await accountRepository.save(fund.account.applyEntry(entry));
+      await vaultRepository.save(fund.vault.applyEntry(entry));
       await fundRepository.save(fund.applyEntry(entry));
       await fundRepository.saveTransaction(fund, entry);
     });
@@ -168,10 +168,10 @@ class FundService extends Service {
     List<String>? labelIds,
   }) async {
     return await work(() async {
-      final fund = await fundRepository.withAccount().withLabels().get(fundId);
+      final fund = await fundRepository.withVault().withLabels().get(fundId);
       final entry = await entryRepository.get(entryId);
 
-      final newAccount = fund.account.revokeEntry(entry);
+      final newVault = fund.vault.revokeEntry(entry);
       final newFund = fund.revokeEntry(entry);
       final newLabels = <Label>[];
 
@@ -182,22 +182,22 @@ class FundService extends Service {
 
       final newEntry = entry
           .copyWith(note: Fund.entryNote(newFund, type), amount: Fund.entryAmount(type, amount), issuedAt: issuedAt)
-          .withAccount(newAccount)
+          .withVault(newVault)
           .withLabels(newLabels);
 
       await entryRepository.save(newEntry);
       await entryRepository.saveLabels(newEntry.id, newEntry.labelIds);
-      await accountRepository.save(newAccount.applyEntry(newEntry));
+      await vaultRepository.save(newVault.applyEntry(newEntry));
       await fundRepository.save(newFund.applyEntry(newEntry));
     });
   }
 
   deleteTransaction({required String fundId, required String entryId}) async {
     return await work(() async {
-      final fund = await fundRepository.withAccount().get(fundId);
+      final fund = await fundRepository.withVault().get(fundId);
       final entry = await entryRepository.get(entryId);
 
-      await accountRepository.save(fund.account.revokeEntry(entry));
+      await vaultRepository.save(fund.vault.revokeEntry(entry));
       await fundRepository.save(fund.revokeEntry(entry));
       await entryRepository.delete(entry.id);
     });

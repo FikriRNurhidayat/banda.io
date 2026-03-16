@@ -1,5 +1,5 @@
 import 'package:bandha/common/repositories/repository.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
@@ -11,8 +11,8 @@ class TransferRepository extends Repository {
   TransferRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  TransferRepository withAccounts() {
-    withArgs.add("accounts");
+  TransferRepository withVaults() {
+    withArgs.add("vaults");
     return TransferRepository(db, withArgs: withArgs);
   }
 
@@ -24,17 +24,17 @@ class TransferRepository extends Repository {
   save(Transfer transfer) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO transfers (id, note, amount, fee, debit_id, debit_account_id, exchange_id, credit_id, credit_account_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_account_id = excluded.debit_account_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_account_id = excluded.credit_account_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO transfers (id, note, amount, fee, debit_id, debit_vault_id, exchange_id, credit_id, credit_vault_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_vault_id = excluded.debit_vault_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_vault_id = excluded.credit_vault_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         transfer.id,
         transfer.note,
         transfer.amount,
         transfer.fee,
         transfer.debitId,
-        transfer.debitAccountId,
+        transfer.debitVaultId,
         transfer.exchangeId,
         transfer.creditId,
-        transfer.creditAccountId,
+        transfer.creditVaultId,
         transfer.issuedAt.toIso8601String(),
         transfer.createdAt.toIso8601String(),
         transfer.updatedAt.toIso8601String(),
@@ -63,25 +63,25 @@ class TransferRepository extends Repository {
   }
 
   Future<List<Transfer>> entities(List<Map> rows) async {
-    if (withArgs.contains("accounts")) {
-      final accountIds = rows
+    if (withArgs.contains("vaults")) {
+      final vaultIds = rows
           .expand(
             (t) => [
-              t["debit_account_id"] as String,
-              t["credit_account_id"] as String,
+              t["debit_vault_id"] as String,
+              t["credit_vault_id"] as String,
             ],
           )
           .toList();
-      final accountRows = await getAccountByIds(accountIds);
+      final vaultRows = await getVaultByIds(vaultIds);
 
       rows = rows.map((t) {
         return {
           ...t,
-          "debit_account": accountRows.firstWhere(
-            (e) => e["id"] == t["debit_account_id"],
+          "debit_vault": vaultRows.firstWhere(
+            (e) => e["id"] == t["debit_vault_id"],
           ),
-          "credit_account": accountRows.firstWhere(
-            (e) => e["id"] == t["credit_account_id"],
+          "credit_vault": vaultRows.firstWhere(
+            (e) => e["id"] == t["credit_vault_id"],
           ),
         };
       }).toList();
@@ -115,10 +115,10 @@ class TransferRepository extends Repository {
     return rows.map((r) {
       return Transfer.fromRow(r)
           .withDebit(Entry.row(r["debit"]))
-          .withDebitAccount(Account.row(r["debit_account"]))
+          .withDebitVault(Vault.row(r["debit_vault"]))
           .withExchange(Entry.tryRow(r["exchange"]))
           .withCredit(Entry.row(r["credit"]))
-          .withCreditAccount(Account.row(r["credit_account"]));
+          .withCreditVault(Vault.row(r["credit_vault"]));
     }).toList();
   }
 }

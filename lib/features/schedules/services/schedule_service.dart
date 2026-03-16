@@ -1,23 +1,23 @@
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/services/service.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
-import 'package:bandha/features/schedules/entities/schedule.dart';
-import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/tags/repositories/label_repository.dart';
 import 'package:bandha/features/tags/types/read_only_label.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 
 class ScheduleService extends Service {
-  final AccountRepository accountRepository;
+  final VaultRepository vaultRepository;
   final ScheduleRepository scheduleRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
   final LabelRepository labelRepository;
 
   ScheduleService({
-    required this.accountRepository,
+    required this.vaultRepository,
     required this.scheduleRepository,
     required this.categoryRepository,
     required this.entryRepository,
@@ -28,61 +28,64 @@ class ScheduleService extends Service {
     String? note,
     required double amount,
     double? fee,
+    required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String accountId,
+    required String vaultId,
     required List<String> labelIds,
   }) {
     return work(() async {
       final category = await categoryRepository.get(categoryId);
-      var account = await accountRepository.get(accountId);
+      var vault = await vaultRepository.get(vaultId);
       final labels = await labelRepository.getByIds(labelIds);
       final feeLabel = await labelRepository.getByName(
         ReadOnlyLabel.fee.label,
       );
+      final sign = (type.isIncome ? 1 : -1);
 
       var entry =
           Entry.readOnly(
-                amount: amount,
+                amount: amount * sign,
                 status: status.entryStatus,
                 issuedAt: dueAt,
-                accountId: account.id,
+                vaultId: vault.id,
                 categoryId: category.id,
               )
               .withCategory(category)
-              .withAccount(account)
+              .withVault(vault)
               .withLabels(labels)
               .annotate("iteration", 1);
 
       final addition = fee != null
           ? Entry.readOnly(
-                  amount: fee,
+                  amount: fee * sign,
                   status: status.entryStatus,
                   issuedAt: dueAt,
-                  accountId: account.id,
+                  vaultId: vault.id,
                   categoryId: category.id,
                 )
                 .withCategory(category)
-                .withAccount(account)
+                .withVault(vault)
                 .withLabels([...labels, feeLabel])
                 .annotate("entry_id", entry.id)
                 .annotate("iteration", 1)
           : null;
 
-      if (addition != null)
+      if (addition != null) {
         entry = entry.annotate("addition_id", addition.id);
+      }
 
       final schedule =
           Schedule.create(
                 note: note,
-                amount: amount,
-                fee: fee,
+                amount: amount * sign,
+                fee: fee != null ? fee * sign : null,
                 cycle: cycle,
                 status: status,
                 categoryId: category.id,
-                accountId: account.id,
+                vaultId: vault.id,
                 entryId: entry.id,
                 additionId: addition?.id,
                 dueAt: dueAt,
@@ -90,7 +93,7 @@ class ScheduleService extends Service {
               .withLabels(labels)
               .withEntry(entry)
               .withAddition(addition)
-              .withAccount(account)
+              .withVault(vault)
               .withCategory(category);
 
       await entryRepository.withLabels().withAnnotations().bulkSave(
@@ -103,8 +106,8 @@ class ScheduleService extends Service {
       );
 
       if (schedule.status.isPaid) {
-        await accountRepository.save(
-          schedule.account.applyEntries(schedule.entries),
+        await vaultRepository.save(
+          schedule.vault.applyEntries(schedule.entries),
         );
       }
 
@@ -120,17 +123,18 @@ class ScheduleService extends Service {
     String? note,
     required double amount,
     double? fee,
+    required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String accountId,
+    required String vaultId,
     required List<String> labelIds,
   }) {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withAccount()
+          .withVault()
           .withEntries()
           .withCategory()
           .get(id);
@@ -140,28 +144,30 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        await accountRepository.save(
-          schedule.account.revokeEntries(schedule.entries),
+        await vaultRepository.save(
+          schedule.vault.revokeEntries(schedule.entries),
         );
       }
 
       final category = await categoryRepository.get(categoryId);
-      var account = await accountRepository.get(accountId);
+      var vault = await vaultRepository.get(vaultId);
       final labels = await labelRepository.getByIds(labelIds);
       final feeLabel = await labelRepository.getByName(
         ReadOnlyLabel.fee.label,
       );
 
+      final sign = type.isIncome ? 1 : -1;
+
       var entry = schedule.entry
           .copyWith(
-            amount: amount,
+            amount: amount * sign,
             status: status.entryStatus,
             issuedAt: dueAt,
-            accountId: account.id,
+            vaultId: vault.id,
             categoryId: category.id,
           )
           .withCategory(category)
-          .withAccount(account)
+          .withVault(vault)
           .withLabels(labels);
 
       final additionId = schedule.additionId;
@@ -169,21 +175,21 @@ class ScheduleService extends Service {
       final addition = fee != null
           ? (schedule.hasAddition
                     ? schedule.addition!.copyWith(
-                        amount: fee,
+                        amount: fee * sign,
                         status: status.entryStatus,
                         issuedAt: dueAt,
-                        accountId: account.id,
+                        vaultId: vault.id,
                         categoryId: category.id,
                       )
                     : Entry.readOnly(
-                        amount: fee,
+                        amount: fee * sign,
                         status: status.entryStatus,
                         issuedAt: dueAt,
-                        accountId: account.id,
+                        vaultId: vault.id,
                         categoryId: category.id,
                       ))
                 .withCategory(category)
-                .withAccount(account)
+                .withVault(vault)
                 .withLabels([...labels, feeLabel])
                 .annotate("entry_id", entry.id)
           : null;
@@ -194,23 +200,23 @@ class ScheduleService extends Service {
 
       schedule = schedule.copyWith(
         note: note,
-        amount: amount,
+        amount: amount * sign,
         cycle: cycle,
         status: status,
         categoryId: category.id,
-        accountId: account.id,
+        vaultId: vault.id,
         entryId: entry.id,
         dueAt: dueAt,
       );
 
       schedule = schedule
           .withNote(note)
-          .withFee(fee)
+          .withFee(fee != null ? fee * sign : fee)
           .withAdditionId(addition?.id)
           .withLabels(labels)
           .withEntry(entry)
           .withAddition(addition)
-          .withAccount(account)
+          .withVault(vault)
           .withCategory(category);
 
       for (var entry in schedule.entries) {
@@ -223,8 +229,8 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        await accountRepository.save(
-          schedule.account.applyEntries(schedule.entries),
+        await vaultRepository.save(
+          schedule.vault.applyEntries(schedule.entries),
         );
       }
 
@@ -243,7 +249,7 @@ class ScheduleService extends Service {
     return await scheduleRepository
         .withCategory()
         .withEntries()
-        .withAccount()
+        .withVault()
         .withLabels()
         .get(id);
   }
@@ -252,7 +258,7 @@ class ScheduleService extends Service {
     return await scheduleRepository
         .withCategory()
         .withLabels()
-        .withAccount()
+        .withVault()
         .search();
   }
 
@@ -266,17 +272,19 @@ class ScheduleService extends Service {
 
       await scheduleRepository.delete(schedule.id);
 
-      final entries = await entryRepository.controlledBy(schedule);
-      final accounts = entries
-          .map((entry) => entry.account)
+      final entries = await entryRepository.withVault().controlledBy(schedule);
+      final entryIds = entries.map((entry) => entry.id).toList();
+      final vaults = entries
+          .map((entry) => entry.vault)
           .toSet()
           .map(
-            (account) => account.revokeEntries(
-              entries.where((entry) => account == entry.account),
+            (vault) => vault.revokeEntries(
+              entries.where((entry) => vault == entry.vault),
             ),
           );
 
-      await accountRepository.bulkSave(accounts);
+      await vaultRepository.bulkSave(vaults);
+      await entryRepository.deleteByIds(entryIds);
     });
   }
 
@@ -284,7 +292,7 @@ class ScheduleService extends Service {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withAccount()
+          .withVault()
           .withCategory()
           .withEntries()
           .get(id);
@@ -297,7 +305,7 @@ class ScheduleService extends Service {
         return null;
       }
 
-      var account = schedule.account;
+      var vault = schedule.vault;
       final entry = schedule.entry;
       final iteration = schedule.iteration - 1;
 
@@ -307,8 +315,8 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        account = account.revokeEntries(schedule.entries);
-        await accountRepository.save(account);
+        vault = vault.revokeEntries(schedule.entries);
+        await vaultRepository.save(vault);
       }
 
       final previousEntry = await entryRepository.withAnnotations().get(
@@ -335,7 +343,7 @@ class ScheduleService extends Service {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withAccount()
+          .withVault()
           .withCategory()
           .withEntries()
           .get(id);
@@ -358,12 +366,12 @@ class ScheduleService extends Service {
                 amount: schedule.amount,
                 status: EntryStatus.pending,
                 issuedAt: schedule.nextTime,
-                accountId: schedule.accountId,
+                vaultId: schedule.vaultId,
                 categoryId: schedule.categoryId,
               )
               .controlledBy(schedule)
               .withLabels(schedule.labels)
-              .withAccount(schedule.account)
+              .withVault(schedule.vault)
               .withCategory(schedule.category)
               .annotate("previous_id", schedule.entryId)
               .annotate("iteration", iteration);
@@ -378,12 +386,12 @@ class ScheduleService extends Service {
                   amount: schedule.fee!,
                   status: EntryStatus.pending,
                   issuedAt: schedule.nextTime,
-                  accountId: schedule.accountId,
+                  vaultId: schedule.vaultId,
                   categoryId: schedule.categoryId,
                 )
                 .controlledBy(schedule)
                 .withLabels([...schedule.labels, feeLabel])
-                .withAccount(schedule.account)
+                .withVault(schedule.vault)
                 .withCategory(schedule.category)
                 .annotate("previous_id", schedule.entryId)
                 .annotate("entry_id", schedule.entryId)
@@ -403,7 +411,7 @@ class ScheduleService extends Service {
             dueAt: schedule.nextTime,
           )
           .withCategory(schedule.category)
-          .withAccount(schedule.account)
+          .withVault(schedule.vault)
           .withLabels(schedule.labels)
           .withEntry(newEntry)
           .withAddition(newAddition);

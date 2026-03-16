@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS entries (
     status TEXT NOT NULL,
     readonly BOOLEAN DEFAULT FALSE,
     category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     controller_id TEXT,
     controller_type TEXT,
     created_at TEXT NOT NULL,

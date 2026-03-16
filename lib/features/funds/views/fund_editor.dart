@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/funds/entities/fund.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
 import 'package:bandha/features/funds/providers/fund_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
@@ -44,7 +44,7 @@ class _FundEditorState extends State<FundEditor> {
         if (widget.id == null) {
           await fundProvider.create(
             goal: _d["goal"],
-            accountId: _d["accountId"],
+            vaultId: _d["vaultId"],
             labelIds: _d["labelIds"],
             note: _d["note"],
           );
@@ -113,7 +113,7 @@ class _FundEditorState extends State<FundEditor> {
     BuildContext context, {
     required Fund? fund,
     required List<Label> labels,
-    required List<Account> accounts,
+    required List<Vault> vaults,
   }) {
     final theme = Theme.of(context);
 
@@ -151,35 +151,35 @@ class _FundEditorState extends State<FundEditor> {
         ),
       SelectFormField<String>(
         readOnly: widget.readOnly,
-        initialValue: _d["accountId"] ?? fund?.accountId,
-        onSaved: (value) => _d["accountId"] = value,
+        initialValue: _d["vaultId"] ?? fund?.vaultId,
+        onSaved: (value) => _d["vaultId"] = value,
         validator: (value) =>
-            value == null ? "Account is required" : null,
+            value == null ? "Vault is required" : null,
         actions: [
           if (!widget.readOnly)
             ActionChip(
               avatar: Icon(Icons.add, color: theme.colorScheme.outline),
               label: Text(
-                "New account",
+                "New vault",
                 style: TextStyle(
                   fontWeight: FontWeight.w100,
                   color: theme.colorScheme.outline,
                 ),
               ),
               onPressed: () {
-                redirect(context, "/accounts/new");
+                redirect(context, "/vaults/new");
               },
             ),
         ],
-        options: accounts.map((account) {
+        options: vaults.map((vault) {
           return SelectItem(
-            value: account.id,
-            label: account.displayName(),
+            value: vault.id,
+            label: vault.displayName(),
           );
         }).toList(),
         decoration: InputStyles.field(
-          labelText: "Account",
-          hintText: "Select account...",
+          labelText: "Vault",
+          hintText: "Select vault...",
         ),
       ),
       MultiSelectFormField<String>(
@@ -216,14 +216,14 @@ class _FundEditorState extends State<FundEditor> {
   @override
   Widget build(BuildContext context) {
     final fundProvider = context.read<FundProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
       appBar: appBarBuilder(context),
       body: FutureBuilder(
         future: Future.wait([
-          accountProvider.search(),
+          vaultProvider.search(),
           labelProvider.search(),
           if (widget.id != null) fundProvider.get(widget.id!),
         ]),
@@ -236,7 +236,7 @@ class _FundEditorState extends State<FundEditor> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final accounts = snapshot.data![0] as List<Account>;
+          final vaults = snapshot.data![0] as List<Vault>;
           final labels = snapshot.data![1] as List<Label>;
           final fund = widget.id != null
               ? (snapshot.data![2] as Fund)
@@ -246,7 +246,7 @@ class _FundEditorState extends State<FundEditor> {
             context,
             fund: fund,
             labels: labels,
-            accounts: accounts,
+            vaults: vaults,
           );
 
           return Container(

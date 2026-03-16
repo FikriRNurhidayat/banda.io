@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS schedules (
     entry_id TEXT NOT NULL REFERENCES entries (id),
     addition_id TEXT REFERENCES entries (id),
     category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     due_at TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,

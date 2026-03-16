@@ -4,7 +4,7 @@ import 'package:bandha/features/loans/entities/loan.dart';
 import 'package:bandha/features/loans/entities/loan_payment.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/loans/repositories/loan_payment_repository.dart';
@@ -18,12 +18,12 @@ class LoanService extends Service {
   final LoanPaymentRepository paymentRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
-  final AccountRepository accountRepository;
+  final VaultRepository vaultRepository;
   final PartyRepository partyRepository;
   final NotificationManager notificationManager;
 
   LoanService({
-    required this.accountRepository,
+    required this.vaultRepository,
     required this.entryRepository,
     required this.categoryRepository,
     required this.loanRepository,
@@ -42,20 +42,20 @@ class LoanService extends Service {
     required double amount,
     double? fee = 0,
     required String partyId,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
     DateTime? settledAt,
   }) {
     return work<Loan>(() async {
       final category = await categoryRepository.getByName(type.label);
       final party = await partyRepository.get(partyId);
-      final account = await accountRepository.get(accountId);
+      final vault = await vaultRepository.get(vaultId);
       final entry = Entry.readOnly(
         note: Loan.entryNote(type, party),
         amount: Loan.entryAmount(type, amount: amount, fee: fee),
         status: EntryStatus.done,
         issuedAt: issuedAt,
-        accountId: accountId,
+        vaultId: vaultId,
         categoryId: category.id,
       );
 
@@ -66,7 +66,7 @@ class LoanService extends Service {
                       amount: Loan.additionAmount(fee!),
                       status: EntryStatus.done,
                       issuedAt: issuedAt,
-                      accountId: account.id,
+                      vaultId: vault.id,
                       categoryId: category.id,
                     )
                   : null)
@@ -79,12 +79,12 @@ class LoanService extends Service {
         type: type,
         status: status,
         partyId: party.id,
-        accountId: account.id,
+        vaultId: vault.id,
         entryId: entry.id,
         additionId: addition?.id,
         issuedAt: issuedAt,
         settledAt: settledAt,
-      ).withAccount(account).withEntry(entry).withAddition(addition).withParty(party);
+      ).withVault(vault).withEntry(entry).withAddition(addition).withParty(party);
 
       return await applyLoan(loan);
     });
@@ -97,23 +97,23 @@ class LoanService extends Service {
     required double amount,
     double? fee,
     required String partyId,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
     DateTime? settledAt,
   }) {
     return work<Loan>(() async {
       final category = await categoryRepository.getByName(type.label);
-      final loan = await loanRepository.withEntries().withParty().withAccount().get(id);
+      final loan = await loanRepository.withEntries().withParty().withVault().get(id);
 
-      await accountRepository.save(loan.account.revokeEntries(loan.entries));
+      await vaultRepository.save(loan.vault.revokeEntries(loan.entries));
 
       final nParty = await partyRepository.get(partyId);
-      final nAccount = await accountRepository.get(accountId);
+      final nVault = await vaultRepository.get(vaultId);
       final nEntry = loan.entry.copyWith(
         note: Loan.entryNote(type, nParty),
         amount: Loan.entryAmount(type, amount: amount, fee: fee),
         issuedAt: issuedAt,
-        accountId: accountId,
+        vaultId: vaultId,
         categoryId: category.id,
       );
 
@@ -124,7 +124,7 @@ class LoanService extends Service {
                       amount: Loan.additionAmount(fee!),
                       status: EntryStatus.done,
                       issuedAt: issuedAt,
-                      accountId: nAccount.id,
+                      vaultId: nVault.id,
                       categoryId: category.id,
                     ).annotate("type", "fee")
                   : (!isZero(loan.fee) && !isZero(fee))
@@ -133,7 +133,7 @@ class LoanService extends Service {
                       amount: Loan.additionAmount(fee!),
                       issuedAt: issuedAt,
                       readonly: true,
-                      accountId: nAccount.id,
+                      vaultId: nVault.id,
                       categoryId: category.id,
                     )
                   : null)
@@ -147,14 +147,14 @@ class LoanService extends Service {
             type: type,
             status: status,
             partyId: nParty.id,
-            accountId: nAccount.id,
+            vaultId: nVault.id,
             entryId: nEntry.id,
             issuedAt: issuedAt,
             settledAt: settledAt,
           )
           .withEntry(nEntry)
           .withAddition(nAddition)
-          .withAccount(nAccount)
+          .withVault(nVault)
           .withParty(nParty);
 
       return await applyLoan(nLoan);
@@ -162,17 +162,17 @@ class LoanService extends Service {
   }
 
   searchPayments({Filter? specification}) {
-    return paymentRepository.withAccount().withEntries().withCategory().search(filter: specification);
+    return paymentRepository.withVault().withEntries().withCategory().search(filter: specification);
   }
 
   deletePayment(String loanId, String entryId) {
     return work(() async {
-      final payment = await paymentRepository.withLoan().withAccount().withEntries().get(loanId, entryId);
+      final payment = await paymentRepository.withLoan().withVault().withEntries().get(loanId, entryId);
 
-      final nAccount = payment.account.revokeEntries(payment.entries);
+      final nVault = payment.vault.revokeEntries(payment.entries);
       final nLoan = payment.loan.revokePayment(payment);
 
-      await accountRepository.save(nAccount);
+      await vaultRepository.save(nVault);
       await loanRepository.save(nLoan);
 
       await paymentRepository.delete(payment.loan.id, payment.entry.id);
@@ -181,7 +181,7 @@ class LoanService extends Service {
   }
 
   getPayment(String loanId, String entryId) {
-    return paymentRepository.withAccount().withCategory().withEntries().get(loanId, entryId);
+    return paymentRepository.withVault().withCategory().withEntries().get(loanId, entryId);
   }
 
   updatePayment(
@@ -189,24 +189,24 @@ class LoanService extends Service {
     String entryId, {
     required double amount,
     double? fee = 0,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
   }) {
     return work<LoanPayment>(() async {
-      var payment = await paymentRepository.withLoan().withEntries().withAccount().get(loanId, entryId);
+      var payment = await paymentRepository.withLoan().withEntries().withVault().get(loanId, entryId);
 
-      await accountRepository.save(payment.account.revokeEntries(payment.entries));
+      await vaultRepository.save(payment.vault.revokeEntries(payment.entries));
 
       final loan = payment.loan.revokePayment(payment);
-      final account = await accountRepository.get(accountId);
+      final vault = await vaultRepository.get(vaultId);
       final entry = payment.entry
           .copyWith(
             amount: LoanPayment.entryAmount(loan, amount),
             status: EntryStatus.done,
             issuedAt: issuedAt,
-            accountId: account.id,
+            vaultId: vault.id,
           )
-          .withAccount(account);
+          .withVault(vault);
       final addition =
           (!payment.hasAddition && !isZero(fee)
                   ? Entry.readOnly(
@@ -214,7 +214,7 @@ class LoanService extends Service {
                       amount: LoanPayment.additionAmount(loan, fee),
                       status: EntryStatus.done,
                       issuedAt: issuedAt,
-                      accountId: account.id,
+                      vaultId: vault.id,
                       categoryId: entry.categoryId,
                     )
                   : ((payment.hasAddition && !isZero(fee)
@@ -222,7 +222,7 @@ class LoanService extends Service {
                             note: LoanPayment.additionNote(loan),
                             amount: LoanPayment.additionAmount(loan, fee),
                             issuedAt: issuedAt,
-                            accountId: account.id,
+                            vaultId: vault.id,
                             categoryId: entry.categoryId,
                           )
                         : null)))
@@ -242,22 +242,22 @@ class LoanService extends Service {
     String loanId, {
     required double amount,
     double? fee = 0,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
   }) {
     return work<LoanPayment>(() async {
-      final loan = await loanRepository.withParty().withAccount().get(loanId);
+      final loan = await loanRepository.withParty().withVault().get(loanId);
       final category = await categoryRepository.getByName(loan.type.label);
 
-      final account = await accountRepository.get(accountId);
+      final vault = await vaultRepository.get(vaultId);
       final entry = Entry.readOnly(
         note: LoanPayment.entryNote(loan),
         amount: LoanPayment.entryAmount(loan, amount),
         status: EntryStatus.done,
         issuedAt: issuedAt,
-        accountId: account.id,
+        vaultId: vault.id,
         categoryId: category.id,
-      ).withAccount(account);
+      ).withVault(vault);
       final addition =
           (!isZero(fee)
                   ? (Entry.readOnly(
@@ -265,7 +265,7 @@ class LoanService extends Service {
                       amount: LoanPayment.additionAmount(loan, fee),
                       status: EntryStatus.done,
                       issuedAt: issuedAt,
-                      accountId: accountId,
+                      vaultId: vaultId,
                       categoryId: category.id,
                     ))
                   : null)
@@ -285,11 +285,11 @@ class LoanService extends Service {
   }
 
   get(String id) {
-    return loanRepository.withParty().withEntries().withAccount().get(id);
+    return loanRepository.withParty().withEntries().withVault().get(id);
   }
 
   search(Filter? spec) {
-    return loanRepository.withParty().withEntries().withAccount().search(spec);
+    return loanRepository.withParty().withEntries().withVault().search(spec);
   }
 
   debugReminder(String id) async {
@@ -304,42 +304,42 @@ class LoanService extends Service {
 
   delete(String id) {
     return work(() async {
-      final loan = await loanRepository.withEntries().withParty().withAccount().get(id);
+      final loan = await loanRepository.withEntries().withParty().withVault().get(id);
 
-      final payments = await paymentRepository.withAccount().withEntries().getByLoanId(loan.id);
+      final payments = await paymentRepository.withVault().withEntries().getByLoanId(loan.id);
 
-      final accounts = [
+      final vaults = [
         ...payments
-            .map((payment) => payment.entry.account)
+            .map((payment) => payment.entry.vault)
             .toSet()
             .map(
-              (account) => account.revokeEntries(
+              (vault) => vault.revokeEntries(
                 payments
-                    .where((payment) => payment.entry.account == account)
+                    .where((payment) => payment.entry.vault == vault)
                     .map((payment) => payment.entries)
                     .expand((entry) => entry)
                     .whereType<Entry>(),
               ),
             ),
-        loan.account.revokeEntries(loan.entries),
+        loan.vault.revokeEntries(loan.entries),
       ];
 
       await loanRepository.delete(loan.id);
-      await accountRepository.bulkSave(accounts);
+      await vaultRepository.bulkSave(vaults);
       await entryRepository.deleteByIds(loan.entryIds);
     });
   }
 
   Future<Loan> applyLoan(Loan loan) async {
     await entryRepository.bulkSave(loan.entries.map((entry) => entry.controlledBy(loan)));
-    await accountRepository.save(loan.account.applyEntries(loan.entries));
+    await vaultRepository.save(loan.vault.applyEntries(loan.entries));
     await loanRepository.save(loan);
     return loan;
   }
 
   Future<LoanPayment> applyPayment(LoanPayment payment) async {
     await entryRepository.bulkSave(payment.entries.map((entry) => entry.controlledBy(payment.loan)));
-    await accountRepository.save(payment.account.applyEntries(payment.entries));
+    await vaultRepository.save(payment.vault.applyEntries(payment.entries));
     await loanRepository.save(payment.loan.applyPayment(payment));
     await paymentRepository.save(payment);
 

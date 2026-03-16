@@ -1,3 +1,4 @@
+import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/schedules/services/schedule_service.dart';
 import 'package:flutter/material.dart';
@@ -15,22 +16,24 @@ class ScheduleProvider extends ChangeNotifier {
     String? note,
     required double amount,
     double? fee,
+    required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String accountId,
+    required String vaultId,
     required List<String> labelIds,
   }) async {
     await scheduleService.create(
       note: note,
+      type: type,
       amount: amount,
       fee: fee,
       cycle: cycle,
       status: status,
       dueAt: dueAt,
       categoryId: categoryId,
-      accountId: accountId,
+      vaultId: vaultId,
       labelIds: labelIds,
     );
 
@@ -42,23 +45,25 @@ class ScheduleProvider extends ChangeNotifier {
     String? note,
     required double amount,
     double? fee,
+    required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String accountId,
+    required String vaultId,
     required List<String> labelIds,
   }) async {
     await scheduleService.update(
       id,
       note: note,
+      type: type,
       amount: amount,
       fee: fee,
       cycle: cycle,
       status: status,
       dueAt: dueAt,
       categoryId: categoryId,
-      accountId: accountId,
+      vaultId: vaultId,
       labelIds: labelIds,
     );
 

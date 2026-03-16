@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS funds (
     goal REAL NOT NULL,
     balance REAL NOT NULL,
     status TEXT NOT NULL,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     released_at TEXT,

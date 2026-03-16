@@ -1,5 +1,5 @@
 import 'package:bandha/common/repositories/repository.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/funds/entities/fund.dart';
@@ -12,8 +12,8 @@ class FundRepository extends Repository {
   FundRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  FundRepository withAccount() {
-    withArgs.add("account");
+  FundRepository withVault() {
+    withArgs.add("vault");
     return FundRepository(db, withArgs: withArgs);
   }
 
@@ -26,14 +26,14 @@ class FundRepository extends Repository {
     final client = await getClient();
 
     client.execute(
-      "INSERT INTO funds (id, note, goal, balance, status, account_id, created_at, updated_at, released_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, goal = excluded.goal, balance = excluded.balance, account_id = excluded.account_id, updated_at = excluded.updated_at, status = excluded.status, released_at = excluded.released_at",
+      "INSERT INTO funds (id, note, goal, balance, status, vault_id, created_at, updated_at, released_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, goal = excluded.goal, balance = excluded.balance, vault_id = excluded.vault_id, updated_at = excluded.updated_at, status = excluded.status, released_at = excluded.released_at",
       [
         fund.id,
         fund.note,
         fund.goal,
         fund.balance,
         fund.status.label,
-        fund.accountId,
+        fund.vaultId,
         fund.createdAt.toIso8601String(),
         fund.updatedAt.toIso8601String(),
         fund.releasedAt?.toIso8601String(),
@@ -127,8 +127,8 @@ class FundRepository extends Repository {
   }
 
   Future<List<Fund>> entities(List<Map> rows) async {
-    if (withArgs.contains("account")) {
-      rows = await populateAccount(rows);
+    if (withArgs.contains("vault")) {
+      rows = await populateVault(rows);
     }
 
     if (withArgs.contains("labels")) {
@@ -139,7 +139,7 @@ class FundRepository extends Repository {
         .map(
           (row) => Fund.row(row)
               .withLabels(Label.tryRows(row["labels"]))
-              .withAccount(Account.tryRow(row["account"])),
+              .withVault(Vault.tryRow(row["vault"])),
         )
         .toList();
   }

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS loans (
     kind TEXT NOT NULL,
     status TEXT NOT NULL,
     issued_at TEXT NOT NULL,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     party_id TEXT NOT NULL REFERENCES parties (id) ON DELETE CASCADE,
     entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
     addition_id TEXT REFERENCES entries (id) ON DELETE CASCADE,

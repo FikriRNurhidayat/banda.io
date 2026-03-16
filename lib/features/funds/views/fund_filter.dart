@@ -1,6 +1,6 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/date_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:bandha/common/widgets/multi_select_form_field.dart';
@@ -22,7 +22,7 @@ class _FundFilterState extends State<FundFilter> {
   final _formKey = GlobalKey<FormState>();
   final _createdBetweenController = TextEditingController();
 
-  List<String>? _accountIdIn;
+  List<String>? _vaultIdIn;
   DateTimeRange? _createdBetween;
 
   @override
@@ -30,8 +30,8 @@ class _FundFilterState extends State<FundFilter> {
     super.initState();
 
     if (widget.specs != null) {
-      if (widget.specs!.containsKey("account_in")) {
-        _accountIdIn = widget.specs!["account_in"];
+      if (widget.specs!.containsKey("vault_in")) {
+        _vaultIdIn = widget.specs!["vault_in"];
       }
 
       if (widget.specs!.containsKey("created_between")) {
@@ -56,8 +56,8 @@ class _FundFilterState extends State<FundFilter> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_accountIdIn != null && _accountIdIn!.isNotEmpty) {
-        query["account_in"] = _accountIdIn;
+      if (_vaultIdIn != null && _vaultIdIn!.isNotEmpty) {
+        query["vault_in"] = _vaultIdIn;
       }
 
       if (_createdBetween != null) {
@@ -96,7 +96,7 @@ class _FundFilterState extends State<FundFilter> {
 
   @override
   Widget build(BuildContext context) {
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -122,7 +122,7 @@ class _FundFilterState extends State<FundFilter> {
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
-            future: accountProvider.search(),
+            future: vaultProvider.search(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -132,7 +132,7 @@ class _FundFilterState extends State<FundFilter> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data!;
+              final vaults = snapshot.data!;
 
               return Form(
                 key: _formKey,
@@ -148,14 +148,14 @@ class _FundFilterState extends State<FundFilter> {
                         hintText: "Select date range...",
                       ),
                     ),
-                    if (accounts.isNotEmpty)
+                    if (vaults.isNotEmpty)
                       MultiSelectFormField<String>(
                         decoration: InputStyles.field(
-                          labelText: "Accounts",
-                          hintText: "Select accounts...",
+                          labelText: "Vaults",
+                          hintText: "Select vaults...",
                         ),
-                        initialValue: _accountIdIn ?? [],
-                        options: accounts
+                        initialValue: _vaultIdIn ?? [],
+                        options: vaults
                             .map(
                               (i) => MultiSelectItem(
                                 value: i.id,
@@ -163,7 +163,7 @@ class _FundFilterState extends State<FundFilter> {
                               ),
                             )
                             .toList(),
-                        onSaved: (value) => _accountIdIn = value,
+                        onSaved: (value) => _vaultIdIn = value,
                       ),
                   ],
                 ),

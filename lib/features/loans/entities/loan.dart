@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
@@ -16,7 +16,7 @@ class Loan extends Controlable {
   final double? fee;
   final double remainder;
   final String partyId;
-  final String accountId;
+  final String vaultId;
   final String entryId;
   final String? additionId;
   final DateTime issuedAt;
@@ -27,7 +27,7 @@ class Loan extends Controlable {
   late final Party party;
   late final Entry entry;
   late final Entry? addition;
-  late final Account account;
+  late final Vault vault;
 
   static double additionAmount(double fee) {
     return fee * -1;
@@ -59,7 +59,7 @@ class Loan extends Controlable {
     required this.partyId,
     required this.entryId,
     this.additionId,
-    required this.accountId,
+    required this.vaultId,
     required this.issuedAt,
     this.settledAt,
     required this.createdAt,
@@ -84,8 +84,8 @@ class Loan extends Controlable {
     return this;
   }
 
-  Loan withAccount(Account? value) {
-    if (value != null) account = value;
+  Loan withVault(Vault? value) {
+    if (value != null) vault = value;
     return this;
   }
 
@@ -134,7 +134,7 @@ class Loan extends Controlable {
       "amount": amount,
       "fee": fee,
       "partyId": partyId,
-      "accountId": accountId,
+      "vaultId": vaultId,
       "entryId": entryId,
       "issuedAt": issuedAt,
       "settledAt": settledAt,
@@ -150,7 +150,7 @@ class Loan extends Controlable {
     double? fee,
     double? remainder,
     String? partyId,
-    String? accountId,
+    String? vaultId,
     String? entryId,
     String? additionId,
     DateTime? issuedAt,
@@ -164,7 +164,7 @@ class Loan extends Controlable {
       fee: fee ?? this.fee,
       remainder: remainder ?? this.remainder,
       partyId: partyId ?? this.partyId,
-      accountId: accountId ?? this.accountId,
+      vaultId: vaultId ?? this.vaultId,
       entryId: entryId ?? this.entryId,
       additionId: additionId ?? this.additionId,
       issuedAt: issuedAt ?? this.issuedAt,
@@ -181,7 +181,7 @@ class Loan extends Controlable {
     required double? fee,
     double? remainder,
     required String partyId,
-    required String accountId,
+    required String vaultId,
     required String entryId,
     String? additionId,
     required DateTime issuedAt,
@@ -195,7 +195,7 @@ class Loan extends Controlable {
       fee: fee,
       remainder: remainder ?? amount,
       partyId: partyId,
-      accountId: accountId,
+      vaultId: vaultId,
       entryId: entryId,
       additionId: additionId,
       issuedAt: issuedAt,
@@ -226,7 +226,7 @@ class Loan extends Controlable {
       fee: row["fee"],
       remainder: row["remainder"],
       partyId: row["party_id"],
-      accountId: row["account_id"],
+      vaultId: row["vault_id"],
       entryId: row["entry_id"],
       additionId: row["addition_id"],
       issuedAt: DateTime.parse(row["issued_at"]),

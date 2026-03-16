@@ -1,11 +1,11 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
@@ -52,7 +52,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            accountId: _d["accountId"],
+            vaultId: _d["vaultId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -66,7 +66,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            accountId: _d["accountId"],
+            vaultId: _d["vaultId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -94,7 +94,7 @@ class _EditorState extends State<EntryEditor> {
     final theme = Theme.of(context);
     final entryProvider = context.read<EntryProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
@@ -140,7 +140,7 @@ class _EditorState extends State<EntryEditor> {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              accountProvider.search(),
+              vaultProvider.search(),
               labelProvider.search(),
               if (widget.id != null) entryProvider.get(widget.id!),
             ]),
@@ -158,7 +158,7 @@ class _EditorState extends State<EntryEditor> {
               }
 
               final categories = snapshot.data![0] as List<Category>;
-              final accounts = snapshot.data![1] as List<Account>;
+              final vaults = snapshot.data![1] as List<Vault>;
               final labels = snapshot.data![2] as List<Label>;
               final entry = widget.id != null
                   ? snapshot.data![3] as Entry
@@ -289,8 +289,8 @@ class _EditorState extends State<EntryEditor> {
                     SelectFormField(
                       readOnly: widget.readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Account",
-                        hintText: "Select account...",
+                        labelText: "Vault",
+                        hintText: "Select vault...",
                       ),
                       actions: [
                         if (!widget.readOnly)
@@ -300,25 +300,25 @@ class _EditorState extends State<EntryEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New vault",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect("/accounts/new");
+                              redirect("/vaults/new");
                             },
                           ),
                       ],
-                      options: accounts.map((i) {
+                      options: vaults.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["accountId"] ?? entry?.accountId,
-                      onSaved: (value) => _d["accountId"] = value,
+                      initialValue: _d["vaultId"] ?? entry?.vaultId,
+                      onSaved: (value) => _d["vaultId"] = value,
                     ),
                     if (!widget.readOnly || !isEmpty(entry?.labels))
                       MultiSelectFormField<String>(

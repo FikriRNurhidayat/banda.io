@@ -33,17 +33,17 @@ class Repository {
     }).toList();
   }
 
-  populateAccount(List<Map> rows) async {
-    final List<String> accountIds = rows
-        .map((row) => row["account_id"] as String)
+  populateVault(List<Map> rows) async {
+    final List<String> vaultIds = rows
+        .map((row) => row["vault_id"] as String)
         .toList();
-    final accountRows = await getAccountByIds(accountIds);
+    final vaultRows = await getVaultByIds(vaultIds);
 
     return rows.map((mainRow) {
       return {
         ...mainRow,
-        "account": accountRows.firstWhere(
-          (accountRow) => mainRow["account_id"] == accountRow["id"],
+        "vault": vaultRows.firstWhere(
+          (vaultRow) => mainRow["vault_id"] == vaultRow["id"],
         ),
       };
     }).toList();
@@ -82,10 +82,10 @@ class Repository {
     );
   }
 
-  getAccountByIds(List<String> ids) async {
+  getVaultByIds(List<String> ids) async {
     final client = await getClient();
     return client.select(
-      "SELECT * FROM accounts WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      "SELECT * FROM vaults WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }

@@ -1,10 +1,10 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/select_form_field.dart';
@@ -41,8 +41,8 @@ class _TransferEditorState extends State<TransferEditor> {
             amount: _d["amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitAccountId: _d["debitAccountId"],
-            creditAccountId: _d["creditAccountId"],
+            debitVaultId: _d["debitVaultId"],
+            creditVaultId: _d["creditVaultId"],
           );
         }
 
@@ -52,8 +52,8 @@ class _TransferEditorState extends State<TransferEditor> {
             amount: _d["amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitAccountId: _d["debitAccountId"],
-            creditAccountId: _d["creditAccountId"],
+            debitVaultId: _d["debitVaultId"],
+            creditVaultId: _d["creditVaultId"],
           );
         }
 
@@ -82,7 +82,7 @@ class _TransferEditorState extends State<TransferEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final transferProvider = context.read<TransferProvider>();
 
     return Scaffold(
@@ -116,7 +116,7 @@ class _TransferEditorState extends State<TransferEditor> {
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
             future: Future.wait([
-              accountProvider.search(),
+              vaultProvider.search(),
               if (widget.id != null) transferProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
@@ -128,7 +128,7 @@ class _TransferEditorState extends State<TransferEditor> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data![0] as List<Account>;
+              final vaults = snapshot.data![0] as List<Vault>;
               final transfer = widget.id != null
                   ? snapshot.data![1] as Transfer
                   : null;
@@ -193,28 +193,28 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New vault",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/accounts/new");
+                              redirect(context, "/vaults/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["creditAccountId"] ??
-                          transfer?.creditAccountId,
+                          _d["creditVaultId"] ??
+                          transfer?.creditVaultId,
                       onSaved: (value) =>
-                          _d["creditAccountId"] = value ?? '',
+                          _d["creditVaultId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "From",
-                        hintText: "Select source account...",
+                        hintText: "Select source vault...",
                       ),
-                      options: accounts.map((i) {
+                      options: vaults.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),
@@ -231,28 +231,28 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New vault",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/accounts/new");
+                              redirect(context, "/vaults/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["debitAccountId"] ??
-                          transfer?.debitAccountId,
+                          _d["debitVaultId"] ??
+                          transfer?.debitVaultId,
                       onSaved: (value) =>
-                          _d["debitAccountId"] = value ?? '',
+                          _d["debitVaultId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "To",
-                        hintText: "Select target account...",
+                        hintText: "Select target vault...",
                       ),
-                      options: accounts.map((i) {
+                      options: vaults.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),

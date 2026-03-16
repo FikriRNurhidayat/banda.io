@@ -1,7 +1,7 @@
-import 'package:bandha/features/accounts/views/account_editor.dart';
-import 'package:bandha/features/accounts/views/account_entries.dart';
-import 'package:bandha/features/accounts/views/account_menu.dart';
-import 'package:bandha/features/accounts/views/accounts.dart';
+import 'package:bandha/features/vaults/views/vault_editor.dart';
+import 'package:bandha/features/vaults/views/vault_entries.dart';
+import 'package:bandha/features/vaults/views/vault_menu.dart';
+import 'package:bandha/features/vaults/views/vaults.dart';
 import 'package:bandha/features/schedules/views/schedule_editor.dart';
 import 'package:bandha/features/schedules/views/schedule_history.dart';
 import 'package:bandha/features/schedules/views/schedule_menu.dart';
@@ -102,15 +102,15 @@ class Routes {
           settings: settings,
           builder: (context) => FundFilter(),
         );
-      case '/accounts':
+      case '/vaults':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Accounts(),
+          builder: (context) => Vaults(),
         );
-      case '/accounts/new':
+      case '/vaults/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => AccountEditor(),
+          builder: (context) => VaultEditor(),
         );
       case '/transfers':
         return MaterialPageRoute(
@@ -169,10 +169,10 @@ class Routes {
             settings: settings,
             builder: (context) => LoanEditor(id: id),
           );
-        case 'accounts':
+        case 'vaults':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => AccountEditor(id: id),
+            builder: (context) => VaultEditor(id: id),
           );
         case 'transfers':
           return MaterialPageRoute(
@@ -196,10 +196,10 @@ class Routes {
             settings: settings,
             builder: (context) => EntryMenu(id: id),
           );
-        case 'accounts':
+        case 'vaults':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => AccountMenu(id: id),
+            builder: (context) => VaultMenu(id: id),
           );
         case 'loans':
           return MaterialPageRoute(
@@ -270,10 +270,10 @@ class Routes {
             settings: settings,
             builder: (context) => FundEntries(fundId: id),
           );
-        case 'accounts':
+        case 'vaults':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => AccountEntries(id: id),
+            builder: (context) => VaultEntries(id: id),
           );
         case 'transfers':
           return MaterialPageRoute(
@@ -302,10 +302,10 @@ class Routes {
             settings: settings,
             builder: (context) => LoanEditor(id: id, readOnly: true),
           );
-        case 'accounts':
+        case 'vaults':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => AccountEditor(id: id, readOnly: true),
+            builder: (context) => VaultEditor(id: id, readOnly: true),
           );
         case 'transfers':
           return MaterialPageRoute(

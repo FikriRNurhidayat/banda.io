@@ -1,7 +1,7 @@
 import 'package:bandha/features/loans/entities/loan.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
-import 'package:bandha/features/accounts/widgets/account_text.dart';
+import 'package:bandha/features/vaults/widgets/vault_text.dart';
 import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +75,7 @@ class LoanTile extends StatelessWidget {
             ],
           ),
           DateTimeText(loan.issuedAt),
-          AccountText(loan.account),
+          VaultText(loan.vault),
           Text(loan.party.name, style: theme.textTheme.bodySmall),
         ],
       ),

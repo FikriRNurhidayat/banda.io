@@ -1,20 +1,20 @@
-import 'package:bandha/features/accounts/entities/account.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class AccountMenu extends StatelessWidget {
+class VaultMenu extends StatelessWidget {
   final String id;
 
-  const AccountMenu({super.key, required this.id});
+  const VaultMenu({super.key, required this.id});
 
   Map<String, GestureTapCallback> menuBuilder(
     BuildContext context,
-    Account account,
+    Vault vault,
   ) {
     final navigator = Navigator.of(context);
-    final accountProvider = context.read<AccountProvider>();
+    final vaultProvider = context.read<VaultProvider>();
 
     final menu = {
       "Share": () {
@@ -23,16 +23,16 @@ class AccountMenu extends StatelessWidget {
             uri: Uri(
               scheme: "app",
               host: "bandha.id",
-              pathSegments: ["accounts", account.id, "detail"],
+              pathSegments: ["vaults", vault.id, "detail"],
             ),
           ),
         );
       },
       "Edit": () async {
-        navigator.pushReplacementNamed("/accounts/${account.id}/edit");
+        navigator.pushReplacementNamed("/vaults/${vault.id}/edit");
       },
       "Balance": () async {
-        await accountProvider.sync(account.id);
+        await vaultProvider.sync(vault.id);
 
         navigator.pop();
       },
@@ -46,11 +46,11 @@ class AccountMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountProvider = context.read<AccountProvider>();
+    final vaultProvider = context.read<VaultProvider>();
 
     return Scaffold(
       body: FutureBuilder(
-        future: accountProvider.get(id),
+        future: vaultProvider.get(id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -64,8 +64,8 @@ class AccountMenu extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final account = snapshot.data!;
-          final menu = menuBuilder(context, account);
+          final vault = snapshot.data!;
+          final menu = menuBuilder(context, vault);
 
           return Center(
             child: ListView.builder(

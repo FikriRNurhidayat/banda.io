@@ -50,7 +50,7 @@ class PaymentTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(
-          payment.entry.account.displayName(),
+          payment.entry.vault.displayName(),
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall,
         ),

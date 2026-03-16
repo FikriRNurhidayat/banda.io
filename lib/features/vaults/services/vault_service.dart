@@ -1,37 +1,35 @@
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/services/service.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 
-class AccountService extends Service {
-  final AccountRepository accountRepository;
+class VaultService extends Service {
+  final VaultRepository vaultRepository;
   final EntryRepository entryRepository;
   final CategoryRepository categoryRepository;
 
-  AccountService({
-    required this.accountRepository,
+  VaultService({
+    required this.vaultRepository,
     required this.entryRepository,
     required this.categoryRepository,
   });
 
-  Future<Account> create({
+  Future<Vault> create({
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind? kind,
   }) {
-    return work<Account>(() async {
-      final account = Account.create(
+    return work<Vault>(() async {
+      final vault = Vault.create(
         name: name,
         holderName: holderName,
         balance: balance,
-        kind: kind,
       );
 
-      await accountRepository.save(account);
+      await vaultRepository.save(vault);
 
       if (!isZero(balance)) {
         final category = await categoryRepository.getByName("Adjustment");
@@ -40,14 +38,14 @@ class AccountService extends Service {
           amount: balance,
           status: EntryStatus.done,
           issuedAt: DateTime.now(),
-          accountId: account.id,
+          vaultId: vault.id,
           categoryId: category.id,
         );
 
         await entryRepository.save(entry);
       }
 
-      return account;
+      return vault;
     });
   }
 
@@ -56,30 +54,28 @@ class AccountService extends Service {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind? kind,
   }) {
     return work(() async {
-      final account = await accountRepository.get(id);
+      final vault = await vaultRepository.get(id);
 
-      if (account.balance != balance) {
+      if (vault.balance != balance) {
         final category = await categoryRepository.getByName("Adjustment");
-        final delta = balance - account.balance;
+        final delta = balance - vault.balance;
         final entry = Entry.readOnly(
           amount: delta,
           status: EntryStatus.done,
           issuedAt: DateTime.now(),
-          accountId: account.id,
+          vaultId: vault.id,
           categoryId: category.id,
         );
 
         await entryRepository.save(entry);
       }
 
-      await accountRepository.save(
-        account.copyWith(
+      await vaultRepository.save(
+        vault.copyWith(
           name: name,
           holderName: holderName,
-          kind: kind,
           balance: balance,
         ),
       );
@@ -87,18 +83,18 @@ class AccountService extends Service {
   }
 
   search() {
-    return accountRepository.search();
+    return vaultRepository.search();
   }
 
   get(String id) {
-    return accountRepository.get(id);
+    return vaultRepository.get(id);
   }
 
   delete(String id) {
-    return accountRepository.delete(id);
+    return vaultRepository.delete(id);
   }
 
   sync(String id) {
-    return accountRepository.sync(id);
+    return vaultRepository.sync(id);
   }
 }

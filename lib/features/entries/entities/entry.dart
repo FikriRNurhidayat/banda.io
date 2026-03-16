@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
@@ -14,7 +14,7 @@ class Entry extends Entity {
   final EntryStatus status;
   final DateTime issuedAt;
   final bool readonly;
-  final String accountId;
+  final String vaultId;
   final String categoryId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,12 +22,12 @@ class Entry extends Entity {
 
   List<Label> labels = [];
   late Category category;
-  late Account account;
+  late Vault vault;
   Map<String, dynamic>? annotations = {};
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is Account && id == other.id);
+      identical(this, other) || (other is Vault && id == other.id);
 
   @override
   int get hashCode => id.hashCode;
@@ -39,7 +39,7 @@ class Entry extends Entity {
     required this.status,
     required this.issuedAt,
     required this.readonly,
-    required this.accountId,
+    required this.vaultId,
     required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
@@ -99,8 +99,8 @@ class Entry extends Entity {
     return this;
   }
 
-  Entry withAccount(Account? account) {
-    if (account != null) this.account = account;
+  Entry withVault(Vault? vault) {
+    if (vault != null) this.vault = vault;
     return this;
   }
 
@@ -120,7 +120,7 @@ class Entry extends Entity {
     EntryStatus? status,
     DateTime? issuedAt,
     bool? readonly,
-    String? accountId,
+    String? vaultId,
     String? categoryId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -132,7 +132,7 @@ class Entry extends Entity {
       amount: amount ?? this.amount,
       status: status ?? this.status,
       readonly: readonly ?? this.readonly,
-      accountId: accountId ?? this.accountId,
+      vaultId: vaultId ?? this.vaultId,
       categoryId: categoryId ?? this.categoryId,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt ?? this.createdAt,
@@ -150,7 +150,7 @@ class Entry extends Entity {
       "status": status,
       "issuedAt": issuedAt,
       "readonly": readonly,
-      "accountId": accountId,
+      "vaultId": vaultId,
       "categoryId": categoryId,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
@@ -163,7 +163,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String vaultId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -173,7 +173,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: false,
-      accountId: accountId,
+      vaultId: vaultId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -184,7 +184,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String vaultId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -194,7 +194,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: true,
-      accountId: accountId,
+      vaultId: vaultId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -206,7 +206,7 @@ class Entry extends Entity {
     required EntryStatus status,
     required DateTime issuedAt,
     required bool readonly,
-    required String accountId,
+    required String vaultId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -216,7 +216,7 @@ class Entry extends Entity {
       amount: amount,
       status: status,
       readonly: readonly,
-      accountId: accountId,
+      vaultId: vaultId,
       categoryId: categoryId,
       issuedAt: issuedAt,
       createdAt: DateTime.now(),
@@ -248,7 +248,7 @@ class Entry extends Entity {
       ),
       issuedAt: DateTime.parse(row["issued_at"]),
       readonly: row["readonly"] == 1,
-      accountId: row["account_id"],
+      vaultId: row["vault_id"],
       categoryId: row["category_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
@@ -263,6 +263,14 @@ enum EntryType {
 
   final String label;
   const EntryType(this.label);
+
+  get isIncome {
+    return this == EntryType.income;
+  }
+
+  get isExpense {
+    return this == EntryType.expense;
+  }
 }
 
 enum EntryStatus {

@@ -1,30 +1,29 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
-import 'package:bandha/common/widgets/select_form_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AccountEditor extends StatelessWidget {
+class VaultEditor extends StatelessWidget {
   final String? id;
   final bool readOnly;
 
-  AccountEditor({super.key, this.id, this.readOnly = false});
+  VaultEditor({super.key, this.id, this.readOnly = false});
 
   final _form = GlobalKey<FormState>();
 
   final FormData _d = {};
 
   void handleMoreTap(BuildContext context) async {
-    Navigator.pushNamed(context, "/accounts/${id!}/menu");
+    Navigator.pushNamed(context, "/vaults/${id!}/menu");
   }
 
   void handleSubmit(BuildContext context) async {
-    final accountProvider = context.read<AccountProvider>();
+    final vaultProvider = context.read<VaultProvider>();
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -33,19 +32,17 @@ class AccountEditor extends StatelessWidget {
         _form.currentState!.save();
 
         if (id == null) {
-          await accountProvider.create(
+          await vaultProvider.create(
             name: _d["name"],
             holderName: _d["holderName"],
             balance: _d["balance"] ?? 0,
-            kind: _d["kind"],
           );
         } else {
-          await accountProvider.update(
+          await vaultProvider.update(
             id!,
             name: _d["name"],
             holderName: _d["holderName"],
             balance: _d["balance"] ?? 0,
-            kind: _d["kind"],
           );
         }
         navigator.pop();
@@ -56,14 +53,14 @@ class AccountEditor extends StatelessWidget {
         print(stackTrace);
       }
 
-      alert(messenger, "Edit account details failed");
+      alert(messenger, "Edit vault details failed");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accountProvider = context.read<AccountProvider>();
+    final vaultProvider = context.read<VaultProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +69,7 @@ class AccountEditor extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          !readOnly ? "Enter account details" : "Account details",
+          !readOnly ? "Enter vault details" : "Vault details",
           style: theme.textTheme.titleLarge,
         ),
         centerTitle: true,
@@ -100,7 +97,7 @@ class AccountEditor extends StatelessWidget {
         ],
       ),
       body: FutureBuilder(
-        future: Future.wait([if (id != null) accountProvider.get(id!)]),
+        future: Future.wait([if (id != null) vaultProvider.get(id!)]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -114,8 +111,8 @@ class AccountEditor extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final account = id != null
-              ? snapshot.data![0] as Account
+          final vault = id != null
+              ? snapshot.data![0] as Vault
               : null;
 
           return Padding(
@@ -129,9 +126,9 @@ class AccountEditor extends StatelessWidget {
                     readOnly: readOnly,
                     decoration: InputStyles.field(
                       labelText: "Name",
-                      hintText: "Enter account name...",
+                      hintText: "Enter vault name...",
                     ),
-                    initialValue: _d["name"] ?? account?.name,
+                    initialValue: _d["name"] ?? vault?.name,
                     onSaved: (value) => _d["name"] = value ?? '',
                     validator: (value) => value == null || value.isEmpty
                         ? "Name is required"
@@ -144,7 +141,7 @@ class AccountEditor extends StatelessWidget {
                       hintText: "Enter holder name...",
                     ),
                     initialValue:
-                        _d["holderName"] ?? account?.holderName,
+                        _d["holderName"] ?? vault?.holderName,
                     onSaved: (value) => _d["holderName"] = value ?? '',
                     validator: (value) => value == null || value.isEmpty
                         ? "Holder is required"
@@ -156,20 +153,8 @@ class AccountEditor extends StatelessWidget {
                       labelText: "Balance",
                       hintText: "Enter balance...",
                     ),
-                    initialValue: _d["balance"] ?? account?.balance,
+                    initialValue: _d["balance"] ?? vault?.balance,
                     onSaved: (value) => _d["balance"] = value ?? 0,
-                  ),
-                  SelectFormField(
-                    readOnly: readOnly,
-                    initialValue: _d["kind"] ?? account?.kind,
-                    onSaved: (value) => _d["kind"] = value,
-                    options: AccountKind.values.map((v) {
-                      return SelectItem(value: v, label: v.label);
-                    }).toList(),
-                    decoration: InputStyles.field(
-                      labelText: "Type",
-                      hintText: "Select account type...",
-                    ),
                   ),
                 ],
               ),

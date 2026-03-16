@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
 import 'package:bandha/features/tags/entities/party.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/loans/providers/loan_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
@@ -49,7 +49,7 @@ class _LoanEditorState extends State<LoanEditor> {
             type: _d["type"],
             status: _d["status"],
             partyId: _d["partyId"],
-            accountId: _d["accountId"],
+            vaultId: _d["vaultId"],
           );
         }
 
@@ -63,7 +63,7 @@ class _LoanEditorState extends State<LoanEditor> {
             type: _d["type"],
             status: _d["status"],
             partyId: _d["partyId"],
-            accountId: _d["accountId"],
+            vaultId: _d["vaultId"],
           );
         }
       }).then((_) => navigator.pop()).catchError((error, stackTrace) {
@@ -87,7 +87,7 @@ class _LoanEditorState extends State<LoanEditor> {
     final theme = Theme.of(context);
     final loanProvider = context.watch<LoanProvider>();
     final partyProvider = context.watch<PartyProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -130,7 +130,7 @@ class _LoanEditorState extends State<LoanEditor> {
           child: FutureBuilder(
             future: Future.wait([
               partyProvider.search(),
-              accountProvider.search(),
+              vaultProvider.search(),
               if (widget.id != null) loanProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
@@ -143,7 +143,7 @@ class _LoanEditorState extends State<LoanEditor> {
               }
 
               final parties = snapshot.data![0] as List<Party>;
-              final accounts = snapshot.data![1] as List<Account>;
+              final vaults = snapshot.data![1] as List<Vault>;
               final loan = widget.id != null
                   ? (snapshot.data![2] as Loan)
                   : null;
@@ -266,10 +266,10 @@ class _LoanEditorState extends State<LoanEditor> {
                     ),
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
-                      initialValue: _d["accountId"] ?? loan?.accountId,
-                      onSaved: (value) => _d["accountId"] = value,
+                      initialValue: _d["vaultId"] ?? loan?.vaultId,
+                      onSaved: (value) => _d["vaultId"] = value,
                       validator: (value) =>
-                          value == null ? "Account is required" : null,
+                          value == null ? "Vault is required" : null,
                       actions: [
                         if (!widget.readOnly)
                           ActionChip(
@@ -278,26 +278,26 @@ class _LoanEditorState extends State<LoanEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New vault",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/accounts/new");
+                              redirect(context, "/vaults/new");
                             },
                           ),
                       ],
-                      options: accounts.map((account) {
+                      options: vaults.map((vault) {
                         return SelectItem(
-                          value: account.id,
-                          label: account.displayName(),
+                          value: vault.id,
+                          label: vault.displayName(),
                         );
                       }).toList(),
                       decoration: InputStyles.field(
-                        labelText: "Account",
-                        hintText: "Select account...",
+                        labelText: "Vault",
+                        hintText: "Select vault...",
                       ),
                     ),
                     SelectFormField<String>(

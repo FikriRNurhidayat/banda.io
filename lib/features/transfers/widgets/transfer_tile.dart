@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/money_helper.dart';
@@ -30,7 +30,7 @@ class TransferTile extends StatelessWidget {
     );
   }
 
-  accountBuilder(BuildContext context, String labelText, Account account) {
+  vaultBuilder(BuildContext context, String labelText, Vault vault) {
     final theme = Theme.of(context);
     return <Widget>[
       Text(
@@ -39,12 +39,12 @@ class TransferTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       Text(
-        account.name,
+        vault.name,
         style: theme.textTheme.bodySmall,
         overflow: TextOverflow.ellipsis,
       ),
       Text(
-        account.holderName,
+        vault.holderName,
         style: theme.textTheme.labelSmall,
         overflow: TextOverflow.ellipsis,
       ),
@@ -98,10 +98,10 @@ class TransferTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: accountBuilder(
+                  children: vaultBuilder(
                     context,
                     "Credit",
-                    transfer.creditAccount,
+                    transfer.creditVault,
                   ),
                 ),
               ),
@@ -112,10 +112,10 @@ class TransferTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: accountBuilder(
+                  children: vaultBuilder(
                     context,
                     "Debit",
-                    transfer.debitAccount,
+                    transfer.debitVault,
                   ),
                 ),
               ),

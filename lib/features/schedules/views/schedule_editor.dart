@@ -2,12 +2,13 @@ import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/growable_multi_select_form_field.dart';
 import 'package:bandha/common/widgets/growable_select_form_field.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
@@ -30,15 +31,15 @@ class ScheduleEditor extends StatelessWidget {
 
   final FormData _d = {};
 
-  void handleRedirect() {
+  void _redirect() {
     _form.currentState!.save();
   }
 
-  void handleMoreTap(BuildContext context) async {
+  void _moreTap(BuildContext context) async {
     Navigator.pushNamed(context, "/schedules/${id!}/menu");
   }
 
-  void handleSubmitTap(BuildContext context) async {
+  void _submitTap(BuildContext context) async {
     _form.currentState!.save();
 
     final navigator = Navigator.of(context);
@@ -54,10 +55,11 @@ class ScheduleEditor extends StatelessWidget {
             note: note,
             amount: _d["amount"],
             fee: _d["fee"],
+            type: _d["type"],
             cycle: _d["cycle"],
             status: _d["status"],
             categoryId: _d["category_id"],
-            accountId: _d["account_id"],
+            vaultId: _d["vault_id"],
             dueAt: _d["due_at"].dateTime,
             labelIds: _d["label_ids"],
           );
@@ -69,10 +71,11 @@ class ScheduleEditor extends StatelessWidget {
             note: note,
             amount: _d["amount"],
             fee: _d["fee"],
+            type: _d["type"],
             status: _d["status"],
             cycle: _d["cycle"],
             categoryId: _d["category_id"],
-            accountId: _d["account_id"],
+            vaultId: _d["vault_id"],
             dueAt: _d["due_at"].dateTime,
             labelIds: _d["label_ids"],
           );
@@ -95,7 +98,7 @@ class ScheduleEditor extends StatelessWidget {
     final theme = Theme.of(context);
     final scheduleProvider = context.read<ScheduleProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
@@ -116,7 +119,7 @@ class ScheduleEditor extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: IconButton(
                 onPressed: () {
-                  handleSubmitTap(context);
+                  _submitTap(context);
                 },
                 icon: Icon(Icons.check),
               ),
@@ -127,7 +130,7 @@ class ScheduleEditor extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: IconButton(
                 onPressed: () {
-                  handleMoreTap(context);
+                  _moreTap(context);
                 },
                 icon: Icon(Icons.more_horiz),
               ),
@@ -141,7 +144,7 @@ class ScheduleEditor extends StatelessWidget {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              accountProvider.search(),
+              vaultProvider.search(),
               labelProvider.search(),
               if (id != null) scheduleProvider.get(id!),
             ]),
@@ -159,7 +162,7 @@ class ScheduleEditor extends StatelessWidget {
               }
 
               final categories = snapshot.data![0] as List<Category>;
-              final accounts = snapshot.data![1] as List<Account>;
+              final vaults = snapshot.data![1] as List<Vault>;
               final labels = snapshot.data![2] as List<Label>;
               final schedule = id != null
                   ? snapshot.data![3] as Schedule
@@ -181,6 +184,18 @@ class ScheduleEditor extends StatelessWidget {
                         initialValue: _d["note"] ?? schedule?.note,
                         onSaved: (value) => _d["note"] = value,
                       ),
+                    SelectFormField<EntryType>(
+                      readOnly: readOnly,
+                      initialValue: _d["type"] ?? schedule?.entryType,
+                      onSaved: (value) => _d["type"] = value,
+                      decoration: InputStyles.field(
+                        labelText: "Type",
+                        hintText: "Select type...",
+                      ),
+                      options: EntryType.values.map((c) {
+                        return SelectItem(value: c, label: c.label);
+                      }).toList(),
+                    ),
                     AmountFormField(
                       readOnly: readOnly,
                       decoration: InputStyles.field(
@@ -269,7 +284,7 @@ class ScheduleEditor extends StatelessWidget {
                       ),
                       actionText: "New category",
                       actionPath: "/categories/edit",
-                      onRedirect: handleRedirect,
+                      onRedirect: _redirect,
                       options: categories
                           .where((c) => readOnly || !c.readonly)
                           .map((c) {
@@ -283,19 +298,19 @@ class ScheduleEditor extends StatelessWidget {
                     GrowableSelectFormField(
                       readOnly: readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Account",
-                        hintText: "Select account...",
+                        labelText: "Vault",
+                        hintText: "Select vault...",
                       ),
-                      actionPath: "/accounts/new",
-                      actionText: "New account",
-                      options: accounts.map((i) {
+                      actionPath: "/vaults/new",
+                      actionText: "New vault",
+                      options: vaults.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["account_id"] ?? schedule?.accountId,
-                      onSaved: (value) => _d["account_id"] = value,
+                      initialValue: _d["vault_id"] ?? schedule?.vaultId,
+                      onSaved: (value) => _d["vault_id"] = value,
                     ),
                     if (!readOnly || !isEmpty(schedule?.labels))
                       GrowableMultiSelectFormField<String>(
@@ -306,7 +321,7 @@ class ScheduleEditor extends StatelessWidget {
                         ),
                         actionText: "New label",
                         actionPath: "/labels/edit",
-                        onRedirect: handleRedirect,
+                        onRedirect: _redirect,
                         initialValue:
                             _d["label_ids"] ?? schedule?.labelIds ?? [],
                         onSaved: (value) => _d["label_ids"] = value,

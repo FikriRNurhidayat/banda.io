@@ -1,21 +1,21 @@
-import 'package:bandha/features/accounts/entities/account.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
-import 'package:bandha/features/accounts/widgets/account_tile.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/vaults/widgets/vault_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Accounts extends StatelessWidget {
-  const Accounts({super.key});
+class Vaults extends StatelessWidget {
+  const Vaults({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Accounts",
+          "Vaults",
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -24,7 +24,7 @@ class Accounts extends StatelessWidget {
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
-        future: accountProvider.search(),
+        future: vaultProvider.search(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -46,8 +46,8 @@ class Accounts extends StatelessWidget {
           return ListView.builder(
             itemCount: snapshot.data?.length ?? 0,
             itemBuilder: (BuildContext context, int index) {
-              final Account account = snapshot.data![index];
-              return AccountTile(account);
+              final Vault vault = snapshot.data![index];
+              return VaultTile(vault);
             },
           );
         },
@@ -59,7 +59,7 @@ class Accounts extends StatelessWidget {
     return FloatingActionButton(
       child: Icon(Icons.add),
       onPressed: () {
-        Navigator.pushNamed(context, "/accounts/new");
+        Navigator.pushNamed(context, "/vaults/new");
       },
     );
   }

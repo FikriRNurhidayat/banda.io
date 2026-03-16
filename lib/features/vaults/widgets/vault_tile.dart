@@ -1,44 +1,44 @@
 import 'package:bandha/common/helpers/tile_helper.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
-class AccountTile extends StatelessWidget {
-  final Account account;
+class VaultTile extends StatelessWidget {
+  final Vault vault;
   final bool readOnly;
 
-  const AccountTile(this.account, {super.key, this.readOnly = false});
+  const VaultTile(this.vault, {super.key, this.readOnly = false});
 
   Future<bool?> handleDismiss(
     BuildContext context,
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmAccountDeletion(context, account);
+      return confirmVaultDeletion(context, vault);
     }
 
-    Navigator.pushNamed(context, "/accounts/${account.id}/edit");
+    Navigator.pushNamed(context, "/vaults/${vault.id}/edit");
     return false;
   }
 
-  handleTap(BuildContext context, Account account) {
+  handleTap(BuildContext context, Vault vault) {
     Navigator.pushNamed(
       context,
       readOnly
-          ? "/accounts/${account.id}/detail"
-          : "/accounts/${account.id}/entries",
+          ? "/vaults/${vault.id}/detail"
+          : "/vaults/${vault.id}/entries",
     );
   }
 
-  tileBuilder(BuildContext context, Account account) {
+  tileBuilder(BuildContext context, Vault vault) {
     final theme = Theme.of(context);
 
     return Material(
       color: theme.cardColor,
       child: InkWell(
         onTap: () {
-          handleTap(context, account);
+          handleTap(context, vault);
         },
         child: Container(
           padding: EdgeInsets.all(16),
@@ -52,22 +52,17 @@ class AccountTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      account.name,
+                      vault.name,
                       style: theme.textTheme.titleSmall,
                     ),
                     Text(
-                      account.holderName,
+                      vault.holderName,
                       style: theme.textTheme.bodySmall,
                     ),
-                    if (account.kind?.label != null)
-                      Text(
-                        account.kind!.label,
-                        style: theme.textTheme.labelSmall,
-                      ),
                   ],
                 ),
               ),
-              MoneyText(account.balance, useSymbol: false),
+              MoneyText(vault.balance, useSymbol: false),
             ],
           ),
         ),
@@ -79,8 +74,8 @@ class AccountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return dismissibleBuilder(
       context,
-      key: account.id,
-      child: tileBuilder(context, account),
+      key: vault.id,
+      child: tileBuilder(context, vault),
       dismissable: true,
       confirmDismiss: (DismissDirection direction) {
         return handleDismiss(context, direction);

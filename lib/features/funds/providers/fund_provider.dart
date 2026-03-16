@@ -71,13 +71,13 @@ class FundProvider extends ChangeNotifier {
   Future<void> create({
     String? note,
     required double goal,
-    required String accountId,
+    required String vaultId,
     List<String>? labelIds,
   }) async {
     await fundService.create(
       note: note,
       goal: goal,
-      accountId: accountId,
+      vaultId: vaultId,
       labelIds: labelIds,
     );
 

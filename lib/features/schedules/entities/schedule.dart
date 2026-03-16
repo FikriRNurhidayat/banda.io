@@ -1,7 +1,7 @@
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/common/types/controller.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/tags/entities/label.dart';
@@ -16,7 +16,7 @@ class Schedule extends Controlable {
   final int iteration;
   final ScheduleStatus status;
   final String categoryId;
-  final String accountId;
+  final String vaultId;
   final String entryId;
   final String? additionId;
   final DateTime dueAt;
@@ -24,7 +24,7 @@ class Schedule extends Controlable {
   final DateTime updatedAt;
 
   late final Category category;
-  late final Account account;
+  late final Vault vault;
   late final Entry entry;
   late final Entry? addition;
   late final List<Label> labels;
@@ -38,13 +38,29 @@ class Schedule extends Controlable {
     required this.iteration,
     required this.status,
     required this.entryId,
-    required this.accountId,
+    required this.vaultId,
     this.additionId,
     required this.categoryId,
     required this.dueAt,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  get isExpense {
+    return amount < 0;
+  }
+
+  get isIncome {
+    return amount >= 0;
+  }
+
+  get entryType {
+    if (isIncome) {
+      return EntryType.income;
+    }
+
+    return EntryType.expense;
+  }
 
   factory Schedule.create({
     String? note,
@@ -53,7 +69,7 @@ class Schedule extends Controlable {
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required String categoryId,
-    required String accountId,
+    required String vaultId,
     required String entryId,
     required String? additionId,
     required DateTime dueAt,
@@ -69,7 +85,7 @@ class Schedule extends Controlable {
       iteration: 1,
       status: status,
       entryId: entryId,
-      accountId: accountId,
+      vaultId: vaultId,
       categoryId: categoryId,
       additionId: additionId,
       dueAt: dueAt,
@@ -88,7 +104,7 @@ class Schedule extends Controlable {
       iteration: row["iteration"],
       status: ScheduleStatus.parse(row["status"]),
       entryId: row["entry_id"],
-      accountId: row["account_id"],
+      vaultId: row["vault_id"],
       additionId: row["addition_id"],
       categoryId: row["category_id"],
       dueAt: DateTime.parse(row["due_at"]),
@@ -107,7 +123,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      accountId: accountId,
+      vaultId: vaultId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -126,7 +142,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      accountId: accountId,
+      vaultId: vaultId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -145,7 +161,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      accountId: accountId,
+      vaultId: vaultId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -175,9 +191,9 @@ class Schedule extends Controlable {
     return this;
   }
 
-  Schedule withAccount(Account? account) {
-    if (account != null) {
-      this.account = account;
+  Schedule withVault(Vault? vault) {
+    if (vault != null) {
+      this.vault = vault;
     }
 
     return this;
@@ -216,7 +232,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      accountId: accountId,
+      vaultId: vaultId,
       additionId: field == "additionId" ? null : additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -233,7 +249,7 @@ class Schedule extends Controlable {
     int? iteration,
     ScheduleStatus? status,
     String? entryId,
-    String? accountId,
+    String? vaultId,
     String? additionId,
     String? categoryId,
     DateTime? dueAt,
@@ -247,7 +263,7 @@ class Schedule extends Controlable {
       iteration: iteration ?? this.iteration,
       status: status ?? this.status,
       entryId: entryId ?? this.entryId,
-      accountId: accountId ?? this.accountId,
+      vaultId: vaultId ?? this.vaultId,
       additionId: additionId ?? this.additionId,
       categoryId: categoryId ?? this.categoryId,
       dueAt: dueAt ?? this.dueAt,
@@ -395,7 +411,7 @@ enum ScheduleCycle {
         return _nextYear(dateTime, 1);
     }
   }
-
+  
   static ScheduleCycle? tryParse(String? value) {
     if (value == null) return null;
     try {

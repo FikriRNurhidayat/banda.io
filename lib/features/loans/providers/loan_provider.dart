@@ -25,14 +25,14 @@ class LoanProvider extends ChangeNotifier {
     required LoanType type,
     required LoanStatus status,
     required String partyId,
-    required String accountId,
+    required String vaultId,
   }) async {
     await loanService.create(
       amount: amount,
       type: type,
       status: status,
       partyId: partyId,
-      accountId: accountId,
+      vaultId: vaultId,
       fee: fee ?? 0,
       issuedAt: issuedAt,
       settledAt: settledAt,
@@ -50,7 +50,7 @@ class LoanProvider extends ChangeNotifier {
     required LoanType type,
     required LoanStatus status,
     required String partyId,
-    required String accountId,
+    required String vaultId,
   }) async {
     await loanService.update(
       id,
@@ -58,7 +58,7 @@ class LoanProvider extends ChangeNotifier {
       type: type,
       status: status,
       partyId: partyId,
-      accountId: accountId,
+      vaultId: vaultId,
       fee: fee,
       issuedAt: issuedAt,
       settledAt: settledAt,

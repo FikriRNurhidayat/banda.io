@@ -1,5 +1,5 @@
 import 'package:bandha/common/entities/entity.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
@@ -13,14 +13,14 @@ class Fund extends Controlable {
   final double goal;
   final double balance;
   final FundStatus status;
-  final String accountId;
+  final String vaultId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? releasedAt;
 
   late List<Entry> entries;
   late List<Label> labels;
-  late Account account;
+  late Vault vault;
 
   static entryNote(Fund fund, TransactionType type) {
     return type.isDeposit
@@ -38,7 +38,7 @@ class Fund extends Controlable {
     required this.goal,
     required this.balance,
     required this.status,
-    required this.accountId,
+    required this.vaultId,
     required this.createdAt,
     required this.updatedAt,
     required this.releasedAt,
@@ -51,7 +51,7 @@ class Fund extends Controlable {
       goal: goal,
       balance: balance,
       status: status,
-      accountId: accountId,
+      vaultId: vaultId,
       createdAt: createdAt,
       updatedAt: updatedAt,
       releasedAt: releasedAt,
@@ -67,7 +67,7 @@ class Fund extends Controlable {
     required double goal,
     required double balance,
     required FundStatus status,
-    required String accountId,
+    required String vaultId,
   }) {
     return Fund(
       id: Entity.getId(),
@@ -75,7 +75,7 @@ class Fund extends Controlable {
       goal: goal,
       balance: balance,
       status: status,
-      accountId: accountId,
+      vaultId: vaultId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       releasedAt: null,
@@ -95,7 +95,7 @@ class Fund extends Controlable {
     double? goal,
     double? balance,
     FundStatus? status,
-    String? accountId,
+    String? vaultId,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? releasedAt,
@@ -106,7 +106,7 @@ class Fund extends Controlable {
       goal: goal ?? this.goal,
       balance: balance ?? this.balance,
       status: status ?? this.status,
-      accountId: accountId ?? this.accountId,
+      vaultId: vaultId ?? this.vaultId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       releasedAt: releasedAt ?? this.releasedAt,
@@ -141,8 +141,8 @@ class Fund extends Controlable {
     return this;
   }
 
-  Fund withAccount(Account? value) {
-    if (value != null) account = value;
+  Fund withVault(Vault? value) {
+    if (value != null) vault = value;
     return this;
   }
 
@@ -153,7 +153,7 @@ class Fund extends Controlable {
       goal: row["goal"],
       balance: row["balance"],
       status: FundStatus.values.firstWhere((e) => e.label == row["status"]),
-      accountId: row["account_id"],
+      vaultId: row["vault_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
       releasedAt: DateTime.tryParse(row["released_at"] ?? ""),

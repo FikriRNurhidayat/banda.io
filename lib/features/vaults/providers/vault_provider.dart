@@ -1,27 +1,25 @@
-import 'package:bandha/features/accounts/entities/account.dart';
-import 'package:bandha/features/accounts/services/account_service.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/services/vault_service.dart';
 import 'package:flutter/material.dart';
 
-class AccountProvider extends ChangeNotifier {
-  final AccountService accountService;
+class VaultProvider extends ChangeNotifier {
+  final VaultService vaultService;
 
-  AccountProvider(this.accountService);
+  VaultProvider(this.vaultService);
 
-  Future<List<Account>> search() {
-    return accountService.search();
+  Future<List<Vault>> search() {
+    return vaultService.search();
   }
 
   Future<void> create({
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind? kind,
   }) {
-    return accountService
+    return vaultService
         .create(
           name: name,
           holderName: holderName,
-          kind: kind,
           balance: balance,
         )
         .then((_) => notifyListeners());
@@ -32,28 +30,26 @@ class AccountProvider extends ChangeNotifier {
     required String name,
     required String holderName,
     required double balance,
-    required AccountKind? kind,
   }) {
-    return accountService
+    return vaultService
         .update(
           id,
           name: name,
           holderName: holderName,
-          kind: kind,
           balance: balance,
         )
         .then((_) => notifyListeners());
   }
 
-  Future<Account?> get(String id) {
-    return accountService.get(id);
+  Future<Vault?> get(String id) {
+    return vaultService.get(id);
   }
 
   Future<void> delete(String id) {
-    return accountService.delete(id).then((_) => notifyListeners());
+    return vaultService.delete(id).then((_) => notifyListeners());
   }
 
   Future<void> sync(String id) {
-    return accountService.sync(id).then((_) => notifyListeners());
+    return vaultService.sync(id).then((_) => notifyListeners());
   }
 }

@@ -6,19 +6,19 @@ import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 
 class TransferService extends Service {
-  final AccountRepository accountRepository;
+  final VaultRepository vaultRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
   final TransferRepository transferRepository;
   final LabelRepository labelRepository;
 
   TransferService({
-    required this.accountRepository,
+    required this.vaultRepository,
     required this.categoryRepository,
     required this.entryRepository,
     required this.transferRepository,
@@ -29,13 +29,13 @@ class TransferService extends Service {
     required double amount,
     required double? fee,
     required DateTime issuedAt,
-    required String debitAccountId,
-    required String creditAccountId,
+    required String debitVaultId,
+    required String creditVaultId,
   }) {
     return work(() async {
       final category = await categoryRepository.getByName(ReadOnlyCategory.transfer.label);
-      final debitAccount = await accountRepository.get(debitAccountId);
-      final creditAccount = await accountRepository.get(creditAccountId);
+      final debitVault = await vaultRepository.get(debitVaultId);
+      final creditVault = await vaultRepository.get(creditVaultId);
       final feeLabel = await labelRepository.getByName(ReadOnlyLabel.fee.label);
 
       final credit = Entry.create(
@@ -43,7 +43,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        accountId: creditAccount.id,
+        vaultId: creditVault.id,
         categoryId: category.id,
       );
 
@@ -52,7 +52,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        accountId: debitAccount.id,
+        vaultId: debitVault.id,
         categoryId: category.id,
       );
 
@@ -62,7 +62,7 @@ class TransferService extends Service {
               status: EntryStatus.done,
               issuedAt: issuedAt,
               readonly: true,
-              accountId: creditAccount.id,
+              vaultId: creditVault.id,
               categoryId: category.id,
             ).annotate("type", "fee")
           : null;
@@ -71,18 +71,18 @@ class TransferService extends Service {
         amount: amount,
         fee: fee,
         debitId: debit.id,
-        debitAccountId: debitAccount.id,
+        debitVaultId: debitVault.id,
         exchangeId: exchange?.id,
         creditId: credit.id,
-        creditAccountId: creditAccount.id,
+        creditVaultId: creditVault.id,
         issuedAt: issuedAt,
       );
 
       transfer = transfer
           .withCredit(credit.controlledBy(transfer))
           .withDebit(debit.controlledBy(transfer))
-          .withCreditAccount(creditAccount)
-          .withDebitAccount(debitAccount)
+          .withCreditVault(creditVault)
+          .withDebitVault(debitVault)
           .withExchange(exchange?.controlledBy(transfer).withLabels([feeLabel]));
 
       await entryRepository.withLabels().withAnnotations().bulkSave(transfer.entries);
@@ -96,16 +96,16 @@ class TransferService extends Service {
     required double amount,
     required double? fee,
     required DateTime issuedAt,
-    required String debitAccountId,
-    required String creditAccountId,
+    required String debitVaultId,
+    required String creditVaultId,
   }) {
     return work(() async {
-      var transfer = await transferRepository.withEntries().withAccounts().get(id);
+      var transfer = await transferRepository.withEntries().withVaults().get(id);
 
       await abortTransfer(transfer);
 
-      final debitAccount = await accountRepository.get(debitAccountId);
-      final creditAccount = await accountRepository.get(creditAccountId);
+      final debitVault = await vaultRepository.get(debitVaultId);
+      final creditVault = await vaultRepository.get(creditVaultId);
       final feeLabel = await labelRepository.getByName(ReadOnlyLabel.fee.label);
 
       final credit = transfer.credit.copyWith(
@@ -113,7 +113,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        accountId: creditAccount.id,
+        vaultId: creditVault.id,
       );
 
       final exchangeId = transfer.exchangeId;
@@ -125,7 +125,7 @@ class TransferService extends Service {
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
                         readonly: true,
-                        accountId: creditAccount.id,
+                        vaultId: creditVault.id,
                         categoryId: credit.categoryId,
                       )
                     : Entry.create(
@@ -133,7 +133,7 @@ class TransferService extends Service {
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
                         readonly: true,
-                        accountId: creditAccount.id,
+                        vaultId: creditVault.id,
                         categoryId: credit.categoryId,
                       ).controlledBy(transfer))
                 .withLabels([feeLabel])
@@ -145,7 +145,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        accountId: debitAccount.id,
+        vaultId: debitVault.id,
       );
 
       transfer = transfer
@@ -153,17 +153,17 @@ class TransferService extends Service {
             amount: amount,
             fee: fee,
             debitId: debit.id,
-            debitAccountId: debitAccount.id,
+            debitVaultId: debitVault.id,
             creditId: credit.id,
-            creditAccountId: creditAccount.id,
+            creditVaultId: creditVault.id,
             issuedAt: issuedAt,
           )
           .setExchangeId(exchange?.id)
           .withExchange(exchange)
           .withDebit(debit)
           .withCredit(credit)
-          .withDebitAccount(debitAccount)
-          .withCreditAccount(creditAccount);
+          .withDebitVault(debitVault)
+          .withCreditVault(creditVault);
 
       await transferRepository.save(transfer);
       await entryRepository.withAnnotations().withLabels().bulkSave(transfer.entries);
@@ -176,7 +176,7 @@ class TransferService extends Service {
 
   Future<void> delete(String id) {
     return work(() async {
-      final transfer = await transferRepository.withEntries().withAccounts().get(id);
+      final transfer = await transferRepository.withEntries().withVaults().get(id);
       await abortTransfer(transfer);
       await transferRepository.delete(transfer.id);
       await entryRepository.deleteByIds(transfer.entryIds);
@@ -184,24 +184,24 @@ class TransferService extends Service {
   }
 
   Future<Transfer?> get(String id) {
-    return transferRepository.withEntries().withAccounts().get(id);
+    return transferRepository.withEntries().withVaults().get(id);
   }
 
   Future<List<Transfer>> search() {
-    return transferRepository.withEntries().withAccounts().search();
+    return transferRepository.withEntries().withVaults().search();
   }
 
   Future<void> abortTransfer(Transfer transfer) async {
-    await accountRepository.bulkSave([
-      transfer.debitAccount.revokeEntry(transfer.debit),
-      transfer.creditAccount.revokeEntries(transfer.credits),
+    await vaultRepository.bulkSave([
+      transfer.debitVault.revokeEntry(transfer.debit),
+      transfer.creditVault.revokeEntries(transfer.credits),
     ]);
   }
 
   Future<void> executeTransfer(Transfer transfer) async {
-    await accountRepository.bulkSave([
-      transfer.debitAccount.applyEntry(transfer.debit),
-      transfer.creditAccount.applyEntries(transfer.credits),
+    await vaultRepository.bulkSave([
+      transfer.debitVault.applyEntry(transfer.debit),
+      transfer.creditVault.applyEntries(transfer.credits),
     ]);
   }
 }

@@ -1,8 +1,8 @@
 import 'package:bandha/common/decorations/input_styles.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
 import 'package:bandha/features/tags/entities/party.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/loans/providers/loan_filter_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
@@ -32,8 +32,8 @@ class _LoanFilterState extends State<LoanFilter> {
     super.initState();
 
     if (widget.specs != null) {
-      if (widget.specs!.containsKey("account_in")) {
-        _formData["account_in"] = widget.specs!["account_in"];
+      if (widget.specs!.containsKey("vault_in")) {
+        _formData["vault_in"] = widget.specs!["vault_in"];
       }
 
       if (widget.specs!.containsKey("status_in")) {
@@ -69,9 +69,9 @@ class _LoanFilterState extends State<LoanFilter> {
         query["status_in"] = _formData["status_in"];
       }
 
-      if (_formData["account_in"] != null &&
-          _formData["account_in"]!.isNotEmpty) {
-        query["account_in"] = _formData["account_in"];
+      if (_formData["vault_in"] != null &&
+          _formData["vault_in"]!.isNotEmpty) {
+        query["vault_in"] = _formData["vault_in"];
       }
 
       if (_formData["party_in"] != null && _formData["party_in"]!.isNotEmpty) {
@@ -89,7 +89,7 @@ class _LoanFilterState extends State<LoanFilter> {
 
   @override
   Widget build(BuildContext context) {
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
     final partyProvider = context.watch<PartyProvider>();
 
     return Scaffold(
@@ -116,7 +116,7 @@ class _LoanFilterState extends State<LoanFilter> {
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
             future: Future.wait([
-              accountProvider.search(),
+              vaultProvider.search(),
               partyProvider.search(),
             ]),
             builder: (context, snapshot) {
@@ -128,7 +128,7 @@ class _LoanFilterState extends State<LoanFilter> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data![0] as List<Account>;
+              final vaults = snapshot.data![0] as List<Vault>;
               final parties = snapshot.data![1] as List<Party>;
 
               return Form(
@@ -181,14 +181,14 @@ class _LoanFilterState extends State<LoanFilter> {
                             .toList(),
                         onSaved: (value) => _formData["party_in"] = value,
                       ),
-                    if (accounts.isNotEmpty)
+                    if (vaults.isNotEmpty)
                       MultiSelectFormField<String>(
                         decoration: InputStyles.field(
-                          labelText: "Debit accounts",
-                          hintText: "Select debit accounts...",
+                          labelText: "Debit vaults",
+                          hintText: "Select debit vaults...",
                         ),
-                        initialValue: _formData["account_in"] ?? [],
-                        options: accounts
+                        initialValue: _formData["vault_in"] ?? [],
+                        options: vaults
                             .map(
                               (i) => MultiSelectItem(
                                 value: i.id,
@@ -196,7 +196,7 @@ class _LoanFilterState extends State<LoanFilter> {
                               ),
                             )
                             .toList(),
-                        onSaved: (value) => _formData["account_in"] = value,
+                        onSaved: (value) => _formData["vault_in"] = value,
                       ),
                   ],
                 ),

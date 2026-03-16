@@ -1,5 +1,5 @@
 import 'package:bandha/common/entities/entity.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
 
@@ -97,12 +97,12 @@ class LoanPayment extends Entity {
     return this;
   }
 
-  String get accountId {
-    return entry.accountId;
+  String get vaultId {
+    return entry.vaultId;
   }
 
-  Account get account {
-    return entry.account;
+  Vault get vault {
+    return entry.vault;
   }
 
   Iterable<Entry> get entries {

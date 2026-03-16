@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
@@ -11,18 +11,18 @@ class Transfer extends Controlable {
   final double amount;
   final double? fee;
   final String debitId;
-  final String debitAccountId;
+  final String debitVaultId;
   final String? exchangeId;
   final String creditId;
-  final String creditAccountId;
+  final String creditVaultId;
   final DateTime issuedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   late final Entry debit;
-  late final Account debitAccount;
+  late final Vault debitVault;
   late final Entry? exchange;
-  late final Account creditAccount;
+  late final Vault creditVault;
   late final Entry credit;
 
   Transfer({
@@ -31,10 +31,10 @@ class Transfer extends Controlable {
     required this.amount,
     this.fee,
     required this.debitId,
-    required this.debitAccountId,
+    required this.debitVaultId,
     this.exchangeId,
     required this.creditId,
-    required this.creditAccountId,
+    required this.creditVaultId,
     required this.issuedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -52,12 +52,12 @@ class Transfer extends Controlable {
     return entries.map((entry) => entry.id);
   }
 
-  Iterable<Account> get accounts {
-    return [debitAccount, creditAccount].whereType<Account>();
+  Iterable<Vault> get vaults {
+    return [debitVault, creditVault].whereType<Vault>();
   }
 
-  Iterable<String> get accountIds {
-    return accounts.map((account) => account.id);
+  Iterable<String> get vaultIds {
+    return vaults.map((vault) => vault.id);
   }
 
   toMap() {
@@ -67,9 +67,9 @@ class Transfer extends Controlable {
       "amount": amount,
       "fee": fee,
       "debitId": debitId,
-      "debitAccountId": debitAccountId,
+      "debitVaultId": debitVaultId,
       "creditId": creditId,
-      "creditAccountId": creditAccountId,
+      "creditVaultId": creditVaultId,
       "issuedAt": issuedAt,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
@@ -88,10 +88,10 @@ class Transfer extends Controlable {
       amount: row["amount"],
       fee: row["fee"],
       debitId: row["debit_id"],
-      debitAccountId: row["debit_account_id"],
+      debitVaultId: row["debit_vault_id"],
       exchangeId: row["exchange_id"],
       creditId: row["credit_id"],
-      creditAccountId: row["credit_account_id"],
+      creditVaultId: row["credit_vault_id"],
       issuedAt: DateTime.parse(row["issued_at"]),
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
@@ -103,10 +103,10 @@ class Transfer extends Controlable {
     required double amount,
     double? fee,
     required String debitId,
-    required String debitAccountId,
+    required String debitVaultId,
     String? exchangeId,
     required String creditId,
-    required String creditAccountId,
+    required String creditVaultId,
     required DateTime issuedAt,
   }) {
     return Transfer(
@@ -115,10 +115,10 @@ class Transfer extends Controlable {
       amount: amount,
       fee: fee,
       debitId: debitId,
-      debitAccountId: debitAccountId,
+      debitVaultId: debitVaultId,
       exchangeId: exchangeId,
       creditId: creditId,
-      creditAccountId: creditAccountId,
+      creditVaultId: creditVaultId,
       issuedAt: issuedAt,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -132,10 +132,10 @@ class Transfer extends Controlable {
       amount: amount,
       fee: fee,
       debitId: debitId,
-      debitAccountId: debitAccountId,
+      debitVaultId: debitVaultId,
       exchangeId: exchangeId,
       creditId: creditId,
-      creditAccountId: creditAccountId,
+      creditVaultId: creditVaultId,
       issuedAt: issuedAt,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -157,14 +157,14 @@ class Transfer extends Controlable {
     return this;
   }
 
-  Transfer withDebitAccount(Account? debitAccount) {
-    if (debitAccount != null) this.debitAccount = debitAccount;
+  Transfer withDebitVault(Vault? debitVault) {
+    if (debitVault != null) this.debitVault = debitVault;
     return this;
   }
 
-  Transfer withCreditAccount(Account? creditAccount) {
-    if (creditAccount != null) {
-      this.creditAccount = creditAccount;
+  Transfer withCreditVault(Vault? creditVault) {
+    if (creditVault != null) {
+      this.creditVault = creditVault;
     }
     return this;
   }
@@ -174,10 +174,10 @@ class Transfer extends Controlable {
     double? amount,
     double? fee,
     String? debitId,
-    String? debitAccountId,
+    String? debitVaultId,
     String? exchangeId,
     String? creditId,
-    String? creditAccountId,
+    String? creditVaultId,
     DateTime? issuedAt,
   }) {
     return Transfer(
@@ -186,10 +186,10 @@ class Transfer extends Controlable {
       amount: amount ?? this.amount,
       fee: fee ?? this.fee,
       debitId: debitId ?? this.debitId,
-      debitAccountId: debitAccountId ?? this.debitAccountId,
+      debitVaultId: debitVaultId ?? this.debitVaultId,
       exchangeId: exchangeId ?? this.exchangeId,
       creditId: creditId ?? this.creditId,
-      creditAccountId: creditAccountId ?? this.creditAccountId,
+      creditVaultId: creditVaultId ?? this.creditVaultId,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt,
       updatedAt: DateTime.now(),

@@ -20,14 +20,14 @@ class LoanPaymentProvider extends ChangeNotifier {
     String loanId, {
     required double amount,
     double? fee,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
   }) async {
     await paymentService.create(
       loanId,
       amount: amount,
       fee: fee,
-      accountId: accountId,
+      vaultId: vaultId,
       issuedAt: issuedAt,
     );
 
@@ -39,7 +39,7 @@ class LoanPaymentProvider extends ChangeNotifier {
     String entryId, {
     required double amount,
     double? fee,
-    required String accountId,
+    required String vaultId,
     required DateTime issuedAt,
   }) async {
     await paymentService.update(
@@ -47,7 +47,7 @@ class LoanPaymentProvider extends ChangeNotifier {
       entryId,
       amount: amount,
       fee: fee,
-      accountId: accountId,
+      vaultId: vaultId,
       issuedAt: issuedAt,
     );
 

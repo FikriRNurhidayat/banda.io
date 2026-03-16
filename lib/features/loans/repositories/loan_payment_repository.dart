@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
@@ -15,8 +15,8 @@ class LoanPaymentRepository extends Repository {
   LoanPaymentRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  LoanPaymentRepository withAccount() {
-    withArgs.add("account");
+  LoanPaymentRepository withVault() {
+    withArgs.add("vault");
     return this;
   }
 
@@ -207,18 +207,18 @@ class LoanPaymentRepository extends Repository {
         }).toList();
       }
 
-      if (withArgs.contains("account")) {
-        final accountIds = rows
-            .map((row) => row["entry"]["account_id"] as String)
+      if (withArgs.contains("vault")) {
+        final vaultIds = rows
+            .map((row) => row["entry"]["vault_id"] as String)
             .toList();
-        final accountRows = await getAccountByIds(accountIds);
+        final vaultRows = await getVaultByIds(vaultIds);
 
         rows = rows.map((row) {
           return {
             ...row,
-            "account": accountRows.firstWhere(
-              (accountRow) =>
-                  accountRow["id"] == row["entry"]["account_id"],
+            "vault": vaultRows.firstWhere(
+              (vaultRow) =>
+                  vaultRow["id"] == row["entry"]["vault_id"],
             ),
           };
         }).toList();
@@ -244,13 +244,13 @@ class LoanPaymentRepository extends Repository {
     return rows.map((row) {
       final loan = Loan.tryParse(row["loan"]);
       final category = Category.tryRow(row["category"]);
-      final account = Account.tryRow(row["account"]);
+      final vault = Vault.tryRow(row["vault"]);
       final addition = Entry.tryRow(
         row["addition"],
-      )?.withCategory(category).withAccount(account);
+      )?.withCategory(category).withVault(vault);
       final entry = Entry.tryRow(
         row["entry"],
-      )?.withCategory(category).withAccount(account);
+      )?.withCategory(category).withVault(vault);
 
       return LoanPayment.fromRow(
         row,

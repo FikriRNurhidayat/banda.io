@@ -16,9 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import "package:bandha/features/tags/repositories/category_repository.dart";
-import 'package:bandha/features/accounts/providers/account_provider.dart';
-import 'package:bandha/features/accounts/repositories/account_repository.dart';
-import 'package:bandha/features/accounts/services/account_service.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/vaults/repositories/vault_repository.dart';
+import 'package:bandha/features/vaults/services/vault_service.dart';
 import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
@@ -49,7 +49,7 @@ makeProvider({
   final notificationRepository = NotificationRepository(dbManager);
   final categoryRepository = CategoryRepository(dbManager);
   final entryRepository = EntryRepository(dbManager);
-  final accountRepository = AccountRepository(dbManager);
+  final vaultRepository = VaultRepository(dbManager);
   final transferRepository = TransferRepository(dbManager);
   final loanRepository = LoanRepository(dbManager);
   final loanPaymentRepository = LoanPaymentRepository(dbManager);
@@ -64,25 +64,25 @@ makeProvider({
 
   final entryService = EntryService(
     entryRepository: entryRepository,
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     labelRepository: labelRepository,
     categoryRepository: categoryRepository,
     notificationManager: notificationManager,
   );
-  final accountService = AccountService(
-    accountRepository: accountRepository,
+  final vaultService = VaultService(
+    vaultRepository: vaultRepository,
     entryRepository: entryRepository,
     categoryRepository: categoryRepository,
   );
   final transferService = TransferService(
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
     transferRepository: transferRepository,
   );
   final loanService = LoanService(
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     loanRepository: loanRepository,
@@ -91,7 +91,7 @@ makeProvider({
     notificationManager: notificationManager,
   );
   final fundService = FundService(
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     fundRepository: fundRepository,
@@ -99,7 +99,7 @@ makeProvider({
   );
 
   final scheduleService = ScheduleService(
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     scheduleRepository: scheduleRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
@@ -107,7 +107,7 @@ makeProvider({
   );
 
   final loanPaymentService = LoanPaymentService(
-    accountRepository: accountRepository,
+    vaultRepository: vaultRepository,
     entryRepository: entryRepository,
     categoryRepository: categoryRepository,
     loanRepository: loanRepository,
@@ -129,7 +129,7 @@ makeProvider({
       create: (_) => CategoryProvider(categoryRepository),
     ),
     ChangeNotifierProvider(
-      create: (_) => AccountProvider(accountService),
+      create: (_) => VaultProvider(vaultService),
     ),
     ChangeNotifierProvider(create: (_) => EntryProvider(entryService)),
     ChangeNotifierProvider(

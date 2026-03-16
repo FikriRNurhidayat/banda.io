@@ -2,7 +2,7 @@ import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
-import 'package:bandha/features/accounts/widgets/account_text.dart';
+import 'package:bandha/features/vaults/widgets/vault_text.dart';
 import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +52,7 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        AccountText(entry.account),
+        VaultText(entry.vault),
         DateTimeText(entry.issuedAt),
         if (!isNull(entry.note) && entry.note!.isNotEmpty)
           Text(

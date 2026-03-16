@@ -2,7 +2,7 @@
 const dbMigrationFiles = <String>[
   'assets/sql/0001_init.sql',
   'assets/sql/0002_create_categories.sql',
-  'assets/sql/0003_create_accounts.sql',
+  'assets/sql/0003_create_vaults.sql',
   'assets/sql/0004_create_labels.sql',
   'assets/sql/0005_create_parties.sql',
   'assets/sql/0006_create_entries.sql',

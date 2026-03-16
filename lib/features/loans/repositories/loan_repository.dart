@@ -1,4 +1,4 @@
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
 import 'package:bandha/features/tags/entities/party.dart';
@@ -14,8 +14,8 @@ class LoanRepository extends Repository {
   LoanRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  LoanRepository withAccount() {
-    withArgs.add("account");
+  LoanRepository withVault() {
+    withArgs.add("vault");
     return this;
   }
 
@@ -32,7 +32,7 @@ class LoanRepository extends Repository {
   save(Loan loan) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO loans (id, kind, status, amount, fee, remainder, party_id, account_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET kind = excluded.kind, status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, party_id = excluded.party_id, account_id = excluded.account_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
+      "INSERT INTO loans (id, kind, status, amount, fee, remainder, party_id, vault_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET kind = excluded.kind, status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, party_id = excluded.party_id, vault_id = excluded.vault_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
       [
         loan.id,
         loan.type.label,
@@ -41,7 +41,7 @@ class LoanRepository extends Repository {
         loan.fee,
         loan.remainder,
         loan.partyId,
-        loan.accountId,
+        loan.vaultId,
         loan.entryId,
         loan.additionId,
         loan.issuedAt.toIso8601String(),
@@ -125,11 +125,11 @@ class LoanRepository extends Repository {
       ]);
     }
 
-    if (spec.containsKey("account_in")) {
-      final value = spec["account_in"] as List<String>;
+    if (spec.containsKey("vault_in")) {
+      final value = spec["vault_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(loans.account_id IN (${value.map((_) => '?').join(', ')}))",
+          "(loans.vault_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -206,16 +206,16 @@ class LoanRepository extends Repository {
       }).toList();
     }
 
-    if (withArgs.contains("account")) {
-      final accountIds = rows
-          .map((row) => row["account_id"] as String)
+    if (withArgs.contains("vault")) {
+      final vaultIds = rows
+          .map((row) => row["vault_id"] as String)
           .toList();
-      final accountRows = await getAccountByIds(accountIds);
+      final vaultRows = await getVaultByIds(vaultIds);
       rows = rows.map((row) {
         return {
           ...row,
-          "account": accountRows.firstWhere(
-            (accountRow) => accountRow["id"] == row["account_id"],
+          "vault": vaultRows.firstWhere(
+            (vaultRow) => vaultRow["id"] == row["vault_id"],
           ),
         };
       }).toList();
@@ -241,7 +241,7 @@ class LoanRepository extends Repository {
           .withAddition(Entry.tryRow(row["addition"]))
           .withEntry(Entry.tryRow(row["entry"]))
           .withParty(Party.tryRow(row["party"]))
-          .withAccount(Account.tryRow(row["account"]));
+          .withVault(Vault.tryRow(row["vault"]));
     }).toList();
   }
 }

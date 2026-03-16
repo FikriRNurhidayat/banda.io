@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     status TEXT NOT NULL,
     entry_id TEXT NOT NULL REFERENCES entries (id),
     category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     issued_at TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,

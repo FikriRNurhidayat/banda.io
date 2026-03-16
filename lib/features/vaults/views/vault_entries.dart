@@ -1,23 +1,23 @@
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/helpers/future_helper.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
-import 'package:bandha/features/accounts/widgets/account_tile.dart';
+import 'package:bandha/features/vaults/widgets/vault_tile.dart';
 import 'package:bandha/features/entries/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AccountEntries extends StatelessWidget {
+class VaultEntries extends StatelessWidget {
   final String id;
-  const AccountEntries({super.key, required this.id});
+  const VaultEntries({super.key, required this.id});
 
   handleMenuTap(BuildContext context) {
-    Navigator.of(context).pushNamed("/accounts/$id/menu");
+    Navigator.of(context).pushNamed("/vaults/$id/menu");
   }
 
   handleTap(BuildContext context) {
-    Navigator.of(context).pushNamed("/accounts/$id/detail");
+    Navigator.of(context).pushNamed("/vaults/$id/detail");
   }
 
   appBarBuilder(BuildContext context) {
@@ -28,7 +28,7 @@ class AccountEntries extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Account", style: theme.textTheme.titleLarge),
+      title: Text("Vault", style: theme.textTheme.titleLarge),
       centerTitle: true,
       actions: [
         IconButton(
@@ -42,13 +42,13 @@ class AccountEntries extends StatelessWidget {
     );
   }
 
-  entriesBuilder(BuildContext context, Account account) {
+  entriesBuilder(BuildContext context, Vault vault) {
     final entryProvider = context.watch<EntryProvider>();
     return Expanded(
       child: FutureBuilder(
         future: entryProvider.search(
           specification: {
-            "account_in": [account.id],
+            "vault_in": [vault.id],
           },
         ),
         builder: futureBuilder<List<Entry>>((context, snapshot) {
@@ -68,20 +68,20 @@ class AccountEntries extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountProvider = context.watch<AccountProvider>();
+    final vaultProvider = context.watch<VaultProvider>();
 
     return Scaffold(
       appBar: appBarBuilder(context),
       body: FutureBuilder(
-        future: accountProvider.get(id),
+        future: vaultProvider.get(id),
         builder: futureBuilder((context, snapshot) {
-          final account = snapshot.data! as Account;
+          final vault = snapshot.data! as Vault;
 
           return Column(
             children: [
-              AccountTile(account, readOnly: true),
+              VaultTile(vault, readOnly: true),
               Divider(height: 1),
-              entriesBuilder(context, account),
+              entriesBuilder(context, vault),
             ],
           );
         }),

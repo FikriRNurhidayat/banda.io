@@ -1,6 +1,6 @@
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/flash.dart';
-import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
@@ -9,7 +9,7 @@ import 'package:bandha/features/funds/entities/fund.dart';
 import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
-import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/loans/providers/loan_provider.dart';
 import 'package:bandha/features/funds/providers/fund_provider.dart';
@@ -217,21 +217,21 @@ Future<bool?> confirmTransferDeletion(
   );
 }
 
-Future<bool?> confirmAccountDeletion(
+Future<bool?> confirmVaultDeletion(
   BuildContext context,
-  Account account,
+  Vault vault,
 ) async {
   return ask(
     context,
-    title: "Delete account",
+    title: "Delete vault",
     content:
-        "You're about to delete this account, this action cannot be reversed. Are you sure?",
+        "You're about to delete this vault, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final accountProvider = context.read<AccountProvider>();
+      final vaultProvider = context.read<VaultProvider>();
 
-      await accountProvider.delete(account.id).catchError((error) {
-        alert(messenger, "Delete account failed");
+      await vaultProvider.delete(vault.id).catchError((error) {
+        alert(messenger, "Delete vault failed");
         throw error;
       });
     },
