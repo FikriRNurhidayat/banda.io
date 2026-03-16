@@ -1,37 +1,37 @@
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
-import 'package:bandha/features/funds/services/fund_service.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
+import 'package:bandha/features/pools/services/pool_service.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:bandha/common/types/transaction_type.dart';
 import 'package:flutter/material.dart';
 
-class FundProvider extends ChangeNotifier {
-  final FundService fundService;
+class PoolProvider extends ChangeNotifier {
+  final PoolService poolService;
 
-  FundProvider(this.fundService);
+  PoolProvider(this.poolService);
 
-  Future<List<Fund>> search(Filter? specification) async {
-    return await fundService.search(specification);
+  Future<List<Pool>> search(Filter? specification) async {
+    return await poolService.search(specification);
   }
 
   Future<void> deleteTransaction({
-    required String fundId,
+    required String poolId,
     required String entryId,
   }) async {
-    await fundService.deleteTransaction(fundId: fundId, entryId: entryId);
+    await poolService.deleteTransaction(poolId: poolId, entryId: entryId);
     notifyListeners();
   }
 
   Future<void> updateTransaction(
-    String fundId,
+    String poolId,
     String entryId, {
     required double amount,
     required TransactionType type,
     required DateTime issuedAt,
     List<String>? labelIds,
   }) async {
-    await fundService.updateTransaction(
-      fundId,
+    await poolService.updateTransaction(
+      poolId,
       entryId,
       amount: amount,
       type: type,
@@ -42,14 +42,14 @@ class FundProvider extends ChangeNotifier {
   }
 
   Future<void> createTransaction(
-    String fundId, {
+    String poolId, {
     required double amount,
     required TransactionType type,
     required DateTime issuedAt,
     List<String>? labelIds,
   }) async {
-    await fundService.createTransaction(
-      fundId,
+    await poolService.createTransaction(
+      poolId,
       amount: amount,
       type: type,
       issuedAt: issuedAt,
@@ -59,11 +59,11 @@ class FundProvider extends ChangeNotifier {
   }
 
   Future<List<Entry>> searchTransactions({
-    required String fundId,
+    required String poolId,
     Filter? specification,
   }) async {
-    return await fundService.searchTransactions(
-      fundId: fundId,
+    return await poolService.searchTransactions(
+      poolId: poolId,
       specification: specification,
     );
   }
@@ -74,7 +74,7 @@ class FundProvider extends ChangeNotifier {
     required String vaultId,
     List<String>? labelIds,
   }) async {
-    await fundService.create(
+    await poolService.create(
       note: note,
       goal: goal,
       vaultId: vaultId,
@@ -85,12 +85,12 @@ class FundProvider extends ChangeNotifier {
   }
 
   Future<void> retract(String id) async {
-    await fundService.retract(id);
+    await poolService.retract(id);
     notifyListeners();
   }
 
   Future<void> release(String id) async {
-    await fundService.release(id);
+    await poolService.release(id);
     notifyListeners();
   }
 
@@ -100,22 +100,22 @@ class FundProvider extends ChangeNotifier {
     required double goal,
     List<String>? labelIds,
   }) async {
-    await fundService.update(id, note: note, goal: goal, labelIds: labelIds);
+    await poolService.update(id, note: note, goal: goal, labelIds: labelIds);
 
     notifyListeners();
   }
 
-  Future<Fund?> get(String id) async {
-    return await fundService.get(id);
+  Future<Pool?> get(String id) async {
+    return await poolService.get(id);
   }
 
   Future<void> delete(String id) async {
-    await fundService.delete(id);
+    await poolService.delete(id);
     notifyListeners();
   }
 
   Future<void> sync(String id) async {
-    await fundService.sync(id);
+    await poolService.sync(id);
     notifyListeners();
   }
 }

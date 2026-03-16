@@ -23,9 +23,9 @@ import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/entries/services/entry_service.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
-import 'package:bandha/features/funds/repositories/fund_repository.dart';
-import 'package:bandha/features/funds/services/fund_service.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
+import 'package:bandha/features/pools/repositories/pool_repository.dart';
+import 'package:bandha/features/pools/services/pool_service.dart';
 import 'package:bandha/features/loans/providers/loan_filter_provider.dart';
 import 'package:bandha/features/loans/providers/loan_provider.dart';
 import 'package:bandha/features/loans/repositories/loan_repository.dart';
@@ -37,7 +37,7 @@ import 'package:bandha/features/tags/repositories/party_repository.dart';
 import 'package:bandha/features/main/handlers/notification_handler.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
 import 'package:bandha/notification.dart';
-import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/features/pools/providers/pool_filter_provider.dart';
 import 'package:bandha/features/notifications/repositories/notification_repository.dart';
 
 makeProvider({
@@ -55,7 +55,7 @@ makeProvider({
   final loanPaymentRepository = LoanPaymentRepository(dbManager);
   final labelRepository = LabelRepository(dbManager);
   final partyRepository = PartyRepository(dbManager);
-  final fundRepository = FundRepository(dbManager);
+  final poolRepository = PoolRepository(dbManager);
   final scheduleRepository = ScheduleRepository(dbManager);
 
   final notificationManager = NotificationManager(
@@ -90,11 +90,11 @@ makeProvider({
     partyRepository: partyRepository,
     notificationManager: notificationManager,
   );
-  final fundService = FundService(
+  final poolService = PoolService(
     vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
-    fundRepository: fundRepository,
+    poolRepository: poolRepository,
     labelRepository: labelRepository,
   );
 
@@ -135,7 +135,7 @@ makeProvider({
     ChangeNotifierProvider(
       create: (_) => TransferProvider(transferService),
     ),
-    ChangeNotifierProvider(create: (_) => FundProvider(fundService)),
+    ChangeNotifierProvider(create: (_) => PoolProvider(poolService)),
     ChangeNotifierProvider(create: (_) => LoanProvider(loanService)),
     ChangeNotifierProvider(
       create: (_) => LoanPaymentProvider(loanPaymentService),
@@ -150,7 +150,7 @@ makeProvider({
     ChangeNotifierProvider(create: (_) => EntryFilterProvider()),
     ChangeNotifierProvider(create: (_) => LoanFilterProvider()),
     ChangeNotifierProvider(create: (_) => LoanTabProvider()),
-    ChangeNotifierProvider(create: (_) => FundFilterProvider()),
+    ChangeNotifierProvider(create: (_) => PoolFilterProvider()),
   ];
 
   return MultiProvider(providers: providers, child: child);

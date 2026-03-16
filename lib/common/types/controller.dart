@@ -13,8 +13,8 @@ class Controller {
     );
   }
 
-  factory Controller.fund(String id) {
-    return Controller(ControllerType.fund, id);
+  factory Controller.pool(String id) {
+    return Controller(ControllerType.pool, id);
   }
 
   factory Controller.loanPayment(String id) {

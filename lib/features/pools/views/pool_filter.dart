@@ -1,24 +1,24 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/date_helper.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/features/pools/providers/pool_filter_provider.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class FundFilter extends StatefulWidget {
+class PoolFilter extends StatefulWidget {
   final Filter? specs;
 
-  const FundFilter({super.key, this.specs});
+  const PoolFilter({super.key, this.specs});
 
   @override
   State<StatefulWidget> createState() {
-    return _FundFilterState();
+    return _PoolFilterState();
   }
 }
 
-class _FundFilterState extends State<FundFilter> {
+class _PoolFilterState extends State<PoolFilter> {
   final _formKey = GlobalKey<FormState>();
   final _createdBetweenController = TextEditingController();
 
@@ -67,7 +67,7 @@ class _FundFilterState extends State<FundFilter> {
         ];
       }
 
-      context.read<FundFilterProvider>().set(query);
+      context.read<PoolFilterProvider>().set(query);
       Navigator.pop(context);
     }
   }
@@ -106,7 +106,7 @@ class _FundFilterState extends State<FundFilter> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          "Filter fund",
+          "Filter pool",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
         centerTitle: true,

@@ -248,11 +248,11 @@ class EntryRepository extends Repository {
       }
     }
 
-    if (spec.containsKey("fund_in")) {
-      final value = spec["fund_in"] as List<String>;
+    if (spec.containsKey("pool_in")) {
+      final value = spec["pool_in"] as List<String>;
       if (value.isNotEmpty) {
         join["query"].add(
-          "INNER JOIN fund_transactions ON fund_transactions.entry_id = entries.id",
+          "INNER JOIN pool_transactions ON pool_transactions.entry_id = entries.id",
         );
       }
     }
@@ -361,11 +361,11 @@ class EntryRepository extends Repository {
       }
     }
 
-    if (filter.containsKey("fund_in")) {
-      final value = filter["fund_in"] as List<String>;
+    if (filter.containsKey("pool_in")) {
+      final value = filter["pool_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(fund_transactions.fund_id IN (${value.map((_) => '?').join(', ')}))",
+          "(pool_transactions.pool_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }

@@ -10,12 +10,12 @@ import 'package:bandha/features/entries/views/entries.dart';
 import 'package:bandha/features/entries/views/entry_editor.dart';
 import 'package:bandha/features/entries/views/entry_filter.dart';
 import 'package:bandha/features/entries/views/entry_menu.dart';
-import 'package:bandha/features/funds/views/fund_editor.dart';
-import 'package:bandha/features/funds/views/fund_entries.dart';
-import 'package:bandha/features/funds/views/fund_entry_editor.dart';
-import 'package:bandha/features/funds/views/fund_filter.dart';
-import 'package:bandha/features/funds/views/fund_menu.dart';
-import 'package:bandha/features/funds/views/funds.dart';
+import 'package:bandha/features/pools/views/pool_editor.dart';
+import 'package:bandha/features/pools/views/pool_entries.dart';
+import 'package:bandha/features/pools/views/pool_entry_editor.dart';
+import 'package:bandha/features/pools/views/pool_filter.dart';
+import 'package:bandha/features/pools/views/pool_menu.dart';
+import 'package:bandha/features/pools/views/pools.dart';
 import 'package:bandha/features/tags/views/party_selector.dart';
 import 'package:bandha/features/transfers/views/transfer_editor.dart';
 import 'package:bandha/features/transfers/views/transfer_entries.dart';
@@ -87,20 +87,20 @@ class Routes {
           settings: settings,
           builder: (context) => LoanFilter(),
         );
-      case '/funds':
+      case '/pools':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Funds(),
+          builder: (context) => Pools(),
         );
-      case '/funds/new':
+      case '/pools/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => FundEditor(),
+          builder: (context) => PoolEditor(),
         );
-      case '/funds/filter':
+      case '/pools/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => FundFilter(),
+          builder: (context) => PoolFilter(),
         );
       case '/vaults':
         return MaterialPageRoute(
@@ -179,10 +179,10 @@ class Routes {
             settings: settings,
             builder: (context) => TransferEditor(id: id),
           );
-        case 'funds':
+        case 'pools':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => FundEditor(id: id),
+            builder: (context) => PoolEditor(id: id),
           );
       }
     }
@@ -216,10 +216,10 @@ class Routes {
             settings: settings,
             builder: (context) => TransferMenu(id: id),
           );
-        case 'funds':
+        case 'pools':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => FundMenu(id: id),
+            builder: (context) => PoolMenu(id: id),
           );
       }
     }
@@ -241,10 +241,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'funds':
+        case 'pools':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => FundEntries(fundId: id),
+            builder: (context) => PoolEntries(poolId: id),
           );
       }
     }
@@ -265,10 +265,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'funds':
+        case 'pools':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => FundEntries(fundId: id),
+            builder: (context) => PoolEntries(poolId: id),
           );
         case 'vaults':
           return MaterialPageRoute(
@@ -312,21 +312,21 @@ class Routes {
             settings: settings,
             builder: (context) => TransferEditor(id: id, readOnly: true),
           );
-        case 'funds':
+        case 'pools':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => FundEditor(id: id, readOnly: true),
+            builder: (context) => PoolEditor(id: id, readOnly: true),
           );
       }
     }
 
     if (uri.pathSegments.length == 4) {
-      if (uri.pathSegments.first == "funds" &&
+      if (uri.pathSegments.first == "pools" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => FundEntryEditor(fundId: uri.pathSegments[1]),
+          builder: (context) => PoolEntryEditor(poolId: uri.pathSegments[1]),
         );
       }
     }
@@ -371,25 +371,25 @@ class Routes {
     }
 
     if (uri.pathSegments.length == 5) {
-      if (uri.pathSegments.first == "funds" &&
+      if (uri.pathSegments.first == "pools" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments.last == "edit") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => FundEntryEditor(
-            fundId: uri.pathSegments[1],
+          builder: (context) => PoolEntryEditor(
+            poolId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
           ),
         );
       }
 
-      if (uri.pathSegments.first == "funds" &&
+      if (uri.pathSegments.first == "pools" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments.last == "detail") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => FundEntryEditor(
-            fundId: uri.pathSegments[1],
+          builder: (context) => PoolEntryEditor(
+            poolId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: true,
           ),

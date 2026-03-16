@@ -1,4 +1,4 @@
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/money_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
@@ -6,16 +6,16 @@ import 'package:bandha/features/vaults/widgets/vault_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
-class FundTile extends StatelessWidget {
-  final Fund fund;
+class PoolTile extends StatelessWidget {
+  final Pool pool;
   final bool readOnly;
 
-  const FundTile(this.fund, {super.key, this.readOnly = false});
+  const PoolTile(this.pool, {super.key, this.readOnly = false});
 
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/funds/${fund.id}/detail" : "/funds/${fund.id}/transactions",
+      readOnly ? "/pools/${pool.id}/detail" : "/pools/${pool.id}/transactions",
     );
   }
 
@@ -24,10 +24,10 @@ class FundTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmFundDeletion(context, fund);
+      return confirmPoolDeletion(context, pool);
     }
 
-    Navigator.pushNamed(context, "/funds/${fund.id}/edit");
+    Navigator.pushNamed(context, "/pools/${pool.id}/edit");
     return false;
   }
 
@@ -35,9 +35,9 @@ class FundTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return [
-      if (fund.status == FundStatus.released)
+      if (pool.status == PoolStatus.released)
         Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
-      if (fund.status != FundStatus.released && fund.balance == fund.goal)
+      if (pool.status != PoolStatus.released && pool.balance == pool.goal)
         Icon(Icons.done_all, size: 8, color: theme.colorScheme.primary),
     ];
   }
@@ -49,13 +49,13 @@ class FundTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        VaultText(fund.vault),
+        VaultText(pool.vault),
         Row(
           spacing: 8,
           children: [
             labelsBuilder(
               context,
-              fund.labels,
+              pool.labels,
               style: theme.textTheme.bodySmall!.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -76,7 +76,7 @@ class FundTile extends StatelessWidget {
         SizedBox(
           height: 8,
           child: LinearProgressIndicator(
-            value: fund.getProgress(),
+            value: pool.getProgress(),
             backgroundColor: theme.colorScheme.surfaceContainer,
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
@@ -87,12 +87,12 @@ class FundTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             MoneyText(
-              fund.balance,
+              pool.balance,
               useSymbol: false,
               style: theme.textTheme.labelSmall,
             ),
             MoneyText(
-              fund.goal,
+              pool.goal,
               useSymbol: false,
               style: theme.textTheme.labelSmall,
             ),
@@ -114,22 +114,22 @@ class FundTile extends StatelessWidget {
           spacing: 8,
           children: [
             Text(
-              MoneyHelper.normalize(fund.balance),
+              MoneyHelper.normalize(pool.balance),
               style: theme.textTheme.bodySmall,
             ),
             Text("/", style: theme.textTheme.bodySmall),
             Text(
-              MoneyHelper.normalize(fund.goal),
+              MoneyHelper.normalize(pool.goal),
               style: theme.textTheme.bodySmall,
             ),
           ],
         ),
-        Text(fund.status.label, style: theme.textTheme.bodySmall),
+        Text(pool.status.label, style: theme.textTheme.bodySmall),
       ],
     );
   }
 
-  fundBuilder(BuildContext context) {
+  poolBuilder(BuildContext context) {
     return tileBuilder(
       context,
       onTap: () {
@@ -155,12 +155,12 @@ class FundTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return dismissibleBuilder(
       context,
-      key: fund.id,
+      key: pool.id,
       dismissable: !readOnly,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);
       },
-      child: fundBuilder(context),
+      child: poolBuilder(context),
     );
   }
 }

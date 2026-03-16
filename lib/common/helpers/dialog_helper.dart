@@ -5,14 +5,14 @@ import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/loans/entities/loan.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/loans/providers/loan_provider.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/common/widgets/verdict.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -85,45 +85,45 @@ Future<bool?> ask(
   return false;
 }
 
-Future<bool?> confirmFundTransactionDeletion(
+Future<bool?> confirmPoolTransactionDeletion(
   BuildContext context,
-  Fund fund,
+  Pool pool,
   Entry entry,
 ) async {
   return ask(
     context,
-    title: "Delete fund entry",
+    title: "Delete pool entry",
     content:
-        "You're about to delete this fund entry, this action cannot be reversed. Are you sure?",
+        "You're about to delete this pool entry, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final fundProvider = context.read<FundProvider>();
+      final poolProvider = context.read<PoolProvider>();
 
-      await fundProvider
-          .deleteTransaction(fundId: fund.id, entryId: entry.id)
+      await poolProvider
+          .deleteTransaction(poolId: pool.id, entryId: entry.id)
           .catchError((error) {
-            alert(messenger, "Delete fund entry failed");
+            alert(messenger, "Delete pool entry failed");
             throw error;
           });
     },
   );
 }
 
-Future<bool?> confirmFundDeletion(
+Future<bool?> confirmPoolDeletion(
   BuildContext context,
-  Fund fund,
+  Pool pool,
 ) async {
   return ask(
     context,
-    title: "Delete fund",
+    title: "Delete pool",
     content:
-        "You're about to delete this fund, this action cannot be reversed. Are you sure?",
+        "You're about to delete this pool, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final fundProvider = context.read<FundProvider>();
+      final poolProvider = context.read<PoolProvider>();
 
-      await fundProvider.delete(fund.id).catchError((error) {
-        alert(messenger, "Delete fund failed");
+      await poolProvider.delete(pool.id).catchError((error) {
+        alert(messenger, "Delete pool failed");
         throw error;
       });
     },

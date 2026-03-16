@@ -1,6 +1,6 @@
 import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/common/types/transaction_type.dart';
@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EntryTile extends StatelessWidget {
-  final Fund fund;
+  final Pool pool;
   final Entry entry;
   final dateFormatter = DateFormat("yyyy/MM/dd");
 
-  EntryTile(this.fund, this.entry, {super.key});
+  EntryTile(this.pool, this.entry, {super.key});
 
   typeBuilder(BuildContext context, Entry entry) {
     final theme = Theme.of(context);
@@ -34,7 +34,7 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         typeBuilder(context, entry),
-        if (fund.status.isReleased)
+        if (pool.status.isReleased)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       ],
     );
@@ -75,12 +75,12 @@ class EntryTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmFundTransactionDeletion(context, fund, entry);
+      return confirmPoolTransactionDeletion(context, pool, entry);
     }
 
     Navigator.pushNamed(
       context,
-      "/funds/${fund.id}/transactions/${entry.id}/edit",
+      "/pools/${pool.id}/transactions/${entry.id}/edit",
     );
 
     return false;
@@ -89,7 +89,7 @@ class EntryTile extends StatelessWidget {
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      "/funds/${fund.id}/transactions/${entry.id}/detail",
+      "/pools/${pool.id}/transactions/${entry.id}/detail",
     );
   }
 
@@ -99,7 +99,7 @@ class EntryTile extends StatelessWidget {
       context,
       key: entry.id,
       child: entryBuilder(context, entry),
-      dismissable: !fund.status.isReleased,
+      dismissable: !pool.status.isReleased,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);
       },

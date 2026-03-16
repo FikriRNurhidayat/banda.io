@@ -2,11 +2,11 @@ import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/types/transaction_type.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
@@ -17,23 +17,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class FundEntryEditor extends StatefulWidget {
-  final String fundId;
+class PoolEntryEditor extends StatefulWidget {
+  final String poolId;
   final String? entryId;
   final bool readOnly;
 
-  const FundEntryEditor({
+  const PoolEntryEditor({
     super.key,
-    required this.fundId,
+    required this.poolId,
     this.entryId,
     this.readOnly = false,
   });
 
   @override
-  State<FundEntryEditor> createState() => _FundEntryEditorState();
+  State<PoolEntryEditor> createState() => _PoolEntryEditorState();
 }
 
-class _FundEntryEditorState extends State<FundEntryEditor> {
+class _PoolEntryEditorState extends State<PoolEntryEditor> {
   final _form = GlobalKey<FormState>();
   final FormData _d = {};
 
@@ -41,7 +41,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
     _form.currentState!.save();
 
     final navigator = Navigator.of(context);
-    final fundProvider = context.read<FundProvider>();
+    final poolProvider = context.read<PoolProvider>();
     final messenger = ScaffoldMessenger.of(context);
 
     if (!_form.currentState!.validate()) {
@@ -50,8 +50,8 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
 
     try {
       if (isNull(widget.entryId)) {
-        await fundProvider.createTransaction(
-          widget.fundId,
+        await poolProvider.createTransaction(
+          widget.poolId,
           amount: _d["amount"],
           type: _d["type"],
           issuedAt: _d["issuedAt"].dateTime,
@@ -60,8 +60,8 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
       }
 
       if (!isNull(widget.entryId)) {
-        await fundProvider.updateTransaction(
-          widget.fundId,
+        await poolProvider.updateTransaction(
+          widget.poolId,
           widget.entryId!,
           amount: _d["amount"],
           type: _d["type"],
@@ -77,7 +77,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
         print(stackTrace);
       }
 
-      alert(messenger, "Edit fund entry details failed");
+      alert(messenger, "Edit pool entry details failed");
     }
   }
 
@@ -116,12 +116,12 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
 
   fieldsBuilder(
     BuildContext context, {
-    required Fund fund,
+    required Pool pool,
     required Entry? entry,
     required List<Label> labels,
   }) {
     final theme = Theme.of(context);
-    final readonlyLabelIds = fund.labelIds;
+    final readonlyLabelIds = pool.labelIds;
 
     return [
       SelectFormField<TransactionType>(
@@ -213,7 +213,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
   @override
   Widget build(BuildContext context) {
     final labelProvider = context.watch<LabelProvider>();
-    final fundProvider = context.watch<FundProvider>();
+    final poolProvider = context.watch<PoolProvider>();
     final entryProvider = context.watch<EntryProvider>();
 
     return Scaffold(
@@ -221,7 +221,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
       body: FutureBuilder(
         future: Future.wait([
           labelProvider.search(),
-          fundProvider.get(widget.fundId),
+          poolProvider.get(widget.poolId),
           if (widget.entryId != null)
             entryProvider.get(widget.entryId!),
         ]),
@@ -235,12 +235,12 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
           }
 
           final labels = snapshot.data![0] as List<Label>;
-          final fund = snapshot.data![1] as Fund;
+          final pool = snapshot.data![1] as Pool;
           final entry = widget.entryId != null
               ? snapshot.data![2] as Entry
               : null;
 
-          final readonlyLabelIds = fund.labelIds;
+          final readonlyLabelIds = pool.labelIds;
 
           labels.sort((a, b) {
             final aReadonly = readonlyLabelIds.contains(a.id);
@@ -253,7 +253,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
 
           final fields = fieldsBuilder(
             context,
-            fund: fund,
+            pool: pool,
             entry: entry,
             labels: labels,
           );

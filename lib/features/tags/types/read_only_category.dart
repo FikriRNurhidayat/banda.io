@@ -1,7 +1,7 @@
 enum ReadOnlyCategory {
   adjustment('Adjustment'),
   transfer('Transfer'),
-  fund('Fund'),
+  pool('Pool'),
   debt('Debt'),
   receivable('Receivable');
 

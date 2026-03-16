@@ -1,18 +1,18 @@
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/common/helpers/error_helper.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class FundMenu extends StatelessWidget {
+class PoolMenu extends StatelessWidget {
   final String id;
 
-  const FundMenu({super.key, required this.id});
+  const PoolMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Fund fund) {
+  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Pool pool) {
     final navigator = Navigator.of(context);
-    final fundProvider = context.read<FundProvider>();
+    final poolProvider = context.read<PoolProvider>();
 
     final Map<String, VoidCallback> menu = {
       "Share": () {
@@ -21,38 +21,38 @@ class FundMenu extends StatelessWidget {
             uri: Uri(
               scheme: "app",
               host: "bandha.id",
-              pathSegments: ["funds", fund.id, "detail"],
+              pathSegments: ["pools", pool.id, "detail"],
             ),
           ),
         );
       },
       "Balance": () async {
-        await fundProvider
+        await poolProvider
             .sync(id)
             .catchError(
-              showError(context: context, content: "Balance fund failed"),
+              showError(context: context, content: "Balance pool failed"),
             );
         navigator.pop();
       },
     };
 
-    if (fund.canDispense) {
+    if (pool.canDispense) {
       menu["Release"] = () async {
-        await fundProvider
+        await poolProvider
             .release(id)
             .catchError(
-              showError(context: context, content: "Release fund failed"),
+              showError(context: context, content: "Release pool failed"),
             );
         navigator.pop();
       };
     }
 
-    if (fund.status.isReleased) {
+    if (pool.status.isReleased) {
       menu["Retract"] = () async {
-        await fundProvider
+        await poolProvider
             .retract(id)
             .catchError(
-              showError(context: context, content: "Retract fund failed"),
+              showError(context: context, content: "Retract pool failed"),
             );
         navigator.pop();
       };
@@ -67,11 +67,11 @@ class FundMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fundProvider = context.read<FundProvider>();
+    final poolProvider = context.read<PoolProvider>();
 
     return Scaffold(
       body: FutureBuilder(
-        future: fundProvider.get(id),
+        future: poolProvider.get(id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -85,8 +85,8 @@ class FundMenu extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final fund = snapshot.data!;
-          final menu = menuBuilder(context, fund);
+          final pool = snapshot.data!;
+          final menu = menuBuilder(context, pool);
 
           return Center(
             child: ListView.builder(

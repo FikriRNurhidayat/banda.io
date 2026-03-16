@@ -1,24 +1,24 @@
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
-import 'package:bandha/features/funds/widgets/fund_tile.dart';
-import 'package:bandha/features/funds/widgets/entry_tile.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
+import 'package:bandha/features/pools/widgets/pool_tile.dart';
+import 'package:bandha/features/pools/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class FundEntries extends StatelessWidget {
-  final String fundId;
-  const FundEntries({super.key, required this.fundId});
+class PoolEntries extends StatelessWidget {
+  final String poolId;
+  const PoolEntries({super.key, required this.poolId});
 
   handlePlus(BuildContext context) {
-    Navigator.pushNamed(context, "/funds/$fundId/transactions/new");
+    Navigator.pushNamed(context, "/pools/$poolId/transactions/new");
   }
 
   handleMore(BuildContext context) {
-    Navigator.of(context).pushNamed("/funds/$fundId/menu");
+    Navigator.of(context).pushNamed("/pools/$poolId/menu");
   }
 
-  appBarBuilder(BuildContext context, Fund fund) {
+  appBarBuilder(BuildContext context, Pool pool) {
     final theme = Theme.of(context);
 
     return AppBar(
@@ -26,7 +26,7 @@ class FundEntries extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Fund", style: theme.textTheme.titleLarge),
+      title: Text("Pool", style: theme.textTheme.titleLarge),
       centerTitle: true,
       actions: [
         IconButton(
@@ -40,8 +40,8 @@ class FundEntries extends StatelessWidget {
     );
   }
 
-  fabBuilder(BuildContext context, Fund fund) {
-    if (!fund.canGrow) return null;
+  fabBuilder(BuildContext context, Pool pool) {
+    if (!pool.canGrow) return null;
 
     return FloatingActionButton(
       child: Icon(Icons.add),
@@ -54,10 +54,10 @@ class FundEntries extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fundProvider = context.watch<FundProvider>();
+    final poolProvider = context.watch<PoolProvider>();
 
     return FutureBuilder(
-      future: fundProvider.get(fundId),
+      future: poolProvider.get(poolId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -78,19 +78,19 @@ class FundEntries extends StatelessWidget {
           );
         }
 
-        final fund = snapshot.data!;
+        final pool = snapshot.data!;
 
         return Scaffold(
-          appBar: appBarBuilder(context, fund),
-          floatingActionButton: fabBuilder(context, fund),
+          appBar: appBarBuilder(context, pool),
+          floatingActionButton: fabBuilder(context, pool),
           body: SafeArea(
             bottom: true,
             child: Column(
               children: [
-                FundTile(fund, readOnly: true),
+                PoolTile(pool, readOnly: true),
                 Divider(height: 1),
                 FutureBuilder(
-                  future: fundProvider.searchTransactions(fundId: fund.id),
+                  future: poolProvider.searchTransactions(poolId: pool.id),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
@@ -118,7 +118,7 @@ class FundEntries extends StatelessWidget {
                         itemCount: entries.length,
                         itemBuilder: (BuildContext context, int index) {
                           final Entry entry = entries[index];
-                          return EntryTile(fund, entry);
+                          return EntryTile(pool, entry);
                         },
                       ),
                     );

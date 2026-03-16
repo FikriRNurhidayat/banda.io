@@ -101,7 +101,7 @@ class ScheduleTile extends StatelessWidget {
               children: [headerBuilder(context), infoBuilder(context)],
             ),
           ),
-          MoneyText(schedule.amount, useSymbol: false),
+          MoneyText(schedule.amount),
         ],
       ),
     );

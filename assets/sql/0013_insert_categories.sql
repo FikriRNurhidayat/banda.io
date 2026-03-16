@@ -18,7 +18,7 @@ VALUES
 ),
 (
     'bf3cdec6-e424-40eb-8540-80e5229911fa',
-    'Fund',
+    'Pool',
     1,
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),

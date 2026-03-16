@@ -33,8 +33,8 @@ class EntryTile extends StatelessWidget {
     }
 
     switch (entry.controller?.type) {
-      case ControllerType.fund:
-        Navigator.pushNamed(context, "/funds/${entry.controller!.id}/entries");
+      case ControllerType.pool:
+        Navigator.pushNamed(context, "/pools/${entry.controller!.id}/entries");
         break;
       case ControllerType.transfer:
         Navigator.pushNamed(

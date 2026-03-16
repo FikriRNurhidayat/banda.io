@@ -1,17 +1,17 @@
-import 'package:bandha/features/funds/entities/fund.dart';
-import 'package:bandha/features/funds/views/fund_filter.dart';
-import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
-import 'package:bandha/features/funds/widgets/fund_tile.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
+import 'package:bandha/features/pools/views/pool_filter.dart';
+import 'package:bandha/features/pools/providers/pool_filter_provider.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
+import 'package:bandha/features/pools/widgets/pool_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Funds extends StatelessWidget {
-  const Funds({super.key});
+class Pools extends StatelessWidget {
+  const Pools({super.key});
 
   List<Widget> actionsBuilder(BuildContext context) {
-    final filterProvider = context.watch<FundFilterProvider>();
+    final filterProvider = context.watch<PoolFilterProvider>();
     final filter = filterProvider.get();
 
     return [
@@ -26,7 +26,7 @@ class Funds extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => FundFilter(specs: filterProvider.get()),
+              builder: (_) => PoolFilter(specs: filterProvider.get()),
             ),
           );
         },
@@ -38,13 +38,13 @@ class Funds extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fundProvider = context.watch<FundProvider>();
-    final filterProvider = context.watch<FundFilterProvider>();
+    final poolProvider = context.watch<PoolProvider>();
+    final filterProvider = context.watch<PoolFilterProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Funds",
+          "Pools",
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -54,7 +54,7 @@ class Funds extends StatelessWidget {
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
-        future: fundProvider.search(filterProvider.get()),
+        future: poolProvider.search(filterProvider.get()),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -82,8 +82,8 @@ class Funds extends StatelessWidget {
             child: ListView.builder(
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
-                final Fund fund = snapshot.data![index];
-                return FundTile(fund);
+                final Pool pool = snapshot.data![index];
+                return PoolTile(pool);
               },
             ),
           );
@@ -96,7 +96,7 @@ class Funds extends StatelessWidget {
     return FloatingActionButton(
       child: Icon(Icons.add),
       onPressed: () {
-        Navigator.pushNamed(context, "/funds/new");
+        Navigator.pushNamed(context, "/pools/new");
       },
     );
   }

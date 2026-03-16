@@ -2,10 +2,10 @@ import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/label.dart';
-import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
-import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/multi_select_form_field.dart';
@@ -14,35 +14,35 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class FundEditor extends StatefulWidget {
+class PoolEditor extends StatefulWidget {
   final String? id;
   final bool readOnly;
 
-  const FundEditor({super.key, this.id, this.readOnly = false});
+  const PoolEditor({super.key, this.id, this.readOnly = false});
 
   @override
-  State<FundEditor> createState() => _FundEditorState();
+  State<PoolEditor> createState() => _PoolEditorState();
 }
 
-class _FundEditorState extends State<FundEditor> {
+class _PoolEditorState extends State<PoolEditor> {
   final _form = GlobalKey<FormState>();
   final FormData _d = {};
 
   void handleMoreTap(BuildContext context) {
-    Navigator.of(context).pushNamed("/funds/${widget.id}/menu");
+    Navigator.of(context).pushNamed("/pools/${widget.id}/menu");
   }
 
   void handleSubmit(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final fundProvider = context.read<FundProvider>();
+    final poolProvider = context.read<PoolProvider>();
 
     try {
       if (_form.currentState!.validate()) {
         _form.currentState!.save();
 
         if (widget.id == null) {
-          await fundProvider.create(
+          await poolProvider.create(
             goal: _d["goal"],
             vaultId: _d["vaultId"],
             labelIds: _d["labelIds"],
@@ -51,7 +51,7 @@ class _FundEditorState extends State<FundEditor> {
         }
 
         if (widget.id != null) {
-          await fundProvider.update(
+          await poolProvider.update(
             widget.id!,
             goal: _d["goal"],
             labelIds: _d["labelIds"],
@@ -67,7 +67,7 @@ class _FundEditorState extends State<FundEditor> {
         print(stackTrace);
       }
 
-      alert(messenger, "Edit fund details failed");
+      alert(messenger, "Edit pool details failed");
     }
   }
 
@@ -85,7 +85,7 @@ class _FundEditorState extends State<FundEditor> {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        !widget.readOnly ? "Enter fund details" : "Fund details",
+        !widget.readOnly ? "Enter pool details" : "Pool details",
         style: theme.textTheme.titleLarge,
       ),
       centerTitle: true,
@@ -111,7 +111,7 @@ class _FundEditorState extends State<FundEditor> {
 
   List<Widget> fieldsBuilder(
     BuildContext context, {
-    required Fund? fund,
+    required Pool? pool,
     required List<Label> labels,
     required List<Vault> vaults,
   }) {
@@ -124,12 +124,12 @@ class _FundEditorState extends State<FundEditor> {
           labelText: "Note",
           hintText: "Enter note...",
         ),
-        initialValue: _d["note"] ?? fund?.note,
+        initialValue: _d["note"] ?? pool?.note,
         onSaved: (value) => _d["note"] = value,
       ),
       AmountFormField(
         readOnly: widget.readOnly,
-        initialValue: _d["goal"] ?? fund?.goal,
+        initialValue: _d["goal"] ?? pool?.goal,
         onSaved: (value) => _d["goal"] = value,
         decoration: InputStyles.field(
           hintText: "Enter goal...",
@@ -140,7 +140,7 @@ class _FundEditorState extends State<FundEditor> {
       if (widget.readOnly)
         AmountFormField(
           readOnly: widget.readOnly,
-          initialValue: _d["balance"] ?? fund?.balance,
+          initialValue: _d["balance"] ?? pool?.balance,
           onSaved: (value) => _d["balance"] = value,
           decoration: InputStyles.field(
             hintText: "Enter balance...",
@@ -151,7 +151,7 @@ class _FundEditorState extends State<FundEditor> {
         ),
       SelectFormField<String>(
         readOnly: widget.readOnly,
-        initialValue: _d["vaultId"] ?? fund?.vaultId,
+        initialValue: _d["vaultId"] ?? pool?.vaultId,
         onSaved: (value) => _d["vaultId"] = value,
         validator: (value) =>
             value == null ? "Vault is required" : null,
@@ -184,7 +184,7 @@ class _FundEditorState extends State<FundEditor> {
       ),
       MultiSelectFormField<String>(
         readOnly: widget.readOnly,
-        initialValue: _d["labelIds"] ?? fund?.labelIds ?? [],
+        initialValue: _d["labelIds"] ?? pool?.labelIds ?? [],
         onSaved: (value) => _d["labelIds"] = value,
         actions: [
           if (!widget.readOnly)
@@ -215,7 +215,7 @@ class _FundEditorState extends State<FundEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final fundProvider = context.read<FundProvider>();
+    final poolProvider = context.read<PoolProvider>();
     final vaultProvider = context.watch<VaultProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
@@ -225,7 +225,7 @@ class _FundEditorState extends State<FundEditor> {
         future: Future.wait([
           vaultProvider.search(),
           labelProvider.search(),
-          if (widget.id != null) fundProvider.get(widget.id!),
+          if (widget.id != null) poolProvider.get(widget.id!),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -238,13 +238,13 @@ class _FundEditorState extends State<FundEditor> {
 
           final vaults = snapshot.data![0] as List<Vault>;
           final labels = snapshot.data![1] as List<Label>;
-          final fund = widget.id != null
-              ? (snapshot.data![2] as Fund)
+          final pool = widget.id != null
+              ? (snapshot.data![2] as Pool)
               : null;
 
           final fields = fieldsBuilder(
             context,
-            fund: fund,
+            pool: pool,
             labels: labels,
             vaults: vaults,
           );
