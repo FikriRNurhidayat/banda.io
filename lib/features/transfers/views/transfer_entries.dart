@@ -1,10 +1,10 @@
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/transfers/widgets/transfer_tile.dart';
-import 'package:banda/common/helpers/future_helper.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/entries/widgets/entry_tile.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/transfers/widgets/transfer_tile.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/entries/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

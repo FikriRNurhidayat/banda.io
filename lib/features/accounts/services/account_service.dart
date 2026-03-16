@@ -1,10 +1,10 @@
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
 
 class AccountService extends Service {
   final AccountRepository accountRepository;

@@ -1,4 +1,4 @@
-import 'package:banda/common/types/widget_list_builder.dart';
+import 'package:bandha/common/types/widget_list_builder.dart';
 import 'package:flutter/material.dart';
 
 class SelectItem<T> {

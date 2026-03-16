@@ -1,5 +1,5 @@
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/entries/entities/entry.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
 
 enum AccountKind {
   bankAccount('Bank Account'),

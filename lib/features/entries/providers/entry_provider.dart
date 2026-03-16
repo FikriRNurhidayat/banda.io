@@ -1,7 +1,7 @@
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/entries/services/entry_service.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/entries/services/entry_service.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
 class EntryProvider extends ChangeNotifier {

@@ -1,5 +1,5 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/accounts/services/account_service.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/accounts/services/account_service.dart';
 import 'package:flutter/material.dart';
 
 class AccountProvider extends ChangeNotifier {

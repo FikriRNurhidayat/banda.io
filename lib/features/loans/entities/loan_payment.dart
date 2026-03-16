@@ -1,7 +1,7 @@
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/loans/entities/loan.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/loans/entities/loan.dart';
 
 class LoanPayment extends Entity {
   final String loanId;

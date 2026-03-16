@@ -5,7 +5,7 @@ class MainMenu extends StatelessWidget {
 
   final Map<String, String> menu = {
     "Accounts": "/accounts",
-    "Bills": "/bills",
+    "Schedules": "/schedules",
     "Entries": "/entries",
     "Funds": "/funds",
     "Info": "/info",

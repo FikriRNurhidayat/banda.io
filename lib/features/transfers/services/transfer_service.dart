@@ -1,14 +1,14 @@
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/features/tags/types/read_only_category.dart';
-import 'package:banda/features/tags/types/read_only_label.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/repositories/transfer_repository.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/tags/types/read_only_category.dart';
+import 'package:bandha/features/tags/types/read_only_label.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
 
 class TransferService extends Service {
   final AccountRepository accountRepository;

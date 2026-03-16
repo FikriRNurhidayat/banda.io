@@ -1,4 +1,4 @@
-import 'package:banda/features/accounts/entities/account.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
 import 'package:flutter/material.dart';
 
 class AccountText extends StatelessWidget {

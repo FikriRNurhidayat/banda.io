@@ -1,15 +1,15 @@
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/features/funds/repositories/fund_repository.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/common/types/transaction_type.dart';
-import 'package:banda/features/tags/types/read_only_category.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/funds/repositories/fund_repository.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/common/types/transaction_type.dart';
+import 'package:bandha/features/tags/types/read_only_category.dart';
 
 class FundService extends Service {
   final FundRepository fundRepository;

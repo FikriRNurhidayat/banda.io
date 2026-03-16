@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/controller_type.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/controller_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -39,8 +39,8 @@ class NotificationHandler {
           return navigate("/loans/${controller.id}/detail");
         case ControllerType.budget:
           return navigate("/budgets/${controller.id}/detail");
-        case ControllerType.bill:
-          return navigate("/bills/${controller.id}/detail");
+        case ControllerType.schedule:
+          return navigate("/schedules/${controller.id}/detail");
         case ControllerType.fund:
           return navigate("/funds/${controller.id}/detail");
         case ControllerType.transfer:

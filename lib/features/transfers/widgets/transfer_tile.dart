@@ -1,8 +1,8 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/money_helper.dart';
-import 'package:banda/common/helpers/type_helper.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/money_helper.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

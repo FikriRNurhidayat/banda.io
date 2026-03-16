@@ -1,6 +1,6 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/accounts/widgets/account_tile.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/accounts/widgets/account_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

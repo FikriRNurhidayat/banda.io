@@ -1,30 +1,30 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/common/widgets/growable_multi_select_form_field.dart';
-import 'package:banda/common/widgets/growable_select_form_field.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/tags/providers/category_provider.dart';
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/widgets/amount_form_field.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
-import 'package:banda/common/widgets/select_form_field.dart';
-import 'package:banda/common/widgets/when_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/widgets/growable_multi_select_form_field.dart';
+import 'package:bandha/common/widgets/growable_select_form_field.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
+import 'package:bandha/common/widgets/when_form_field.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BillEditor extends StatelessWidget {
+class ScheduleEditor extends StatelessWidget {
   final String? id;
   final bool readOnly;
 
-  BillEditor({super.key, this.id, this.readOnly = false});
+  ScheduleEditor({super.key, this.id, this.readOnly = false});
 
   final _form = GlobalKey<FormState>();
 
@@ -35,7 +35,7 @@ class BillEditor extends StatelessWidget {
   }
 
   void handleMoreTap(BuildContext context) async {
-    Navigator.pushNamed(context, "/bills/${id!}/menu");
+    Navigator.pushNamed(context, "/schedules/${id!}/menu");
   }
 
   void handleSubmitTap(BuildContext context) async {
@@ -43,14 +43,14 @@ class BillEditor extends StatelessWidget {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final billProvider = context.read<BillProvider>();
+    final scheduleProvider = context.read<ScheduleProvider>();
 
     if (_form.currentState!.validate()) {
       try {
         final note = _d["note"]?.isNotEmpty ? _d["note"] : null;
 
         if (id == null) {
-          await billProvider.create(
+          await scheduleProvider.create(
             note: note,
             amount: _d["amount"],
             fee: _d["fee"],
@@ -64,7 +64,7 @@ class BillEditor extends StatelessWidget {
         }
 
         if (id != null) {
-          await billProvider.update(
+          await scheduleProvider.update(
             id!,
             note: note,
             amount: _d["amount"],
@@ -85,7 +85,7 @@ class BillEditor extends StatelessWidget {
           print(stackTrace);
         }
 
-        alert(messenger, "Edit bill details failed!");
+        alert(messenger, "Edit schedule details failed!");
       }
     }
   }
@@ -93,7 +93,7 @@ class BillEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final billProvider = context.read<BillProvider>();
+    final scheduleProvider = context.read<ScheduleProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
     final accountProvider = context.watch<AccountProvider>();
     final labelProvider = context.watch<LabelProvider>();
@@ -107,7 +107,7 @@ class BillEditor extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          readOnly ? "Bill details" : "Enter bill details",
+          readOnly ? "Schedule details" : "Enter schedule details",
           style: theme.textTheme.titleLarge,
         ),
         actions: [
@@ -143,7 +143,7 @@ class BillEditor extends StatelessWidget {
               categoryProvider.search(),
               accountProvider.search(),
               labelProvider.search(),
-              if (id != null) billProvider.get(id!),
+              if (id != null) scheduleProvider.get(id!),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -161,8 +161,8 @@ class BillEditor extends StatelessWidget {
               final categories = snapshot.data![0] as List<Category>;
               final accounts = snapshot.data![1] as List<Account>;
               final labels = snapshot.data![2] as List<Label>;
-              final bill = id != null
-                  ? snapshot.data![3] as Bill
+              final schedule = id != null
+                  ? snapshot.data![3] as Schedule
                   : null;
 
               return Form(
@@ -171,14 +171,14 @@ class BillEditor extends StatelessWidget {
                   spacing: 16,
                   children: [
                     if (!readOnly ||
-                        (bill?.note != null && bill!.note!.isNotEmpty))
+                        (schedule?.note != null && schedule!.note!.isNotEmpty))
                       TextFormField(
                         readOnly: readOnly,
                         decoration: InputStyles.field(
                           labelText: "Note",
                           hintText: "Enter note...",
                         ),
-                        initialValue: _d["note"] ?? bill?.note,
+                        initialValue: _d["note"] ?? schedule?.note,
                         onSaved: (value) => _d["note"] = value,
                       ),
                     AmountFormField(
@@ -188,7 +188,7 @@ class BillEditor extends StatelessWidget {
                         hintText: "Enter amount...",
                       ),
                       initialValue:
-                          _d["amount"]?.abs() ?? bill?.amount.abs(),
+                          _d["amount"]?.abs() ?? schedule?.amount.abs(),
                       onSaved: (value) => _d["amount"] = value,
                       validator: (value) =>
                           value == null ? "Enter amount" : null,
@@ -200,21 +200,21 @@ class BillEditor extends StatelessWidget {
                         hintText: "Enter fee...",
                       ),
                       initialValue:
-                          _d["fee"]?.abs() ?? bill?.fee?.abs(),
+                          _d["fee"]?.abs() ?? schedule?.fee?.abs(),
                       onSaved: (value) => _d["fee"] = value,
                     ),
-                    SelectFormField<BillCycle>(
+                    SelectFormField<ScheduleCycle>(
                       readOnly: readOnly,
                       initialValue:
                           _d["cycle"] ??
-                          bill?.cycle ??
-                          BillCycle.monthly,
+                          schedule?.cycle ??
+                          ScheduleCycle.monthly,
                       onSaved: (value) => _d["cycle"] = value,
                       decoration: InputStyles.field(
                         labelText: "Cycle",
                         hintText: "Select cycle...",
                       ),
-                      options: BillCycle.values.map((c) {
+                      options: ScheduleCycle.values.map((c) {
                         return SelectItem(value: c, label: c.label);
                       }).toList(),
                     ),
@@ -223,8 +223,8 @@ class BillEditor extends StatelessWidget {
                       options: WhenOption.min,
                       initialValue:
                           _d["due_at"] ??
-                          (bill?.dueAt != null
-                              ? When.specificTime(bill!.dueAt)
+                          (schedule?.dueAt != null
+                              ? When.specificTime(schedule!.dueAt)
                               : When.now()),
                       onSaved: (value) => _d["due_at"] = value,
                       validator: (value) => value == null
@@ -243,25 +243,25 @@ class BillEditor extends StatelessWidget {
                         hintText: "Select time...",
                       ),
                     ),
-                    SelectFormField<BillStatus>(
+                    SelectFormField<ScheduleStatus>(
                       readOnly: readOnly,
                       initialValue:
                           _d["status"] ??
-                          bill?.status ??
-                          BillStatus.pending,
+                          schedule?.status ??
+                          ScheduleStatus.pending,
                       onSaved: (value) => _d["status"] = value,
                       decoration: InputStyles.field(
                         labelText: "Status",
                         hintText: "Select status...",
                       ),
-                      options: BillStatus.values.map((c) {
+                      options: ScheduleStatus.values.map((c) {
                         return SelectItem(value: c, label: c.label);
                       }).toList(),
                     ),
                     GrowableSelectFormField(
                       readOnly: readOnly,
                       initialValue:
-                          _d["category_id"] ?? bill?.categoryId,
+                          _d["category_id"] ?? schedule?.categoryId,
                       onSaved: (value) => _d["category_id"] = value,
                       decoration: InputStyles.field(
                         labelText: "Category",
@@ -294,10 +294,10 @@ class BillEditor extends StatelessWidget {
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["account_id"] ?? bill?.accountId,
+                      initialValue: _d["account_id"] ?? schedule?.accountId,
                       onSaved: (value) => _d["account_id"] = value,
                     ),
-                    if (!readOnly || !isEmpty(bill?.labels))
+                    if (!readOnly || !isEmpty(schedule?.labels))
                       GrowableMultiSelectFormField<String>(
                         readOnly: readOnly,
                         decoration: InputStyles.field(
@@ -308,7 +308,7 @@ class BillEditor extends StatelessWidget {
                         actionPath: "/labels/edit",
                         onRedirect: handleRedirect,
                         initialValue:
-                            _d["label_ids"] ?? bill?.labelIds ?? [],
+                            _d["label_ids"] ?? schedule?.labelIds ?? [],
                         onSaved: (value) => _d["label_ids"] = value,
                         options: labels.map((l) {
                           return MultiSelectItem(

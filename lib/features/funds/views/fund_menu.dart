@@ -1,6 +1,6 @@
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/error_helper.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/error_helper.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';

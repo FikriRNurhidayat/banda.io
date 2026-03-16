@@ -1,5 +1,5 @@
-import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/loans/providers/loan_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

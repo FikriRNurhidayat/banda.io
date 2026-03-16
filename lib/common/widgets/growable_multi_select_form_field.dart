@@ -1,4 +1,4 @@
-import 'package:banda/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 
 class GrowableMultiSelectFormField<T> extends MultiSelectFormField<T> {

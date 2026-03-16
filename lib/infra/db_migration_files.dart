@@ -9,7 +9,7 @@ const dbMigrationFiles = <String>[
   'assets/sql/0007_create_transfers.sql',
   'assets/sql/0008_create_loans.sql',
   'assets/sql/0009_create_funds.sql',
-  'assets/sql/0010_create_bills.sql',
+  'assets/sql/0010_create_schedules.sql',
   'assets/sql/0011_create_budgets.sql',
   'assets/sql/0012_create_notifications.sql',
   'assets/sql/0013_insert_categories.sql',

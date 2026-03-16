@@ -1,6 +1,6 @@
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/transfers/widgets/transfer_tile.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/transfers/widgets/transfer_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

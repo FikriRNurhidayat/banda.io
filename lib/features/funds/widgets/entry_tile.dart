@@ -1,10 +1,10 @@
-import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/common/types/transaction_type.dart';
-import 'package:banda/common/widgets/money_text.dart';
+import 'package:bandha/common/widgets/date_time_text.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/common/types/transaction_type.dart';
+import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

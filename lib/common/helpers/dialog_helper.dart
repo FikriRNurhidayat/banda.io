@@ -1,19 +1,19 @@
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/common/widgets/flash.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/loans/providers/loan_payment_provider.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/loans/providers/loan_provider.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/common/widgets/verdict.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/widgets/flash.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/common/widgets/verdict.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -130,20 +130,20 @@ Future<bool?> confirmFundDeletion(
   );
 }
 
-Future<bool?> confirmBillDeletion(
+Future<bool?> confirmScheduleDeletion(
   BuildContext context,
-  Bill bill,
+  Schedule schedule,
 ) async {
   return ask(
     context,
-    title: "Delete bill",
+    title: "Delete schedule",
     content:
-        "You're about to delete this bill, this action cannot be reversed. Are you sure?",
+        "You're about to delete this schedule, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final billProvider = context.read<BillProvider>();
+      final scheduleProvider = context.read<ScheduleProvider>();
 
-      await billProvider.delete(bill.id).catchError((
+      await scheduleProvider.delete(schedule.id).catchError((
         error,
         stackTrace,
       ) {
@@ -152,7 +152,7 @@ Future<bool?> confirmBillDeletion(
           print(stackTrace);
         }
 
-        alert(messenger, "Delete bill failed");
+        alert(messenger, "Delete schedule failed");
         throw error;
       });
     },

@@ -1,7 +1,7 @@
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/entries/providers/entry_filter_provider.dart';
-import 'package:banda/features/entries/widgets/entry_tile.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
+import 'package:bandha/features/entries/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import "package:provider/provider.dart";
 

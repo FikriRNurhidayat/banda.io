@@ -1,5 +1,5 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/accounts/providers/account_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';

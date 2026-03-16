@@ -1,28 +1,28 @@
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/bills/services/bill_service.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/services/schedule_service.dart';
 import 'package:flutter/material.dart';
 
-class BillProvider extends ChangeNotifier {
-  final BillService billService;
+class ScheduleProvider extends ChangeNotifier {
+  final ScheduleService scheduleService;
 
-  BillProvider(this.billService);
+  ScheduleProvider(this.scheduleService);
 
-  Future<List<Bill>> search() {
-    return billService.search();
+  Future<List<Schedule>> search() {
+    return scheduleService.search();
   }
 
   create({
     String? note,
     required double amount,
     double? fee,
-    required BillCycle cycle,
-    required BillStatus status,
+    required ScheduleCycle cycle,
+    required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
     required String accountId,
     required List<String> labelIds,
   }) async {
-    await billService.create(
+    await scheduleService.create(
       note: note,
       amount: amount,
       fee: fee,
@@ -42,14 +42,14 @@ class BillProvider extends ChangeNotifier {
     String? note,
     required double amount,
     double? fee,
-    required BillCycle cycle,
-    required BillStatus status,
+    required ScheduleCycle cycle,
+    required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
     required String accountId,
     required List<String> labelIds,
   }) async {
-    await billService.update(
+    await scheduleService.update(
       id,
       note: note,
       amount: amount,
@@ -65,23 +65,23 @@ class BillProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Bill?> get(String id) async {
-    return await billService.get(id);
+  Future<Schedule?> get(String id) async {
+    return await scheduleService.get(id);
   }
 
   delete(String id) async {
-    await billService.delete(id);
+    await scheduleService.delete(id);
 
     notifyListeners();
   }
 
   rollback(String id) async {
-    await billService.rollback(id);
+    await scheduleService.rollback(id);
     notifyListeners();
   }
 
   rollover(String id) async {
-    await billService.rollover(id);
+    await scheduleService.rollover(id);
     notifyListeners();
   }
 }

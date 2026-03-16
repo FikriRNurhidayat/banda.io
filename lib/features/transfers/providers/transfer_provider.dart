@@ -1,5 +1,5 @@
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/services/transfer_service.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/services/transfer_service.dart';
 import 'package:flutter/material.dart';
 
 class TransferProvider extends ChangeNotifier {

@@ -1,4 +1,4 @@
-import 'package:banda/features/tags/entities/tagable.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
 
 class Label extends Tagable {
   @override

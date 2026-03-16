@@ -1,15 +1,15 @@
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/services/service.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/loans/entities/loan_payment.dart';
-import 'package:banda/features/loans/repositories/loan_payment_repository.dart';
-import 'package:banda/features/loans/repositories/loan_repository.dart';
-import 'package:banda/features/notifications/managers/notification_manager.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/tags/repositories/party_repository.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/loans/repositories/loan_payment_repository.dart';
+import 'package:bandha/features/loans/repositories/loan_repository.dart';
+import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/tags/repositories/party_repository.dart';
 
 class LoanPaymentService extends Service {
   final LoanRepository loanRepository;

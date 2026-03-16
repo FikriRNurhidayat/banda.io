@@ -1,4 +1,4 @@
-import 'package:banda/features/tags/entities/label.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 import 'package:flutter/material.dart';
 
 labelsBuilder(BuildContext context, List<Label> labels, {TextStyle? style}) {

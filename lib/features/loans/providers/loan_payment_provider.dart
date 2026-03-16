@@ -1,6 +1,6 @@
-import 'package:banda/features/loans/entities/loan_payment.dart';
-import 'package:banda/features/loans/services/loan_payment_service.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/loans/services/loan_payment_service.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
 class LoanPaymentProvider extends ChangeNotifier {

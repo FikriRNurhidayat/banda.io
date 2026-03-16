@@ -1,10 +1,10 @@
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/features/loans/entities/loan_payment.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/common/widgets/money_text.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/widgets/date_time_text.dart';
+import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

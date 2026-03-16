@@ -1,6 +1,6 @@
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/controller_type.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/controller_type.dart';
 
 class Notification extends Entity {
   late int id;

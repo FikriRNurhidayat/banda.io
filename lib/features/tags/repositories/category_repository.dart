@@ -1,5 +1,5 @@
-import 'package:banda/features/tags/entities/category.dart';
-import "package:banda/common/repositories/repository.dart";
+import 'package:bandha/features/tags/entities/category.dart';
+import "package:bandha/common/repositories/repository.dart";
 import 'package:sqlite3/sqlite3.dart';
 
 class CategoryRepository extends Repository {

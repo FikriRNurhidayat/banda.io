@@ -1,4 +1,4 @@
-import 'package:banda/common/formatters/numeric_formatter.dart';
+import 'package:bandha/common/formatters/numeric_formatter.dart';
 import 'package:flutter/material.dart';
 
 class AmountFormField extends FormField<double> {

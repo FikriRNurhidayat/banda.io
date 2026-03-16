@@ -1,18 +1,18 @@
-import 'package:banda/common/helpers/future_helper.dart';
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/bills/widgets/bill_tile.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/schedules/widgets/schedule_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Bills extends StatelessWidget {
-  const Bills({super.key});
+class Schedules extends StatelessWidget {
+  const Schedules({super.key});
 
   Widget fabBuilder(BuildContext context) {
     return FloatingActionButton(
       child: Icon(Icons.add),
       onPressed: () {
-        Navigator.pushNamed(context, "/bills/new");
+        Navigator.pushNamed(context, "/schedules/new");
       },
     );
   }
@@ -22,7 +22,7 @@ class Bills extends StatelessWidget {
 
     return AppBar(
       title: Text(
-        "Bills",
+        "Schedules",
         style: theme.textTheme.titleLarge,
         textAlign: TextAlign.center,
       ),
@@ -33,21 +33,21 @@ class Bills extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final billProvider = context.watch<BillProvider>();
+    final scheduleProvider = context.watch<ScheduleProvider>();
 
     return Scaffold(
       appBar: appBarBuilder(context),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
-        future: billProvider.search(),
+        future: scheduleProvider.search(),
         builder: futureBuilder((context, snapshot) {
-          final bills = snapshot.data! as List<Bill>;
+          final schedules = snapshot.data! as List<Schedule>;
 
           return ListView.builder(
-            itemCount: bills.length,
+            itemCount: schedules.length,
             itemBuilder: (context, index) {
-              final bill = bills[index];
-              return BillTile(bill);
+              final schedule = schedules[index];
+              return ScheduleTile(schedule);
             },
           );
         }),

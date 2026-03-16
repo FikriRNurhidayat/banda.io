@@ -1,4 +1,4 @@
-import 'package:banda/common/helpers/date_helper.dart';
+import 'package:bandha/common/helpers/date_helper.dart';
 import 'package:flutter/material.dart';
 
 enum WhenOption {

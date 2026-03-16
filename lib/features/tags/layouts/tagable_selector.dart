@@ -1,5 +1,5 @@
-import 'package:banda/features/tags/entities/tagable.dart';
-import 'package:banda/features/tags/providers/tagable_provider.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
+import 'package:bandha/features/tags/providers/tagable_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

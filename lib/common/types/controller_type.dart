@@ -5,7 +5,7 @@ enum ControllerType {
   transfer('Transfer'),
   loan('Loan'),
   loanPayment('Loan Payment'),
-  bill('Bill'),
+  schedule('Schedule'),
   purchase('Purchase'),
   unknown('Unknown');
 

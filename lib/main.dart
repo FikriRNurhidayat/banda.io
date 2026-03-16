@@ -1,7 +1,7 @@
 import 'package:app_links/app_links.dart';
-import 'package:banda/features/main/handlers/notification_handler.dart';
-import 'package:banda/provider.dart';
-import 'package:banda/routes.dart';
+import 'package:bandha/features/main/handlers/notification_handler.dart';
+import 'package:bandha/provider.dart';
+import 'package:bandha/routes.dart';
 import 'package:flutter/material.dart' hide Router;
 
 final navigator = GlobalKey<NavigatorState>();

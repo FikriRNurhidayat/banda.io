@@ -1,8 +1,8 @@
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/features/funds/widgets/fund_tile.dart';
-import 'package:banda/features/funds/widgets/entry_tile.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/widgets/fund_tile.dart';
+import 'package:bandha/features/funds/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

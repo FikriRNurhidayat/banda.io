@@ -1,4 +1,4 @@
-import 'package:banda/common/providers/tab_provider.dart';
+import 'package:bandha/common/providers/tab_provider.dart';
 
 enum LoanTab { payments, entries }
 

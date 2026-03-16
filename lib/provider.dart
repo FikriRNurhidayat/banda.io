@@ -1,44 +1,44 @@
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/bills/repositories/bill_repository.dart';
-import 'package:banda/features/bills/services/bill_service.dart';
-import 'package:banda/features/loans/providers/loan_payment_provider.dart';
-import 'package:banda/features/loans/providers/loan_tab_provider.dart';
-import 'package:banda/features/loans/services/loan_payment_service.dart';
-import 'package:banda/features/loans/services/loan_service.dart';
-import 'package:banda/features/main/providers/tool_provider.dart';
-import 'package:banda/features/main/services/tool_service.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/transfers/repositories/transfer_repository.dart';
-import 'package:banda/features/transfers/services/transfer_service.dart';
-import 'package:banda/features/loans/repositories/loan_payment_repository.dart';
-import 'package:banda/infra/db.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
+import 'package:bandha/features/schedules/services/schedule_service.dart';
+import 'package:bandha/features/loans/providers/loan_payment_provider.dart';
+import 'package:bandha/features/loans/providers/loan_tab_provider.dart';
+import 'package:bandha/features/loans/services/loan_payment_service.dart';
+import 'package:bandha/features/loans/services/loan_service.dart';
+import 'package:bandha/features/main/providers/tool_provider.dart';
+import 'package:bandha/features/main/services/tool_service.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
+import 'package:bandha/features/transfers/services/transfer_service.dart';
+import 'package:bandha/features/loans/repositories/loan_payment_repository.dart';
+import 'package:bandha/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import "package:banda/features/tags/repositories/category_repository.dart";
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/accounts/services/account_service.dart';
-import 'package:banda/features/entries/providers/entry_filter_provider.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/entries/services/entry_service.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/features/funds/repositories/fund_repository.dart';
-import 'package:banda/features/funds/services/fund_service.dart';
-import 'package:banda/features/loans/providers/loan_filter_provider.dart';
-import 'package:banda/features/loans/providers/loan_provider.dart';
-import 'package:banda/features/loans/repositories/loan_repository.dart';
-import 'package:banda/features/tags/providers/category_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/features/tags/providers/party_provider.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/features/tags/repositories/party_repository.dart';
-import 'package:banda/features/main/handlers/notification_handler.dart';
-import 'package:banda/features/notifications/managers/notification_manager.dart';
-import 'package:banda/notification.dart';
-import 'package:banda/features/funds/providers/fund_filter_provider.dart';
-import 'package:banda/features/notifications/repositories/notification_repository.dart';
+import "package:bandha/features/tags/repositories/category_repository.dart";
+import 'package:bandha/features/accounts/providers/account_provider.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/accounts/services/account_service.dart';
+import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/entries/services/entry_service.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/repositories/fund_repository.dart';
+import 'package:bandha/features/funds/services/fund_service.dart';
+import 'package:bandha/features/loans/providers/loan_filter_provider.dart';
+import 'package:bandha/features/loans/providers/loan_provider.dart';
+import 'package:bandha/features/loans/repositories/loan_repository.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/features/tags/providers/party_provider.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/tags/repositories/party_repository.dart';
+import 'package:bandha/features/main/handlers/notification_handler.dart';
+import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/notification.dart';
+import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/features/notifications/repositories/notification_repository.dart';
 
 makeProvider({
   required Widget child,
@@ -56,7 +56,7 @@ makeProvider({
   final labelRepository = LabelRepository(dbManager);
   final partyRepository = PartyRepository(dbManager);
   final fundRepository = FundRepository(dbManager);
-  final billRepository = BillRepository(dbManager);
+  final scheduleRepository = ScheduleRepository(dbManager);
 
   final notificationManager = NotificationManager(
     notificationRepository: notificationRepository,
@@ -98,9 +98,9 @@ makeProvider({
     labelRepository: labelRepository,
   );
 
-  final billService = BillService(
+  final scheduleService = ScheduleService(
     accountRepository: accountRepository,
-    billRepository: billRepository,
+    scheduleRepository: scheduleRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
@@ -140,7 +140,7 @@ makeProvider({
     ChangeNotifierProvider(
       create: (_) => LoanPaymentProvider(loanPaymentService),
     ),
-    ChangeNotifierProvider(create: (_) => BillProvider(billService)),
+    ChangeNotifierProvider(create: (_) => ScheduleProvider(scheduleService)),
     ChangeNotifierProvider(
       create: (_) => LabelProvider(labelRepository),
     ),

@@ -1,21 +1,21 @@
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/bills/providers/bill_provider.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class BillMenu extends StatelessWidget {
+class ScheduleMenu extends StatelessWidget {
   final String id;
 
-  const BillMenu({super.key, required this.id});
+  const ScheduleMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Bill bill) {
+  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Schedule schedule) {
     final navigator = Navigator.of(context);
-    final billProvider = context.watch<BillProvider>();
+    final scheduleProvider = context.watch<ScheduleProvider>();
 
     final menu = {
       "Edit": () async {
-        navigator.pushReplacementNamed("/bills/$id/edit");
+        navigator.pushReplacementNamed("/schedules/$id/edit");
       },
       "Share": () async {
         SharePlus.instance.share(
@@ -23,23 +23,23 @@ class BillMenu extends StatelessWidget {
             uri: Uri(
               scheme: "app",
               host: "bandha.id",
-              pathSegments: ["bills", bill.id, "detail"],
+              pathSegments: ["schedules", schedule.id, "detail"],
             ),
           ),
         );
       },
     };
 
-    if (bill.canRollover) {
+    if (schedule.canRollover) {
       menu["Rollover"] = () async {
-        await billProvider.rollover(bill.id);
+        await scheduleProvider.rollover(schedule.id);
         navigator.pop();
       };
     }
 
-    if (bill.canRollback) {
+    if (schedule.canRollback) {
       menu["Rollback"] = () async {
-        await billProvider.rollback(bill.id);
+        await scheduleProvider.rollback(schedule.id);
         navigator.pop();
       };
     }
@@ -53,11 +53,11 @@ class BillMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final billProvider = context.read<BillProvider>();
+    final scheduleProvider = context.read<ScheduleProvider>();
 
     return Scaffold(
       body: FutureBuilder(
-        future: billProvider.get(id),
+        future: scheduleProvider.get(id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -71,8 +71,8 @@ class BillMenu extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final bill = snapshot.data!;
-          final menu = menuBuilder(context, bill);
+          final schedule = snapshot.data!;
+          final menu = menuBuilder(context, schedule);
 
           return Center(
             child: ListView.builder(

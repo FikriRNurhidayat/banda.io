@@ -1,47 +1,47 @@
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/common/widgets/money_text.dart';
-import 'package:banda/features/accounts/widgets/account_text.dart';
-import 'package:banda/features/bills/entities/bill.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/widgets/date_time_text.dart';
+import 'package:bandha/common/widgets/money_text.dart';
+import 'package:bandha/features/accounts/widgets/account_text.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:flutter/material.dart';
 
-class BillTile extends StatelessWidget {
-  final Bill bill;
+class ScheduleTile extends StatelessWidget {
+  final Schedule schedule;
   final bool readOnly;
 
-  const BillTile(this.bill, {super.key, this.readOnly = false});
+  const ScheduleTile(this.schedule, {super.key, this.readOnly = false});
 
   Future<bool?> handleDismiss(
     BuildContext context,
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmBillDeletion(context, bill);
+      return confirmScheduleDeletion(context, schedule);
     }
 
-    Navigator.pushNamed(context, "/bills/${bill.id}/edit");
+    Navigator.pushNamed(context, "/schedules/${schedule.id}/edit");
     return false;
   }
 
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/bills/${bill.id}/detail" : "/bills/${bill.id}/history",
+      readOnly ? "/schedules/${schedule.id}/detail" : "/schedules/${schedule.id}/history",
     );
   }
 
   Widget statusBuilder(BuildContext context) {
     final theme = Theme.of(context);
-    switch (bill.status) {
-      case BillStatus.pending:
+    switch (schedule.status) {
+      case ScheduleStatus.pending:
         return Icon(
           Icons.hourglass_empty,
           color: theme.colorScheme.primary,
           size: 8,
         );
-      case BillStatus.overdue:
+      case ScheduleStatus.overdue:
         return Icon(Icons.warning, color: theme.colorScheme.primary, size: 8);
       default:
         return SizedBox(width: 8);
@@ -55,15 +55,15 @@ class BillTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        AccountText(bill.account),
-        DateTimeText(bill.dueAt),
-        if (!isNull(bill.note) && bill.note!.isNotEmpty)
+        AccountText(schedule.account),
+        DateTimeText(schedule.dueAt),
+        if (!isNull(schedule.note) && schedule.note!.isNotEmpty)
           Text(
-            bill.note!,
+            schedule.note!,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),
-        labelsBuilder(context, bill.labels),
+        labelsBuilder(context, schedule.labels),
       ],
     );
   }
@@ -76,15 +76,15 @@ class BillTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 8,
       children: [
-        Text(bill.category.name, style: theme.textTheme.titleSmall),
-        Text(bill.cycle.label, style: theme.textTheme.labelSmall),
-        Text("x${bill.iteration.toString()}", style: theme.textTheme.labelSmall),
+        Text(schedule.category.name, style: theme.textTheme.titleSmall),
+        Text(schedule.cycle.label, style: theme.textTheme.labelSmall),
+        Text("x${schedule.iteration.toString()}", style: theme.textTheme.labelSmall),
         statusBuilder(context),
       ],
     );
   }
 
-  billBuilder(BuildContext context) {
+  scheduleBuilder(BuildContext context) {
     return tileBuilder(
       context,
       onTap: () {
@@ -101,7 +101,7 @@ class BillTile extends StatelessWidget {
               children: [headerBuilder(context), infoBuilder(context)],
             ),
           ),
-          MoneyText(bill.amount, useSymbol: false),
+          MoneyText(schedule.amount, useSymbol: false),
         ],
       ),
     );
@@ -111,8 +111,8 @@ class BillTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return dismissibleBuilder(
       context,
-      key: bill.id,
-      child: billBuilder(context),
+      key: schedule.id,
+      child: scheduleBuilder(context),
       dismissable: !readOnly,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);

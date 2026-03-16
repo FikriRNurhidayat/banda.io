@@ -1,6 +1,6 @@
-import 'package:banda/features/notifications/entities/notification.dart';
-import 'package:banda/common/repositories/repository.dart';
-import 'package:banda/common/types/controller.dart';
+import 'package:bandha/features/notifications/entities/notification.dart';
+import 'package:bandha/common/repositories/repository.dart';
+import 'package:bandha/common/types/controller.dart';
 
 class NotificationRepository extends Repository {
   final WithArgs withArgs;

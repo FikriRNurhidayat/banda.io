@@ -1,20 +1,20 @@
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/tags/entities/label.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 
-class Bill extends Controlable {
+class Schedule extends Controlable {
   @override
   final String id;
   final String? note;
   final double amount;
   final double? fee;
-  final BillCycle cycle;
+  final ScheduleCycle cycle;
   final int iteration;
-  final BillStatus status;
+  final ScheduleStatus status;
   final String categoryId;
   final String accountId;
   final String entryId;
@@ -29,7 +29,7 @@ class Bill extends Controlable {
   late final Entry? addition;
   late final List<Label> labels;
 
-  Bill({
+  Schedule({
     required this.id,
     this.note,
     required this.amount,
@@ -46,12 +46,12 @@ class Bill extends Controlable {
     required this.updatedAt,
   });
 
-  factory Bill.create({
+  factory Schedule.create({
     String? note,
     required double amount,
     double? fee,
-    required BillCycle cycle,
-    required BillStatus status,
+    required ScheduleCycle cycle,
+    required ScheduleStatus status,
     required String categoryId,
     required String accountId,
     required String entryId,
@@ -60,7 +60,7 @@ class Bill extends Controlable {
   }) {
     final now = DateTime.now();
 
-    return Bill(
+    return Schedule(
       id: Entity.getId(),
       note: note,
       amount: amount,
@@ -78,15 +78,15 @@ class Bill extends Controlable {
     );
   }
 
-  factory Bill.row(Map row) {
-    return Bill(
+  factory Schedule.row(Map row) {
+    return Schedule(
       id: row["id"],
       note: row["note"],
       amount: row["amount"],
       fee: row["fee"],
-      cycle: BillCycle.parse(row["cycle"]),
+      cycle: ScheduleCycle.parse(row["cycle"]),
       iteration: row["iteration"],
-      status: BillStatus.parse(row["status"]),
+      status: ScheduleStatus.parse(row["status"]),
       entryId: row["entry_id"],
       accountId: row["account_id"],
       additionId: row["addition_id"],
@@ -97,8 +97,8 @@ class Bill extends Controlable {
     );
   }
 
-  Bill withNote(String? note) {
-    return Bill(
+  Schedule withNote(String? note) {
+    return Schedule(
       id: id,
       note: note,
       amount: amount,
@@ -116,8 +116,8 @@ class Bill extends Controlable {
     );
   }
 
-  Bill withFee(double? fee) {
-    return Bill(
+  Schedule withFee(double? fee) {
+    return Schedule(
       id: id,
       note: note,
       amount: amount,
@@ -135,8 +135,8 @@ class Bill extends Controlable {
     );
   }
 
-  Bill withAdditionId(String? additionId) {
-    return Bill(
+  Schedule withAdditionId(String? additionId) {
+    return Schedule(
       id: id,
       note: note,
       amount: amount,
@@ -154,7 +154,7 @@ class Bill extends Controlable {
     );
   }
 
-  Bill withCategory(Category? category) {
+  Schedule withCategory(Category? category) {
     if (category != null) {
       this.category = category;
     }
@@ -162,7 +162,7 @@ class Bill extends Controlable {
     return this;
   }
 
-  Bill withEntry(Entry? entry) {
+  Schedule withEntry(Entry? entry) {
     if (entry != null) {
       this.entry = entry;
     }
@@ -170,12 +170,12 @@ class Bill extends Controlable {
     return this;
   }
 
-  Bill withAddition(Entry? addition) {
+  Schedule withAddition(Entry? addition) {
     this.addition = addition;
     return this;
   }
 
-  Bill withAccount(Account? account) {
+  Schedule withAccount(Account? account) {
     if (account != null) {
       this.account = account;
     }
@@ -183,7 +183,7 @@ class Bill extends Controlable {
     return this;
   }
 
-  Bill withLabels(List<Label>? labels) {
+  Schedule withLabels(List<Label>? labels) {
     if (labels != null) {
       this.labels = labels;
     }
@@ -206,8 +206,8 @@ class Bill extends Controlable {
     return addition != null;
   }
 
-  Bill unset(String field) {
-    return Bill(
+  Schedule unset(String field) {
+    return Schedule(
       id: id,
       note: field == "note" ? null : note,
       amount: amount,
@@ -225,20 +225,20 @@ class Bill extends Controlable {
     );
   }
 
-  Bill copyWith({
+  Schedule copyWith({
     String? note,
     double? amount,
     double? fee,
-    BillCycle? cycle,
+    ScheduleCycle? cycle,
     int? iteration,
-    BillStatus? status,
+    ScheduleStatus? status,
     String? entryId,
     String? accountId,
     String? additionId,
     String? categoryId,
     DateTime? dueAt,
   }) {
-    return Bill(
+    return Schedule(
       id: id,
       note: note ?? this.note,
       amount: amount ?? this.amount,
@@ -274,7 +274,7 @@ class Bill extends Controlable {
 
   @override
   Controller toController() {
-    return Controller.bill(id);
+    return Controller.schedule(id);
   }
 
   toMap() {
@@ -295,21 +295,21 @@ class Bill extends Controlable {
   }
 }
 
-enum BillStatus {
+enum ScheduleStatus {
   paid('Paid'),
   pending('Pending'),
   overdue('Overdue');
 
   get isPaid {
-    return this == BillStatus.paid;
+    return this == ScheduleStatus.paid;
   }
 
   get isPending {
-    return this == BillStatus.pending;
+    return this == ScheduleStatus.pending;
   }
 
   get isOverdue {
-    return this == BillStatus.overdue;
+    return this == ScheduleStatus.overdue;
   }
 
   EntryStatus get entryStatus {
@@ -317,33 +317,33 @@ enum BillStatus {
   }
 
   static parse(String value) {
-    return BillStatus.values.firstWhere((status) => status.label == value);
+    return ScheduleStatus.values.firstWhere((status) => status.label == value);
   }
 
   final String label;
-  const BillStatus(this.label);
+  const ScheduleStatus(this.label);
 }
 
-enum BillCycle {
+enum ScheduleCycle {
   daily('Daily'),
   weekly('Weekly'),
   monthly('Monthly'),
   yearly('Yearly');
 
   get isDaily {
-    return this == BillCycle.daily;
+    return this == ScheduleCycle.daily;
   }
 
   get isWeekly {
-    return this == BillCycle.weekly;
+    return this == ScheduleCycle.weekly;
   }
 
   get isMonthly {
-    return this == BillCycle.monthly;
+    return this == ScheduleCycle.monthly;
   }
 
   get isYearly {
-    return this == BillCycle.yearly;
+    return this == ScheduleCycle.yearly;
   }
 
   DateTime _nextMonth(DateTime dateTime, int months) {
@@ -372,31 +372,31 @@ enum BillCycle {
 
   previous(DateTime dateTime) {
     switch (this) {
-      case BillCycle.daily:
+      case ScheduleCycle.daily:
         return dateTime.subtract(Duration(days: 1));
-      case BillCycle.weekly:
+      case ScheduleCycle.weekly:
         return dateTime.subtract(Duration(days: 7));
-      case BillCycle.monthly:
+      case ScheduleCycle.monthly:
         return _nextMonth(dateTime, -1);
-      case BillCycle.yearly:
+      case ScheduleCycle.yearly:
         return _nextYear(dateTime, -1);
     }
   }
 
   next(DateTime dateTime) {
     switch (this) {
-      case BillCycle.daily:
+      case ScheduleCycle.daily:
         return dateTime.add(Duration(days: 1));
-      case BillCycle.weekly:
+      case ScheduleCycle.weekly:
         return dateTime.add(Duration(days: 7));
-      case BillCycle.monthly:
+      case ScheduleCycle.monthly:
         return _nextMonth(dateTime, 1);
-      case BillCycle.yearly:
+      case ScheduleCycle.yearly:
         return _nextYear(dateTime, 1);
     }
   }
 
-  static BillCycle? tryParse(String? value) {
+  static ScheduleCycle? tryParse(String? value) {
     if (value == null) return null;
     try {
       return parse(value);
@@ -405,11 +405,11 @@ enum BillCycle {
     }
   }
 
-  static BillCycle parse(String value) {
-    return BillCycle.values.firstWhere((cycle) => cycle.label == value);
+  static ScheduleCycle parse(String value) {
+    return ScheduleCycle.values.firstWhere((cycle) => cycle.label == value);
   }
 
   final String label;
 
-  const BillCycle(this.label);
+  const ScheduleCycle(this.label);
 }

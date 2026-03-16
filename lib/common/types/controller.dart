@@ -1,4 +1,4 @@
-import 'package:banda/common/types/controller_type.dart';
+import 'package:bandha/common/types/controller_type.dart';
 
 class Controller {
   final String id;
@@ -33,8 +33,8 @@ class Controller {
     return Controller(ControllerType.transfer, id);
   }
 
-  factory Controller.bill(String id) {
-    return Controller(ControllerType.bill, id);
+  factory Controller.schedule(String id) {
+    return Controller(ControllerType.schedule, id);
   }
 
   factory Controller.entry(String id) {

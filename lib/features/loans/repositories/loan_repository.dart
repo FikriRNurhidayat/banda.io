@@ -1,11 +1,11 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/features/tags/entities/party.dart';
-import 'package:banda/common/repositories/repository.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/types/pair.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/loans/entities/loan.dart';
+import 'package:bandha/features/tags/entities/party.dart';
+import 'package:bandha/common/repositories/repository.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/types/pair.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
 class LoanRepository extends Repository {

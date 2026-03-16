@@ -1,4 +1,4 @@
-import 'package:banda/infra/db.dart';
+import 'package:bandha/infra/db.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 

@@ -1,4 +1,4 @@
-import 'package:banda/features/tags/entities/tagable.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
 import 'package:flutter/material.dart';
 
 abstract class TagableProvider<I extends Tagable> extends ChangeNotifier {

@@ -1,6 +1,6 @@
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/features/main/providers/tool_provider.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/features/main/providers/tool_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,4 @@
-import 'package:banda/common/helpers/alert_helper.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

@@ -1,11 +1,11 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/loans/entities/loan_payment.dart';
-import 'package:banda/features/tags/entities/party.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/common/types/controller.dart';
+import 'package:bandha/features/accounts/entities/account.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/loans/entities/loan_payment.dart';
+import 'package:bandha/features/tags/entities/party.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/common/types/controller.dart';
 
 class Loan extends Controlable {
   @override

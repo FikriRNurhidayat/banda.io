@@ -1,37 +1,37 @@
-import 'package:banda/features/accounts/views/account_editor.dart';
-import 'package:banda/features/accounts/views/account_entries.dart';
-import 'package:banda/features/accounts/views/account_menu.dart';
-import 'package:banda/features/accounts/views/accounts.dart';
-import 'package:banda/features/bills/views/bill_editor.dart';
-import 'package:banda/features/bills/views/bill_history.dart';
-import 'package:banda/features/bills/views/bill_menu.dart';
-import 'package:banda/features/bills/views/bills.dart';
-import 'package:banda/features/entries/views/entries.dart';
-import 'package:banda/features/entries/views/entry_editor.dart';
-import 'package:banda/features/entries/views/entry_filter.dart';
-import 'package:banda/features/entries/views/entry_menu.dart';
-import 'package:banda/features/funds/views/fund_editor.dart';
-import 'package:banda/features/funds/views/fund_entries.dart';
-import 'package:banda/features/funds/views/fund_entry_editor.dart';
-import 'package:banda/features/funds/views/fund_filter.dart';
-import 'package:banda/features/funds/views/fund_menu.dart';
-import 'package:banda/features/funds/views/funds.dart';
-import 'package:banda/features/tags/views/party_selector.dart';
-import 'package:banda/features/transfers/views/transfer_editor.dart';
-import 'package:banda/features/transfers/views/transfer_entries.dart';
-import 'package:banda/features/transfers/views/transfer_menu.dart';
-import 'package:banda/features/transfers/views/transfers.dart';
-import 'package:banda/features/tags/views/category_selector.dart';
-import 'package:banda/features/main/views/information.dart';
-import 'package:banda/features/tags/views/label_selector.dart';
-import 'package:banda/features/loans/views/loan_editor.dart';
-import 'package:banda/features/loans/views/loan_filter.dart';
-import 'package:banda/features/loans/views/loan_menu.dart';
-import 'package:banda/features/loans/views/loan_entry_editor.dart';
-import 'package:banda/features/loans/views/loan_entries.dart';
-import 'package:banda/features/loans/views/loans.dart';
-import 'package:banda/features/main/views/main_menu.dart';
-import 'package:banda/features/main/views/tools.dart';
+import 'package:bandha/features/accounts/views/account_editor.dart';
+import 'package:bandha/features/accounts/views/account_entries.dart';
+import 'package:bandha/features/accounts/views/account_menu.dart';
+import 'package:bandha/features/accounts/views/accounts.dart';
+import 'package:bandha/features/schedules/views/schedule_editor.dart';
+import 'package:bandha/features/schedules/views/schedule_history.dart';
+import 'package:bandha/features/schedules/views/schedule_menu.dart';
+import 'package:bandha/features/schedules/views/schedules.dart';
+import 'package:bandha/features/entries/views/entries.dart';
+import 'package:bandha/features/entries/views/entry_editor.dart';
+import 'package:bandha/features/entries/views/entry_filter.dart';
+import 'package:bandha/features/entries/views/entry_menu.dart';
+import 'package:bandha/features/funds/views/fund_editor.dart';
+import 'package:bandha/features/funds/views/fund_entries.dart';
+import 'package:bandha/features/funds/views/fund_entry_editor.dart';
+import 'package:bandha/features/funds/views/fund_filter.dart';
+import 'package:bandha/features/funds/views/fund_menu.dart';
+import 'package:bandha/features/funds/views/funds.dart';
+import 'package:bandha/features/tags/views/party_selector.dart';
+import 'package:bandha/features/transfers/views/transfer_editor.dart';
+import 'package:bandha/features/transfers/views/transfer_entries.dart';
+import 'package:bandha/features/transfers/views/transfer_menu.dart';
+import 'package:bandha/features/transfers/views/transfers.dart';
+import 'package:bandha/features/tags/views/category_selector.dart';
+import 'package:bandha/features/main/views/information.dart';
+import 'package:bandha/features/tags/views/label_selector.dart';
+import 'package:bandha/features/loans/views/loan_editor.dart';
+import 'package:bandha/features/loans/views/loan_filter.dart';
+import 'package:bandha/features/loans/views/loan_menu.dart';
+import 'package:bandha/features/loans/views/loan_entry_editor.dart';
+import 'package:bandha/features/loans/views/loan_entries.dart';
+import 'package:bandha/features/loans/views/loans.dart';
+import 'package:bandha/features/main/views/main_menu.dart';
+import 'package:bandha/features/main/views/tools.dart';
 import 'package:flutter/material.dart';
 
 class Routes {
@@ -57,17 +57,17 @@ class Routes {
           settings: settings,
           builder: (context) => EntryFilter(),
         );
-      case '/bills':
+      case '/schedules':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Bills(),
+          builder: (context) => Schedules(),
         );
-      case '/bills/new':
+      case '/schedules/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => BillEditor(),
+          builder: (context) => ScheduleEditor(),
         );
-      case '/bills/filter':
+      case '/schedules/filter':
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => LoanFilter(),
@@ -154,10 +154,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'bills':
+        case 'schedules':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => BillEditor(id: id),
+            builder: (context) => ScheduleEditor(id: id),
           );
         case 'entries':
           return MaterialPageRoute(
@@ -206,10 +206,10 @@ class Routes {
             settings: settings,
             builder: (context) => LoanMenu(id: id),
           );
-        case 'bills':
+        case 'schedules':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => BillMenu(id: id),
+            builder: (context) => ScheduleMenu(id: id),
           );
         case 'transfers':
           return MaterialPageRoute(
@@ -253,10 +253,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'bills':
+        case 'schedules':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => BillHistory(id: id),
+            builder: (context) => ScheduleHistory(id: id),
           );
       }
     }
@@ -287,10 +287,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'bills':
+        case 'schedules':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => BillEditor(id: id, readOnly: true),
+            builder: (context) => ScheduleEditor(id: id, readOnly: true),
           );
         case 'entries':
           return MaterialPageRoute(

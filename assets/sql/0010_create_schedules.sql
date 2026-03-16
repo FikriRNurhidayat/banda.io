@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS bills (
+CREATE TABLE IF NOT EXISTS schedules (
     id TEXT PRIMARY KEY,
     note TEXT,
     amount REAL NOT NULL,
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS bills (
     deleted_at TEXT
 );
 
-CREATE TABLE IF NOT EXISTS bill_labels (
+CREATE TABLE IF NOT EXISTS schedule_labels (
     label_id TEXT NOT NULL REFERENCES labels (id) ON DELETE CASCADE,
-    bill_id TEXT NOT NULL REFERENCES bills (id) ON DELETE CASCADE,
-    PRIMARY KEY (label_id, bill_id)
+    schedule_id TEXT NOT NULL REFERENCES schedules (id) ON DELETE CASCADE,
+    PRIMARY KEY (label_id, schedule_id)
 );

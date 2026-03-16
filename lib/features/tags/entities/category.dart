@@ -1,5 +1,5 @@
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/tags/entities/tagable.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
 
 class Category extends Tagable {
   @override

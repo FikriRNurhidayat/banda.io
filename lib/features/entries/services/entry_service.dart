@@ -1,13 +1,13 @@
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/notifications/managers/notification_manager.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/notification_action.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/features/accounts/repositories/account_repository.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/notification_action.dart';
+import 'package:bandha/common/types/specification.dart';
 
 class EntryService extends Service {
   final EntryRepository entryRepository;
