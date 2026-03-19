@@ -8,7 +8,8 @@ class Transfer extends Controlable {
   @override
   final String id;
   final String? note;
-  final double amount;
+  final double debitAmount;
+  final double creditAmount;
   final double? fee;
   final String debitId;
   final String debitVaultId;
@@ -28,7 +29,8 @@ class Transfer extends Controlable {
   Transfer({
     required this.id,
     this.note,
-    required this.amount,
+    required this.debitAmount,
+    required this.creditAmount,
     this.fee,
     required this.debitId,
     required this.debitVaultId,
@@ -64,7 +66,8 @@ class Transfer extends Controlable {
     return {
       "id": id,
       "note": note,
-      "amount": amount,
+      "creditAmount": creditAmount,
+      "debitAmount": debitAmount,
       "fee": fee,
       "debitId": debitId,
       "debitVaultId": debitVaultId,
@@ -85,7 +88,8 @@ class Transfer extends Controlable {
     return Transfer(
       id: row["id"],
       note: row["note"],
-      amount: row["amount"],
+      debitAmount: row["debit_amount"],
+      creditAmount: row["credit_amount"],
       fee: row["fee"],
       debitId: row["debit_id"],
       debitVaultId: row["debit_vault_id"],
@@ -100,7 +104,8 @@ class Transfer extends Controlable {
 
   factory Transfer.create({
     String? note,
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     double? fee,
     required String debitId,
     required String debitVaultId,
@@ -112,7 +117,8 @@ class Transfer extends Controlable {
     return Transfer(
       id: Entity.getId(),
       note: note,
-      amount: amount,
+      debitAmount: debitAmount,
+      creditAmount: creditAmount,
       fee: fee,
       debitId: debitId,
       debitVaultId: debitVaultId,
@@ -129,7 +135,8 @@ class Transfer extends Controlable {
     return Transfer(
       id: id,
       note: note,
-      amount: amount,
+      debitAmount: debitAmount,
+      creditAmount: creditAmount,
       fee: fee,
       debitId: debitId,
       debitVaultId: debitVaultId,
@@ -171,7 +178,8 @@ class Transfer extends Controlable {
 
   Transfer copyWith({
     String? note,
-    double? amount,
+    double? debitAmount,
+    double? creditAmount,
     double? fee,
     String? debitId,
     String? debitVaultId,
@@ -183,7 +191,8 @@ class Transfer extends Controlable {
     return Transfer(
       id: id,
       note: note ?? this.note,
-      amount: amount ?? this.amount,
+      debitAmount: debitAmount ?? this.debitAmount,
+      creditAmount: creditAmount ?? this.creditAmount,
       fee: fee ?? this.fee,
       debitId: debitId ?? this.debitId,
       debitVaultId: debitVaultId ?? this.debitVaultId,

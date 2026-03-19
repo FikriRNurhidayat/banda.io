@@ -79,6 +79,14 @@ class CommitmentTile extends StatelessWidget {
                 style: theme.textTheme.titleSmall,
               ),
               statusBuilder(context),
+              if (commitment.hasLabels)
+                labelsBuilder(
+                  context,
+                  commitment.labels,
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
             ],
           ),
           DateTimeText(commitment.issuedAt),
@@ -92,38 +100,36 @@ class CommitmentTile extends StatelessWidget {
   progressBuilder(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 8,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MoneyText(
-                commitment.paid,
-                useSymbol: false,
-                style: theme.textTheme.bodySmall,
-              ),
-              Text("/"),
-              MoneyText(
-                commitment.amount,
-                useSymbol: false,
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
-          ),
-          Badge(
-            padding: EdgeInsets.all(0),
-            label: Text(commitment.status.label),
-            textColor: theme.colorScheme.onSurface,
-            backgroundColor: Colors.transparent,
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 8,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            MoneyText(
+              commitment.paid,
+              useSymbol: false,
+              style: theme.textTheme.bodySmall,
+            ),
+            Text("/"),
+            MoneyText(
+              commitment.amount,
+              useSymbol: false,
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+        Badge(
+          padding: EdgeInsets.all(0),
+          label: Text(commitment.status.label),
+          textColor: theme.colorScheme.onSurface,
+          backgroundColor: Colors.transparent,
+        ),
+      ],
     );
   }
 
@@ -146,7 +152,10 @@ class CommitmentTile extends StatelessWidget {
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text("${(commitment.completion * 100).floor()}%", style: theme.textTheme.labelSmall),
+            Text(
+              "${(commitment.completion * 100).floor()}%",
+              style: theme.textTheme.labelSmall,
+            ),
           ],
         ),
       ],

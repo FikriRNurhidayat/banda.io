@@ -23,7 +23,14 @@ class EntryTile extends StatelessWidget {
   }
 
   String getTime() {
-    return DateHelper.formatTime(TimeOfDay.fromDateTime(entry.issuedAt));
+    return DateHelper.formatTime(
+      TimeOfDay.fromDateTime(entry.issuedAt),
+    );
+  }
+
+  handleLongPress(BuildContext context, Entry entry) {
+    Navigator.pushNamed(context, "/entries/${entry.id}/detail");
+    return;
   }
 
   handleTap(BuildContext context, Entry entry) {
@@ -34,7 +41,10 @@ class EntryTile extends StatelessWidget {
 
     switch (entry.controller?.type) {
       case ControllerType.pool:
-        Navigator.pushNamed(context, "/pools/${entry.controller!.id}/entries");
+        Navigator.pushNamed(
+          context,
+          "/pools/${entry.controller!.id}/entries",
+        );
         break;
       case ControllerType.transfer:
         Navigator.pushNamed(
@@ -43,10 +53,16 @@ class EntryTile extends StatelessWidget {
         );
         break;
       case ControllerType.schedule:
-        Navigator.pushNamed(context, "/schedules/${entry.controller!.id}/history");
+        Navigator.pushNamed(
+          context,
+          "/schedules/${entry.controller!.id}/history",
+        );
         break;
       case ControllerType.commitment:
-        Navigator.pushNamed(context, "/commitments/${entry.controller!.id}/payments");
+        Navigator.pushNamed(
+          context,
+          "/commitments/${entry.controller!.id}/payments",
+        );
         break;
       default:
         Navigator.pushNamed(context, "/entries/${entry.id}/detail");
@@ -87,15 +103,19 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        VaultText(entry.vault),
         DateTimeText(entry.issuedAt),
-        if (!isNull(entry.note) && entry.note!.isNotEmpty)
+        VaultText(entry.vault),
+        if (!isNull(entry.controller?.id))
           Text(
-            entry.note!,
+            entry.controller!.id.toUpperCase(),
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),
-        labelsBuilder(context, entry.labels),
+        if (entry.hasWritableLabels)
+          labelsBuilder(
+            context,
+            entry.labels.where((label) => !label.readOnly).toList(),
+          ),
       ],
     );
   }
@@ -109,6 +129,11 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(entry.category.name, style: theme.textTheme.titleSmall),
+        if (entry.hasReadOnlyLabels)
+          labelsBuilder(
+            context,
+            entry.labels.where((label) => label.readOnly).toList(),
+          ),
         if (entry.readonly)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
         statusBuilder(context),
@@ -119,6 +144,9 @@ class EntryTile extends StatelessWidget {
   entryBuilder(BuildContext context, Entry entry) {
     return tileBuilder(
       context,
+      onLongPress: () {
+        handleLongPress(context, entry);
+      },
       onTap: () {
         handleTap(context, entry);
       },

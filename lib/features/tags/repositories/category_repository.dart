@@ -38,7 +38,7 @@ class CategoryRepository extends Repository {
     return Category(
       id: id,
       name: name,
-      readonly: true,
+      readOnly: true,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,

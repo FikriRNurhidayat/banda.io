@@ -12,4 +12,8 @@ enum TransactionType {
   get isWithdrawal {
     return this == TransactionType.withdrawal;
   }
+
+  get isDisbursement {
+    return false;
+  }
 }

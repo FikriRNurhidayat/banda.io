@@ -8,7 +8,7 @@ class Party extends Tagable {
   final DateTime createdAt;
   final DateTime updatedAt;
   @override
-  final readonly = false;
+  final readOnly = false;
 
   Party({
     required this.id,

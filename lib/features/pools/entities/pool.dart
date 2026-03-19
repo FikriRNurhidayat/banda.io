@@ -1,4 +1,5 @@
 import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
@@ -13,6 +14,7 @@ class Pool extends Controlable {
   final double goal;
   final double balance;
   final PoolStatus status;
+  final String categoryId;
   final String vaultId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -20,12 +22,15 @@ class Pool extends Controlable {
 
   late List<Entry> entries;
   late List<Label> labels;
+  late Category category;
   late Vault vault;
 
+  static entryLabelName(Pool pool, TransactionType type) {
+    return type.label;
+  }
+
   static entryNote(Pool pool, TransactionType type) {
-    return type.isDeposit
-        ? "Deposit"
-        : "Withdraw";
+    return type.label;
   }
 
   static entryAmount(TransactionType type, double amount) {
@@ -39,6 +44,7 @@ class Pool extends Controlable {
     required this.balance,
     required this.status,
     required this.vaultId,
+    required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
     required this.releasedAt,
@@ -51,6 +57,7 @@ class Pool extends Controlable {
       goal: goal,
       balance: balance,
       status: status,
+      categoryId: categoryId,
       vaultId: vaultId,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -58,7 +65,7 @@ class Pool extends Controlable {
     };
   }
 
-  get labelIds {
+  List<String> get labelIds {
     return labels.map((label) => label.id).toList();
   }
 
@@ -67,6 +74,7 @@ class Pool extends Controlable {
     required double goal,
     required double balance,
     required PoolStatus status,
+    required String categoryId,
     required String vaultId,
   }) {
     return Pool(
@@ -76,6 +84,7 @@ class Pool extends Controlable {
       balance: balance,
       status: status,
       vaultId: vaultId,
+      categoryId: categoryId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       releasedAt: null,
@@ -95,6 +104,7 @@ class Pool extends Controlable {
     double? goal,
     double? balance,
     PoolStatus? status,
+    String? categoryId,
     String? vaultId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -106,6 +116,7 @@ class Pool extends Controlable {
       goal: goal ?? this.goal,
       balance: balance ?? this.balance,
       status: status ?? this.status,
+      categoryId: categoryId ?? this.categoryId,
       vaultId: vaultId ?? this.vaultId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
@@ -113,8 +124,12 @@ class Pool extends Controlable {
     );
   }
 
-  double getProgress() {
+  double get progress {
     return (balance.toDouble() / goal.toDouble());
+  }
+
+  double get completion {
+    return (balance.toDouble() / goal.toDouble()).abs();
   }
 
   Pool applyDelta(EntryType type, double delta) {
@@ -129,6 +144,11 @@ class Pool extends Controlable {
 
   Pool revokeEntry(Entry entry) {
     return copyWith(balance: balance + entry.amount);
+  }
+
+  Pool withCategory(Category? value) {
+    if (value != null) category = value;
+    return this;
   }
 
   Pool withLabels(List<Label>? value) {
@@ -152,7 +172,10 @@ class Pool extends Controlable {
       note: row["note"],
       goal: row["goal"],
       balance: row["balance"],
-      status: PoolStatus.values.firstWhere((e) => e.label == row["status"]),
+      status: PoolStatus.values.firstWhere(
+        (e) => e.label == row["status"],
+      ),
+      categoryId: row["category_id"],
       vaultId: row["vault_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),

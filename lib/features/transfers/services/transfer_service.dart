@@ -1,5 +1,6 @@
 import 'package:bandha/common/services/service.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/tags/repositories/label_repository.dart';
 import 'package:bandha/features/tags/types/read_only_category.dart';
 import 'package:bandha/features/tags/types/read_only_label.dart';
@@ -26,20 +27,26 @@ class TransferService extends Service {
   });
 
   Future<void> create({
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required double? fee,
     required DateTime issuedAt,
     required String debitVaultId,
     required String creditVaultId,
+    String? note,
   }) {
     return work(() async {
-      final category = await categoryRepository.getByName(ReadOnlyCategory.transfer.label);
+      final category = await categoryRepository.getByName(
+        ReadOnlyCategory.transfer.label,
+      );
       final debitVault = await vaultRepository.get(debitVaultId);
       final creditVault = await vaultRepository.get(creditVaultId);
-      final feeLabel = await labelRepository.getByName(ReadOnlyLabel.fee.label);
+      final [creditLabel, debitLabel, feeLabel] =
+          await _readOnlyLabels();
 
       final credit = Entry.create(
-        amount: amount * -1,
+        note: note,
+        amount: creditAmount * -1,
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
@@ -48,7 +55,8 @@ class TransferService extends Service {
       );
 
       final debit = Entry.create(
-        amount: amount,
+        note: note,
+        amount: debitAmount,
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
@@ -58,6 +66,7 @@ class TransferService extends Service {
 
       final exchange = !isZero(fee)
           ? Entry.create(
+              note: note,
               amount: fee! * -1,
               status: EntryStatus.done,
               issuedAt: issuedAt,
@@ -68,7 +77,9 @@ class TransferService extends Service {
           : null;
 
       var transfer = Transfer.create(
-        amount: amount,
+        note: note,
+        debitAmount: debitAmount,
+        creditAmount: creditAmount,
         fee: fee,
         debitId: debit.id,
         debitVaultId: debitVault.id,
@@ -79,13 +90,21 @@ class TransferService extends Service {
       );
 
       transfer = transfer
-          .withCredit(credit.controlledBy(transfer))
-          .withDebit(debit.controlledBy(transfer))
+          .withCredit(
+            credit.controlledBy(transfer).withLabels([creditLabel]),
+          )
+          .withDebit(
+            debit.controlledBy(transfer).withLabels([debitLabel]),
+          )
           .withCreditVault(creditVault)
           .withDebitVault(debitVault)
-          .withExchange(exchange?.controlledBy(transfer).withLabels([feeLabel]));
+          .withExchange(
+            exchange?.controlledBy(transfer).withLabels([feeLabel]),
+          );
 
-      await entryRepository.withLabels().withAnnotations().bulkSave(transfer.entries);
+      await entryRepository.withLabels().withAnnotations().bulkSave(
+        transfer.entries,
+      );
       await transferRepository.save(transfer);
       await executeTransfer(transfer);
     });
@@ -93,34 +112,44 @@ class TransferService extends Service {
 
   Future<void> update({
     required String id,
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required double? fee,
     required DateTime issuedAt,
     required String debitVaultId,
     required String creditVaultId,
+    String? note,
   }) {
     return work(() async {
-      var transfer = await transferRepository.withEntries().withVaults().get(id);
+      var transfer = await transferRepository
+          .withEntries()
+          .withVaults()
+          .get(id);
 
       await abortTransfer(transfer);
 
       final debitVault = await vaultRepository.get(debitVaultId);
       final creditVault = await vaultRepository.get(creditVaultId);
-      final feeLabel = await labelRepository.getByName(ReadOnlyLabel.fee.label);
+      final [creditLabel, debitLabel, feeLabel] =
+          await _readOnlyLabels();
 
-      final credit = transfer.credit.copyWith(
-        amount: amount * -1,
-        status: EntryStatus.done,
-        issuedAt: issuedAt,
-        readonly: true,
-        vaultId: creditVault.id,
-      );
+      final credit = transfer.credit
+          .copyWith(
+            note: note,
+            amount: creditAmount * -1,
+            status: EntryStatus.done,
+            issuedAt: issuedAt,
+            readonly: true,
+            vaultId: creditVault.id,
+          )
+          .withLabels([creditLabel]);
 
       final exchangeId = transfer.exchangeId;
       final exchangeRemoved = !isZero(transfer.fee) && isZero(fee);
       final Entry? exchange = !isZero(fee)
           ? (transfer.hasExchange
                     ? transfer.exchange!.copyWith(
+                        note: note,
                         amount: fee! * -1,
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
@@ -129,6 +158,7 @@ class TransferService extends Service {
                         categoryId: credit.categoryId,
                       )
                     : Entry.create(
+                        note: note,
                         amount: fee! * -1,
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
@@ -140,17 +170,22 @@ class TransferService extends Service {
                 .annotate("type", "fee")
           : null;
 
-      final debit = transfer.debit.copyWith(
-        amount: amount,
-        status: EntryStatus.done,
-        issuedAt: issuedAt,
-        readonly: true,
-        vaultId: debitVault.id,
-      );
+      final debit = transfer.debit
+          .copyWith(
+            note: note,
+            amount: debitAmount,
+            status: EntryStatus.done,
+            issuedAt: issuedAt,
+            readonly: true,
+            vaultId: debitVault.id,
+          )
+          .withLabels([debitLabel]);
 
       transfer = transfer
           .copyWith(
-            amount: amount,
+            note: note,
+            debitAmount: debitAmount,
+            creditAmount: creditAmount,
             fee: fee,
             debitId: debit.id,
             debitVaultId: debitVault.id,
@@ -166,7 +201,9 @@ class TransferService extends Service {
           .withCreditVault(creditVault);
 
       await transferRepository.save(transfer);
-      await entryRepository.withAnnotations().withLabels().bulkSave(transfer.entries);
+      await entryRepository.withAnnotations().withLabels().bulkSave(
+        transfer.entries,
+      );
       await executeTransfer(transfer);
       if (exchangeRemoved) {
         await entryRepository.delete(exchangeId!);
@@ -176,7 +213,10 @@ class TransferService extends Service {
 
   Future<void> delete(String id) {
     return work(() async {
-      final transfer = await transferRepository.withEntries().withVaults().get(id);
+      final transfer = await transferRepository
+          .withEntries()
+          .withVaults()
+          .get(id);
       await abortTransfer(transfer);
       await transferRepository.delete(transfer.id);
       await entryRepository.deleteByIds(transfer.entryIds);
@@ -203,5 +243,25 @@ class TransferService extends Service {
       transfer.debitVault.applyEntry(transfer.debit),
       transfer.creditVault.applyEntries(transfer.credits),
     ]);
+  }
+
+  Future<List<Label>> _readOnlyLabels() async {
+    final labels = await labelRepository.getByNames([
+      ReadOnlyLabel.credit.label,
+      ReadOnlyLabel.debit.label,
+      ReadOnlyLabel.fee.label,
+    ]);
+
+    return <Label>[
+      labels.firstWhere(
+        (label) => label.name == ReadOnlyLabel.credit.label,
+      ),
+      labels.firstWhere(
+        (label) => label.name == ReadOnlyLabel.debit.label,
+      ),
+      labels.firstWhere(
+        (label) => label.name == ReadOnlyLabel.fee.label,
+      ),
+    ];
   }
 }

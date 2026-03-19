@@ -1,4 +1,5 @@
 import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
@@ -30,6 +31,7 @@ class Commitment extends Controlable {
   late final Entry entry;
   late final Entry? addition;
   late final Vault vault;
+  late List<Label> labels;
 
   static double additionAmount(double fee) {
     return fee * -1;
@@ -85,6 +87,14 @@ class Commitment extends Controlable {
     return entries.map((entry) => entry.id);
   }
 
+  get labelIds {
+    return labels.map((label) => label.id).toList();
+  }
+
+  get hasLabels {
+    return labels.isNotEmpty;
+  }
+
   Commitment withEntry(Entry? value) {
     if (value != null) entry = value;
     return this;
@@ -107,6 +117,11 @@ class Commitment extends Controlable {
 
   Commitment withCategory(Category? value) {
     if (value != null) category = value;
+    return this;
+  }
+
+  Commitment withLabels(List<Label>? value) {
+    if (value != null) labels = value;
     return this;
   }
 

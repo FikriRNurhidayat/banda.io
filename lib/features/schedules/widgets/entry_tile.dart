@@ -53,14 +53,15 @@ class EntryTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         VaultText(entry.vault),
-        DateTimeText(entry.issuedAt),
-        if (!isNull(entry.note) && entry.note!.isNotEmpty)
+        if (!isNull(entry.controller?.id))
           Text(
-            entry.note!,
+            entry.controller!.id.toUpperCase(),
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),
-        labelsBuilder(context, entry.labels),
+        DateTimeText(entry.issuedAt),
+        if (entry.hasWritableLabels)
+          labelsBuilder(context, entry.writableLabels),
       ],
     );
   }
@@ -74,6 +75,8 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(entry.category.name, style: theme.textTheme.titleSmall),
+        if (entry.hasReadOnlyLabels)
+          labelsBuilder(context, entry.readOnlyLabels),
         statusBuilder(context),
       ],
     );

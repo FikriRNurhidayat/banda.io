@@ -174,7 +174,8 @@ class ScheduleEditor extends StatelessWidget {
                   spacing: 16,
                   children: [
                     if (!readOnly ||
-                        (schedule?.note != null && schedule!.note!.isNotEmpty))
+                        (schedule?.note != null &&
+                            schedule!.note!.isNotEmpty))
                       TextFormField(
                         readOnly: readOnly,
                         decoration: InputStyles.field(
@@ -286,7 +287,7 @@ class ScheduleEditor extends StatelessWidget {
                       actionPath: "/categories/edit",
                       onRedirect: _redirect,
                       options: categories
-                          .where((c) => readOnly || !c.readonly)
+                          .where((c) => readOnly || !c.readOnly)
                           .map((c) {
                             return SelectItem(
                               value: c.id,
@@ -325,12 +326,15 @@ class ScheduleEditor extends StatelessWidget {
                         initialValue:
                             _d["label_ids"] ?? schedule?.labelIds ?? [],
                         onSaved: (value) => _d["label_ids"] = value,
-                        options: labels.map((l) {
-                          return MultiSelectItem(
-                            value: l.id,
-                            label: l.name,
-                          );
-                        }).toList(),
+                        options: labels
+                            .where((label) => !label.readOnly)
+                            .map((l) {
+                              return MultiSelectItem(
+                                value: l.id,
+                                label: l.name,
+                              );
+                            })
+                            .toList(),
                       ),
                   ],
                 ),

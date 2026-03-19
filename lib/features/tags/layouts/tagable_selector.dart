@@ -149,7 +149,7 @@ class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
                     ? GestureDetector(onTap: _create, child: Icon(Icons.check))
                     : null,
               ),
-              ...items.where((i) => !i.readonly!).map((item) {
+              ...items.where((i) => !i.readOnly!).map((item) {
                 final isEditing = item.id == editId;
 
                 return ListTile(

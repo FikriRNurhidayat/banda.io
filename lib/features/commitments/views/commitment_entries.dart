@@ -8,7 +8,6 @@ import 'package:bandha/features/commitments/providers/commitment_payment_provide
 import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:bandha/features/commitments/widgets/payment_tile.dart';
 import 'package:bandha/features/commitments/widgets/commitment_tile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -78,7 +77,8 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
   }
 
   tabBuilder(Commitment commitment) {
-    final commitmentPaymentProvider = context.watch<CommitmentPaymentProvider>();
+    final commitmentPaymentProvider = context
+        .watch<CommitmentPaymentProvider>();
     final entryProvider = context.watch<EntryProvider>();
 
     return [
@@ -96,13 +96,17 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
             FutureBuilder(
               future: commitmentPaymentProvider.search(widget.id),
               builder: futureBuilder((context, snapshot) {
-                final payments = snapshot.data as List<CommitmentPayment>;
+                final payments =
+                    snapshot.data as List<CommitmentPayment>;
 
                 return ListView.builder(
                   itemCount: payments.length,
                   itemBuilder: (BuildContext context, int index) {
                     final payment = payments[index];
-                    return PaymentTile(payment: payment, commitment: commitment);
+                    return PaymentTile(
+                      payment: payment,
+                      commitment: commitment,
+                    );
                   },
                 );
               }),
@@ -135,11 +139,6 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
       future: commitmentProvider.get(widget.id),
       builder: futureBuilder((context, snapshot) {
         final commitment = snapshot.data as Commitment;
-
-        if (kDebugMode) {
-          print("commitment.amount: ${commitment.amount}");
-          print("commitment.remainder: ${commitment.remainder}");
-        }
 
         return Scaffold(
           appBar: appBarBuilder(context),

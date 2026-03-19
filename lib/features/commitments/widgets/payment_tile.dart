@@ -55,36 +55,12 @@ class PaymentTile extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         DateTimeText(payment.issuedAt),
-        if (!isNull(payment.entry.note))
-          Text(
-            payment.entry.note!,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall,
-          ),
       ],
     );
   }
 
   amountBuilder(BuildContext context, CommitmentPayment payment) {
     return MoneyText(payment.amount.abs(), useSymbol: false);
-  }
-
-  headerBuilder(BuildContext context, CommitmentPayment payment) {
-    final theme = Theme.of(context);
-
-    return Row(
-      spacing: 8,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          payment.entry.category.name,
-          style: theme.textTheme.titleSmall,
-        ),
-        if (commitment.status.isSettled)
-          Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
-      ],
-    );
   }
 
   paymentBuilder(BuildContext context, CommitmentPayment payment) {
@@ -97,14 +73,7 @@ class PaymentTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              headerBuilder(context, payment),
-              infoBuilder(context, payment),
-            ],
-          ),
+          infoBuilder(context, payment),
           amountBuilder(context, payment),
         ],
       ),

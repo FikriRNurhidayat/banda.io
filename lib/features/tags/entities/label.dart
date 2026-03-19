@@ -8,11 +8,12 @@ class Label extends Tagable {
   final DateTime createdAt;
   final DateTime updatedAt;
   @override
-  bool readonly = false;
+  bool readOnly = false;
 
   Label({
     required this.id,
     required this.name,
+    required this.readOnly,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -26,6 +27,7 @@ class Label extends Tagable {
     return Label(
       id: row["id"],
       name: row["name"],
+      readOnly: row["readonly"] == 1,
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
     );

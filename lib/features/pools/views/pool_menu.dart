@@ -15,6 +15,10 @@ class PoolMenu extends StatelessWidget {
     final poolProvider = context.read<PoolProvider>();
 
     final Map<String, VoidCallback> menu = {
+      "Edit": () {
+        navigator.pop();
+        navigator.pushNamed("/pools/$id/edit");
+      },
       "Share": () {
         SharePlus.instance.share(
           ShareParams(

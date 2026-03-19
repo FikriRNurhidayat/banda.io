@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS pools (
     goal REAL NOT NULL,
     balance REAL NOT NULL,
     status TEXT NOT NULL,
+    category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
     vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
@@ -12,8 +13,9 @@ CREATE TABLE IF NOT EXISTS pools (
 );
 
 CREATE TABLE IF NOT EXISTS pool_transactions (
-    entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
     pool_id TEXT NOT NULL REFERENCES pools (id) ON DELETE CASCADE,
+    entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (entry_id, pool_id)

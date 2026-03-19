@@ -94,25 +94,6 @@ class ScheduleRepository extends Repository {
     return super.populateEntityLabels(rows, "schedule_labels", "schedule_id");
   }
 
-  populateEntries(List<Map> rows) async {
-    final entryIds = rows
-        .map((r) => [r["entry_id"], r["addition_id"]])
-        .expand((i) => i)
-        .whereType<String>()
-        .toList();
-    var entryRows = await getAnnotatedEntriesByIds(entryIds); 
-
-    return rows.map((r) {
-      return {
-        ...r,
-        "entry": entryRows.firstWhere((e) => e["id"] == r["entry_id"]),
-        "addition": r["addition_id"] != null
-            ? entryRows.firstWhere((e) => e["id"] == r["addition_id"])
-            : null,
-      };
-    }).toList();
-  }
-
   Future<List<Schedule>> entities(List<Map> rows) async {
     if (withArgs.contains("entries")) {
       rows = await populateEntries(rows);

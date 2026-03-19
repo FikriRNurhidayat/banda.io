@@ -1,8 +1,6 @@
 enum ReadOnlyCategory {
   adjustment('Adjustment'),
-  transfer('Transfer'),
-  pool('Pool'),
-  commitment('Commitment');
+  transfer('Transfer');
 
   final String label;
   const ReadOnlyCategory(this.label);

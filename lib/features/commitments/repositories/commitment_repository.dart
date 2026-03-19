@@ -1,10 +1,10 @@
 import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/common/repositories/repository.dart';
-import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/types/pair.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +17,11 @@ class CommitmentRepository extends Repository {
 
   CommitmentRepository withVault() {
     withArgs.add("vault");
+    return this;
+  }
+
+  CommitmentRepository withLabels() {
+    withArgs.add("labels");
     return this;
   }
 
@@ -189,75 +194,27 @@ class CommitmentRepository extends Repository {
 
   Future<List<Commitment>> _entities(List<Map> rows) async {
     if (withArgs.contains("entries")) {
-      final entryIds = rows
-          .map(
-            (row) => [
-              row["entry_id"] as String,
-              row["addition_id"] as String?,
-            ],
-          )
-          .expand((id) => id)
-          .whereType<String>()
-          .toList();
-      final entryRows = await getAnnotatedEntriesByIds(entryIds);
-      rows = rows.map((row) {
-        return {
-          ...row,
-          "entry": entryRows.firstWhere(
-            (entryRow) => entryRow["id"] == row["entry_id"],
-          ),
-          "addition": !isNull(row["addition_id"])
-              ? entryRows.firstWhere(
-                  (entryRow) => entryRow["id"] == row["addition_id"],
-                )
-              : null,
-        };
-      }).toList();
+      rows = await populateEntries(rows);
+    }
+
+    if (withArgs.contains("labels")) {
+      rows = await populateLabels(rows);
     }
 
     if (withArgs.contains("vault")) {
-      final vaultIds = rows
-          .map((row) => row["vault_id"] as String)
-          .toList();
-      final vaultRows = await getVaultByIds(vaultIds);
-      rows = rows.map((row) {
-        return {
-          ...row,
-          "vault": vaultRows.firstWhere(
-            (vaultRow) => vaultRow["id"] == row["vault_id"],
-          ),
-        };
-      }).toList();
+      rows = await populateVault(rows);
     }
 
     if (withArgs.contains("category")) {
-      final categoryIds = rows
-          .map((row) => row["category_id"] as String)
-          .toList();
-      final categoryRows = await getCategoryByIds(categoryIds);
-      rows = rows.map((row) {
-        return {
-          ...row,
-          "category": categoryRows.firstWhere(
-            (categoryRow) => categoryRow["id"] == row["category_id"],
-          ),
-        };
-      }).toList();
+      rows = await populateCategory(rows);
     }
 
     if (withArgs.contains("party")) {
-      final partyIds = rows
-          .map((row) => row["party_id"] as String)
-          .toList();
-      final partyRows = await getPartyByIds(partyIds);
-      rows = rows.map((row) {
-        return {
-          ...row,
-          "party": partyRows.firstWhere(
-            (partyRow) => partyRow["id"] == row["party_id"],
-          ),
-        };
-      }).toList();
+      rows = await populateParty(rows);
+    }
+
+    if (withArgs.contains("labels")) {
+      rows = await populateLabels(rows);
     }
 
     return rows.map((row) {
@@ -265,8 +222,34 @@ class CommitmentRepository extends Repository {
           .withAddition(Entry.tryRow(row["addition"]))
           .withEntry(Entry.tryRow(row["entry"]))
           .withCategory(Category.tryRow(row["category"]))
+          .withLabels(Label.tryRows(row["labels"]))
           .withParty(Party.tryRow(row["party"]))
           .withVault(Vault.tryRow(row["vault"]));
     }).toList();
+  }
+
+  saveLabels(String commitmentId, Iterable<String> labelIds) {
+    return setEntityLabels(
+      entityId: commitmentId,
+      labelIds: labelIds,
+      junctionTable: "commitment_labels",
+      junctionKey: "commitment_id",
+    );
+  }
+
+  removeLabels(Commitment commitment) async {
+    return resetEntityLabels(
+      entityId: commitment.id,
+      junctionTable: "commitment_labels",
+      junctionKey: "commitment_id",
+    );
+  }
+
+  populateLabels(List<Map> rows) {
+    return super.populateEntityLabels(
+      rows,
+      "commitment_labels",
+      "commitment_id",
+    );
   }
 }

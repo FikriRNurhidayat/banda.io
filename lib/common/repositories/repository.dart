@@ -1,3 +1,4 @@
+import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/infra/db.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +16,49 @@ class Repository {
 
   getClient() async {
     return db.current;
+  }
+
+  populateEntries(List<Map> rows) async {
+    final entryIds = rows
+        .map(
+          (row) => [
+            row["entry_id"] as String,
+            row["addition_id"] as String?,
+          ],
+        )
+        .expand((id) => id)
+        .whereType<String>()
+        .toList();
+    final entryRows = await getAnnotatedEntriesByIds(entryIds);
+    return rows.map((row) {
+      return {
+        ...row,
+        "entry": entryRows.firstWhere(
+          (entryRow) => entryRow["id"] == row["entry_id"],
+        ),
+        "addition": !isNull(row["addition_id"])
+            ? entryRows.firstWhere(
+                (entryRow) => entryRow["id"] == row["addition_id"],
+              )
+            : null,
+      };
+    }).toList();
+  }
+
+  populateParty(List<Map> mainRows) async {
+    final List<String> partyIds = mainRows
+        .map((row) => row["party_id"] as String)
+        .toList();
+    final partyRows = await getPartyByIds(partyIds);
+
+    return mainRows.map((mainRow) {
+      return {
+        ...mainRow,
+        "party": partyRows.firstWhere(
+          (partyRow) => mainRow["party_id"] == partyRow["id"],
+        ),
+      };
+    }).toList();
   }
 
   populateCategory(List<Map> mainRows) async {
@@ -142,6 +186,19 @@ class Repository {
     );
   }
 
+  resetExactEntityLabels({
+    required String entityId,
+    required Iterable<String> labelIds,
+    required String junctionTable,
+    required String junctionKey,
+  }) async {
+    final client = await getClient();
+    client.execute(
+      "DELETE FROM $junctionTable WHERE $junctionTable.$junctionKey = ? AND label_id IN (${labelIds.map((_) => "?").join(",")})",
+      [entityId, ...labelIds],
+    );
+  }
+
   resetEntityLabels({
     required String entityId,
     required String junctionTable,
@@ -177,9 +234,42 @@ class Repository {
     return rows;
   }
 
+  Future<void> applyEntityLabels({
+    required String entityId,
+    required Iterable<(bool, String)> diffIds,
+    required String junctionTable,
+    required String junctionKey,
+  }) async {
+    await resetExactEntityLabels(
+      entityId: entityId,
+      labelIds: diffIds.map((i) => i.$2),
+      junctionTable: junctionTable,
+      junctionKey: junctionKey,
+    );
+
+    if (diffIds.isEmpty) {
+      return;
+    }
+
+    final client = await getClient();
+
+    final labelIds = diffIds
+        .where((d) => d.$1)
+        .map((d) => d.$2)
+        .toSet();
+
+    client.execute(
+      "INSERT INTO $junctionTable ($junctionKey, label_id) VALUES ${labelIds.map((_) => "(?, ?)").join(", ")}",
+      labelIds
+          .map((labelId) => [entityId, labelId])
+          .expand((a) => a)
+          .toList(),
+    );
+  }
+
   Future<void> setEntityLabels({
     required String entityId,
-    required List<String>? labelIds,
+    required Iterable<String>? labelIds,
     required String junctionTable,
     required String junctionKey,
   }) async {
@@ -195,9 +285,11 @@ class Repository {
 
     final client = await getClient();
 
+    final uniqueLabelIds = labelIds.toSet();
+
     client.execute(
-      "INSERT INTO $junctionTable ($junctionKey, label_id) VALUES ${labelIds.map((_) => '(?, ?)').join(",")}",
-      labelIds
+      "INSERT INTO $junctionTable ($junctionKey, label_id) VALUES ${uniqueLabelIds.map((_) => '(?, ?)').join(",")}",
+      uniqueLabelIds
           .map((labelId) => [entityId, labelId])
           .expand((args) => args)
           .toList(),

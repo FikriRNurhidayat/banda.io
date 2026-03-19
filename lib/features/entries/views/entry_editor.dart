@@ -277,7 +277,7 @@ class _EditorState extends State<EntryEditor> {
                           ),
                       ],
                       options: categories
-                          .where((c) => widget.readOnly || !c.readonly)
+                          .where((c) => widget.readOnly || !c.readOnly)
                           .map((c) {
                             return SelectItem(
                               value: c.id,
@@ -349,12 +349,21 @@ class _EditorState extends State<EntryEditor> {
                         initialValue:
                             _d["labelIds"] ?? entry?.labelIds ?? [],
                         onSaved: (value) => _d["labelIds"] = value,
-                        options: labels.map((l) {
-                          return MultiSelectItem(
-                            value: l.id,
-                            label: l.name,
-                          );
-                        }).toList(),
+                        options: labels
+                            .where((label) {
+                              if (widget.readOnly) {
+                                return true;
+                              }
+
+                              return !label.readOnly;
+                            })
+                            .map((l) {
+                              return MultiSelectItem(
+                                value: l.id,
+                                label: l.name,
+                              );
+                            })
+                            .toList(),
                       ),
                   ],
                 ),

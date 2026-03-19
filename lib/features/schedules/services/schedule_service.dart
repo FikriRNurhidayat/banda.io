@@ -60,7 +60,7 @@ class ScheduleService extends Service {
 
       final addition = fee != null
           ? Entry.readOnly(
-                  amount: fee * sign,
+                  amount: fee * -1,
                   status: status.entryStatus,
                   issuedAt: dueAt,
                   vaultId: vault.id,
@@ -175,14 +175,14 @@ class ScheduleService extends Service {
       final addition = fee != null
           ? (schedule.hasAddition
                     ? schedule.addition!.copyWith(
-                        amount: fee * sign,
+                        amount: fee * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
                         vaultId: vault.id,
                         categoryId: category.id,
                       )
                     : Entry.readOnly(
-                        amount: fee * sign,
+                        amount: fee * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
                         vaultId: vault.id,

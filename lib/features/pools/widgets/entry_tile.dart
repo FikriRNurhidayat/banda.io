@@ -3,7 +3,6 @@ import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/pools/entities/pool.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
-import 'package:bandha/common/types/transaction_type.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,15 +14,6 @@ class EntryTile extends StatelessWidget {
 
   EntryTile(this.pool, this.entry, {super.key});
 
-  typeBuilder(BuildContext context, Entry entry) {
-    final theme = Theme.of(context);
-    return Text(
-      (entry.amount >= 0 ? TransactionType.withdrawal : TransactionType.deposit)
-          .label,
-      style: theme.textTheme.titleSmall,
-    );
-  }
-
   headerBuilder(BuildContext context, Entry entry) {
     final theme = Theme.of(context);
 
@@ -33,7 +23,23 @@ class EntryTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        typeBuilder(context, entry),
+        labelsBuilder(
+          context,
+          entry.labels.where((label) => label.readOnly).toList(),
+          style: theme.textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        labelsBuilder(
+          context,
+          entry.labels
+              .where(
+                (label) =>
+                    !label.readOnly &&
+                    !pool.labelIds.contains(label.id),
+              )
+              .toList(),
+        ),
         if (pool.status.isReleased)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       ],
@@ -51,7 +57,6 @@ class EntryTile extends StatelessWidget {
       children: [
         headerBuilder(context, entry),
         DateTimeText(entry.issuedAt),
-        labelsBuilder(context, entry.labels),
       ],
     );
   }
@@ -65,7 +70,10 @@ class EntryTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [infoBuilder(context, entry), amountBuilder(context, entry)],
+        children: [
+          infoBuilder(context, entry),
+          amountBuilder(context, entry),
+        ],
       ),
     );
   }

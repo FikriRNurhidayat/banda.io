@@ -18,7 +18,10 @@ class PoolProvider extends ChangeNotifier {
     required String poolId,
     required String entryId,
   }) async {
-    await poolService.deleteTransaction(poolId: poolId, entryId: entryId);
+    await poolService.deleteTransaction(
+      poolId: poolId,
+      entryId: entryId,
+    );
     notifyListeners();
   }
 
@@ -36,6 +39,7 @@ class PoolProvider extends ChangeNotifier {
       amount: amount,
       type: type,
       issuedAt: issuedAt,
+      labelIds: labelIds,
     );
 
     notifyListeners();
@@ -53,6 +57,7 @@ class PoolProvider extends ChangeNotifier {
       amount: amount,
       type: type,
       issuedAt: issuedAt,
+      labelIds: labelIds,
     );
 
     notifyListeners();
@@ -71,12 +76,14 @@ class PoolProvider extends ChangeNotifier {
   Future<void> create({
     String? note,
     required double goal,
+    required String categoryId,
     required String vaultId,
     List<String>? labelIds,
   }) async {
     await poolService.create(
       note: note,
       goal: goal,
+      categoryId: categoryId,
       vaultId: vaultId,
       labelIds: labelIds,
     );
@@ -98,9 +105,16 @@ class PoolProvider extends ChangeNotifier {
     String id, {
     String? note,
     required double goal,
+    String? categoryId,
     List<String>? labelIds,
   }) async {
-    await poolService.update(id, note: note, goal: goal, labelIds: labelIds);
+    await poolService.update(
+      id,
+      note: note,
+      goal: goal,
+      categoryId: categoryId,
+      labelIds: labelIds,
+    );
 
     notifyListeners();
   }

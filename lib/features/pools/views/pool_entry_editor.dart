@@ -196,7 +196,7 @@ class _PoolEntryEditorState extends State<PoolEntryEditor> {
         ],
         initialValue:
             _d["labelIds"] ?? entry?.labelIds ?? readonlyLabelIds ?? [],
-        options: labels.map((label) {
+        options: labels.where((label) => !label.readOnly).map((label) {
           return MultiSelectItem(
             value: label.id,
             label: label.name,

@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS transfers (
     id TEXT PRIMARY KEY,
     note TEXT,
-    amount REAL NOT NULL,
+    debit_amount REAL NOT NULL,
+    credit_amount REAL NOT NULL,
     fee REAL,
     issued_at TEXT NOT NULL,
     credit_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,

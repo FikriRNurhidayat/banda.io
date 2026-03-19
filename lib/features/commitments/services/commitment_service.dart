@@ -1,9 +1,11 @@
 import 'package:bandha/common/services/service.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
@@ -20,6 +22,7 @@ class CommitmentService extends Service {
   final EntryRepository entryRepository;
   final VaultRepository vaultRepository;
   final PartyRepository partyRepository;
+  final LabelRepository labelRepository;
   final NotificationManager notificationManager;
 
   CommitmentService({
@@ -29,6 +32,7 @@ class CommitmentService extends Service {
     required this.commitmentRepository,
     required this.paymentRepository,
     required this.partyRepository,
+    required this.labelRepository,
     required this.notificationManager,
   });
 
@@ -44,6 +48,7 @@ class CommitmentService extends Service {
     required String categoryId,
     required String partyId,
     required String vaultId,
+    List<String>? labelIds,
     required DateTime issuedAt,
     DateTime? settledAt,
   }) {
@@ -52,8 +57,11 @@ class CommitmentService extends Service {
       final category = await categoryRepository.get(categoryId);
       final party = await partyRepository.get(partyId);
       final vault = await vaultRepository.get(vaultId);
+      final labels = labelIds != null
+          ? await labelRepository.getByIds(labelIds)
+          : [];
+
       final entry = Entry.readOnly(
-        note: Commitment.entryNote(type, party),
         amount: Commitment.entryAmount(type, amount: amount),
         status: EntryStatus.done,
         issuedAt: issuedAt,
@@ -61,18 +69,15 @@ class CommitmentService extends Service {
         categoryId: category.id,
       );
 
-      final addition =
-          (!isZero(fee)
-                  ? Entry.readOnly(
-                      note: Commitment.additionNote(type),
-                      amount: Commitment.additionAmount(fee!),
-                      status: EntryStatus.done,
-                      issuedAt: issuedAt,
-                      vaultId: vault.id,
-                      categoryId: category.id,
-                    )
-                  : null)
-              ?.annotate("type", "fee");
+      final addition = (!isZero(fee)
+          ? Entry.readOnly(
+              amount: Commitment.additionAmount(fee!),
+              status: EntryStatus.done,
+              issuedAt: issuedAt,
+              vaultId: vault.id,
+              categoryId: category.id,
+            )
+          : null);
 
       final commitment =
           Commitment.create(
@@ -93,7 +98,7 @@ class CommitmentService extends Service {
               .withAddition(addition)
               .withParty(party);
 
-      return await applyCommitment(commitment);
+      return await applyCommitment(commitment, labels);
     });
   }
 
@@ -108,6 +113,7 @@ class CommitmentService extends Service {
     required String vaultId,
     required DateTime issuedAt,
     DateTime? settledAt,
+    List<String>? labelIds,
   }) {
     return work<Commitment>(() async {
       final nAmount = amount * (type.isIncome ? 1 : -1);
@@ -125,37 +131,35 @@ class CommitmentService extends Service {
 
       final nParty = await partyRepository.get(partyId);
       final nVault = await vaultRepository.get(vaultId);
+      final labels = labelIds != null
+          ? await labelRepository.getByIds(labelIds)
+          : [];
       final nEntry = commitment.entry.copyWith(
-        note: Commitment.entryNote(type, nParty),
         amount: Commitment.entryAmount(type, amount: amount),
         issuedAt: issuedAt,
         vaultId: vaultId,
         categoryId: nCategory.id,
       );
 
-      final Entry? nAddition =
-          ((isZero(commitment.fee) && !isZero(fee))
-                  ? Entry.readOnly(
-                      note: Commitment.additionNote(type),
-                      amount: Commitment.additionAmount(fee!),
-                      status: EntryStatus.done,
-                      issuedAt: issuedAt,
-                      vaultId: nVault.id,
-                      categoryId: nCategory.id,
-                    ).annotate("type", "fee")
-                  : (!isZero(commitment.fee) && !isZero(fee))
-                  ? commitment.addition!.copyWith(
-                      note: Commitment.additionNote(type),
-                      amount: Commitment.additionAmount(fee!),
-                      issuedAt: issuedAt,
-                      readonly: true,
-                      vaultId: nVault.id,
-                      categoryId: nCategory.id,
-                    )
-                  : null)
-              ?.annotate("type", "fee");
+      final Entry? nAddition = ((isZero(commitment.fee) && !isZero(fee))
+          ? Entry.readOnly(
+              amount: Commitment.additionAmount(fee!),
+              status: EntryStatus.done,
+              issuedAt: issuedAt,
+              vaultId: nVault.id,
+              categoryId: nCategory.id,
+            )
+          : (!isZero(commitment.fee) && !isZero(fee))
+          ? commitment.addition!.copyWith(
+              amount: Commitment.additionAmount(fee!),
+              issuedAt: issuedAt,
+              readonly: true,
+              vaultId: nVault.id,
+              categoryId: nCategory.id,
+            )
+          : null);
 
-      final nRemainder = _newRemainder(
+      final nRemainder = computeRemainder(
         newAmount: nAmount,
         currentAmount: commitment.amount,
         currentRemainder: commitment.remainder,
@@ -179,7 +183,7 @@ class CommitmentService extends Service {
           .withVault(nVault)
           .withParty(nParty);
 
-      return await applyCommitment(nCommitment);
+      return await applyCommitment(nCommitment, labels);
     });
   }
 
@@ -198,6 +202,7 @@ class CommitmentService extends Service {
         .withParty()
         .withEntries()
         .withVault()
+        .withLabels()
         .search(spec);
   }
 
@@ -246,42 +251,56 @@ class CommitmentService extends Service {
     });
   }
 
-  Future<Commitment> applyCommitment(Commitment commitment) async {
+  Future<Commitment> applyCommitment(
+    Commitment commitment,
+    Iterable<Label>? labels,
+  ) async {
+    final [commitmentLabel, feeLabel] = await getReadOnlyLabels();
+    final labelIds = labels?.map((label) => label.id) ?? <String>[];
+
     await entryRepository.bulkSave(
       commitment.entries.map((entry) => entry.controlledBy(commitment)),
     );
+    for (var entry in commitment.entries) {
+      await entryRepository.saveLabels(entry.id, [
+        commitmentLabel.id,
+        if (commitment.addition != null &&
+            entry.id == commitment.addition!.id)
+          feeLabel.id,
+        ...?labels?.map((label) => label.id),
+      ]);
+    }
+
     await vaultRepository.save(
       commitment.vault.applyEntries(commitment.entries),
     );
     await commitmentRepository.save(commitment);
+    await commitmentRepository.saveLabels(commitment.id, labelIds);
     return commitment;
   }
 
-  Future<CommitmentPayment> applyPayment(
-    CommitmentPayment payment,
-  ) async {
-    await entryRepository.bulkSave(
-      payment.entries.map(
-        (entry) => entry.controlledBy(payment.commitment),
-      ),
-    );
-    await vaultRepository.save(
-      payment.vault.applyEntries(payment.entries),
-    );
-    await commitmentRepository.save(
-      payment.commitment.applyPayment(payment),
-    );
-    await paymentRepository.save(payment);
-
-    return payment;
-  }
-
-  _newRemainder({
+  computeRemainder({
     required double newAmount,
     required double currentAmount,
     required double currentRemainder,
   }) {
     final paidAmount = currentAmount - currentRemainder;
     return newAmount - paidAmount;
+  }
+
+  Future<List<Label>> getReadOnlyLabels() async {
+    final labels = await labelRepository.getByNames([
+      ReadOnlyLabel.commitment.label,
+      ReadOnlyLabel.fee.label,
+    ]);
+
+    return <Label>[
+      labels.firstWhere(
+        (label) => label.name == ReadOnlyLabel.commitment.label,
+      ),
+      labels.firstWhere(
+        (label) => label.name == ReadOnlyLabel.fee.label,
+      ),
+    ];
   }
 }

@@ -1,6 +1,8 @@
 import 'package:bandha/common/services/service.dart';
+import 'package:bandha/common/types/controller_type.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/pools/entities/pool.dart';
+import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
@@ -9,7 +11,6 @@ import 'package:bandha/features/tags/repositories/label_repository.dart';
 import 'package:bandha/features/pools/repositories/pool_repository.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:bandha/common/types/transaction_type.dart';
-import 'package:bandha/features/tags/types/read_only_category.dart';
 
 class PoolService extends Service {
   final PoolRepository poolRepository;
@@ -33,21 +34,32 @@ class PoolService extends Service {
   retract(String id) {
     return work(() async {
       final now = DateTime.now();
-      final category = await categoryRepository.getByName(ReadOnlyCategory.pool.label);
-      final pool = await poolRepository.withVault().get(id);
+      final pool = await poolRepository
+          .withCategory()
+          .withVault()
+          .withLabels()
+          .get(id);
 
-      await poolRepository.save(pool.copyWith(releasedAt: null, status: PoolStatus.active));
+      await poolRepository.save(
+        pool.copyWith(releasedAt: null, status: PoolStatus.active),
+      );
 
       final entry = Entry.readOnly(
-        note: "Retracted from ${pool.note}",
         amount: pool.balance * -1,
         status: EntryStatus.done,
         issuedAt: now,
         vaultId: pool.vaultId,
-        categoryId: category.id,
+        categoryId: pool.category.id,
       );
 
-      await entryRepository.save(entry.controlledBy(pool));
+      await entryRepository.save(
+        entry.controlledBy(pool).withLabels([
+          await labelRepository.getByName(
+            ReadOnlyLabel.retracted.label,
+          ),
+          ...pool.labels,
+        ]),
+      );
       await vaultRepository.save(pool.vault.applyEntry(entry));
     });
   }
@@ -55,27 +67,50 @@ class PoolService extends Service {
   release(String id) {
     return work(() async {
       final now = DateTime.now();
-      final category = await categoryRepository.getByName(ReadOnlyCategory.pool.label);
-      final pool = await poolRepository.withVault().get(id);
-      await poolRepository.save(pool.copyWith(releasedAt: now, status: PoolStatus.released));
+      final pool = await poolRepository
+          .withVault()
+          .withLabels()
+          .withCategory()
+          .get(id);
+
+      await poolRepository.save(
+        pool.copyWith(releasedAt: now, status: PoolStatus.released),
+      );
 
       final entry = Entry.readOnly(
-        note: "Released from ${pool.note}",
         amount: pool.balance,
         status: EntryStatus.done,
         issuedAt: now,
         vaultId: pool.vaultId,
-        categoryId: category.id,
+        categoryId: pool.category.id,
       );
 
-      await entryRepository.save(entry.controlledBy(pool));
+      await entryRepository.save(
+        entry.controlledBy(pool).withLabels([
+          await labelRepository.getByName(ReadOnlyLabel.released.label),
+          ...pool.labels,
+        ]),
+      );
       await vaultRepository.save(pool.vault.applyEntry(entry));
     });
   }
 
-  Future<Pool> create({String? note, required double goal, required String vaultId, List<String>? labelIds}) async {
+  Future<Pool> create({
+    String? note,
+    required double goal,
+    required String categoryId,
+    required String vaultId,
+    List<String>? labelIds,
+  }) async {
     return await work<Pool>(() async {
-      final pool = Pool.create(note: note, goal: goal, balance: 0, vaultId: vaultId, status: PoolStatus.active);
+      final pool = Pool.create(
+        note: note,
+        goal: goal,
+        balance: 0,
+        categoryId: categoryId,
+        vaultId: vaultId,
+        status: PoolStatus.active,
+      );
 
       await poolRepository.save(pool);
       if (labelIds != null) {
@@ -86,13 +121,49 @@ class PoolService extends Service {
     });
   }
 
-  update(String id, {String? note, required double goal, List<String>? labelIds}) async {
+  update(
+    String id, {
+    String? note,
+    required double goal,
+    String? categoryId,
+    List<String>? labelIds,
+  }) async {
     return await work(() async {
-      final pool = await poolRepository.get(id);
-      await poolRepository.save(pool.copyWith(note: note, goal: goal));
+      final ePool = await poolRepository.withLabels().get(id);
+      final nPool = ePool.copyWith(
+        note: note,
+        goal: goal,
+        categoryId: categoryId,
+      );
+
+      await poolRepository.save(nPool);
+
+      final Iterable<(bool, String)> diffIds = ((labelIds != null)
+          ? (ePool.labelIds
+                .where((labelId) => !labelIds.contains(labelId))
+                .map((labelId) => (false, labelId))
+                .followedBy(labelIds.map((labelId) => (true, labelId))))
+          : []);
+
       if (labelIds != null) {
-        await poolRepository.saveLabels(pool.id, labelIds);
+        await poolRepository.saveLabels(ePool.id, labelIds);
       }
+
+      await entryRepository.iterate(
+        {
+          "controller_id_is": ePool.id,
+          "controller_type_is": ControllerType.pool.label,
+        },
+        (entry) async {
+          await entryRepository.save(
+            entry.copyWith(categoryId: nPool.categoryId),
+          );
+
+          if (diffIds.isNotEmpty) {
+            await entryRepository.applyLabels(entry.id, diffIds);
+          }
+        },
+      );
     });
   }
 
@@ -102,12 +173,17 @@ class PoolService extends Service {
       final vault = pool.vault;
       await poolRepository.removeTransactions(pool);
       await poolRepository.delete(pool.id);
+      await entryRepository.deleteByController(pool);
       await vaultRepository.sync(vault.id);
     });
   }
 
   search(Filter? specification) {
-    return poolRepository.withLabels().withVault().search(specification);
+    return poolRepository
+        .withLabels()
+        .withVault()
+        .withCategory()
+        .search(specification);
   }
 
   get(String id) {
@@ -115,10 +191,14 @@ class PoolService extends Service {
   }
 
   searchTransactions({required String poolId, Filter? specification}) {
-    return entryRepository.withLabels().withVault().search({
-      "pool_in": [poolId],
-      ...?specification,
-    });
+    return entryRepository
+        .withCategory()
+        .withLabels()
+        .withVault()
+        .search({
+          "pool_in": [poolId],
+          ...?specification,
+        });
   }
 
   createTransaction(
@@ -129,10 +209,17 @@ class PoolService extends Service {
     List<String>? labelIds,
   }) async {
     return await work(() async {
-      final category = await categoryRepository.getByName(ReadOnlyCategory.pool.label);
-      final pool = await poolRepository.withLabels().withVault().get(poolId);
+      final pool = await poolRepository
+          .withLabels()
+          .withCategory()
+          .withVault()
+          .get(poolId);
 
-      final labels = <Label>[];
+      final labels = <Label>[
+        await labelRepository.getByName(
+          Pool.entryLabelName(pool, type),
+        ),
+      ];
 
       if (pool.labels.isNotEmpty) {
         labels.addAll(pool.labels);
@@ -142,20 +229,28 @@ class PoolService extends Service {
         labels.addAll(await labelRepository.getByIds(labelIds));
       }
 
-      final entry = Entry.readOnly(
-        note: Pool.entryNote(pool, type),
-        amount: Pool.entryAmount(type, amount),
-        status: EntryStatus.done,
-        issuedAt: issuedAt,
-        vaultId: pool.vaultId,
-        categoryId: category.id,
-      ).controlledBy(pool).withLabels(labels).withVault(pool.vault).withCategory(category);
+      final entry =
+          Entry.readOnly(
+                amount: Pool.entryAmount(type, amount),
+                status: EntryStatus.done,
+                issuedAt: issuedAt,
+                vaultId: pool.vaultId,
+                categoryId: pool.category.id,
+              )
+              .controlledBy(pool)
+              .withLabels(labels)
+              .withVault(pool.vault)
+              .withCategory(pool.category);
 
       await entryRepository.save(entry);
       await entryRepository.saveLabels(entry.id, entry.labelIds);
       await vaultRepository.save(pool.vault.applyEntry(entry));
-      await poolRepository.save(pool.applyEntry(entry));
-      await poolRepository.saveTransaction(pool, entry);
+
+      if (!type.isDisbursement) {
+        await poolRepository.save(pool.applyEntry(entry));
+      }
+
+      await poolRepository.saveTransaction(pool, type, entry);
     });
   }
 
@@ -168,12 +263,19 @@ class PoolService extends Service {
     List<String>? labelIds,
   }) async {
     return await work(() async {
-      final pool = await poolRepository.withVault().withLabels().get(poolId);
-      final entry = await entryRepository.get(entryId);
-
+      final pool = await poolRepository.withVault().withLabels().get(
+        poolId,
+      );
+      final entry = await entryRepository.withLabels().get(entryId);
       final newVault = pool.vault.revokeEntry(entry);
-      final newPool = pool.revokeEntry(entry);
-      final newLabels = <Label>[];
+      final newPool = !entry.isDisbursement
+          ? pool.revokeEntry(entry)
+          : pool;
+      final newLabels = <Label>[
+        await labelRepository.getByName(
+          Pool.entryLabelName(pool, type),
+        ),
+      ];
 
       if (pool.labels.isNotEmpty) newLabels.addAll(pool.labels);
       if (labelIds != null && labelIds.isNotEmpty) {
@@ -181,24 +283,36 @@ class PoolService extends Service {
       }
 
       final newEntry = entry
-          .copyWith(note: Pool.entryNote(newPool, type), amount: Pool.entryAmount(type, amount), issuedAt: issuedAt)
+          .copyWith(
+            amount: Pool.entryAmount(type, amount),
+            issuedAt: issuedAt,
+          )
           .withVault(newVault)
           .withLabels(newLabels);
 
       await entryRepository.save(newEntry);
       await entryRepository.saveLabels(newEntry.id, newEntry.labelIds);
       await vaultRepository.save(newVault.applyEntry(newEntry));
-      await poolRepository.save(newPool.applyEntry(newEntry));
+      if (type.isDisbursement) {
+        await poolRepository.save(newPool.applyEntry(newEntry));
+      }
+
+      await poolRepository.saveTransaction(newPool, type, newEntry);
     });
   }
 
-  deleteTransaction({required String poolId, required String entryId}) async {
+  deleteTransaction({
+    required String poolId,
+    required String entryId,
+  }) async {
     return await work(() async {
       final pool = await poolRepository.withVault().get(poolId);
       final entry = await entryRepository.get(entryId);
 
       await vaultRepository.save(pool.vault.revokeEntry(entry));
-      await poolRepository.save(pool.revokeEntry(entry));
+      if (!entry.isDisbursement) {
+        await poolRepository.save(pool.revokeEntry(entry));
+      }
       await entryRepository.delete(entry.id);
     });
   }

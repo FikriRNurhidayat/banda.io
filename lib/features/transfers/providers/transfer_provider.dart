@@ -16,39 +16,47 @@ class TransferProvider extends ChangeNotifier {
   }
 
   Future<void> create({
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required DateTime issuedAt,
     required String debitVaultId,
     required String creditVaultId,
+    String? note,
     double? fee,
   }) {
     return transferService
         .create(
-          amount: amount,
+          debitAmount: debitAmount,
+          creditAmount: creditAmount,
           issuedAt: issuedAt,
           fee: fee,
           debitVaultId: debitVaultId,
           creditVaultId: creditVaultId,
+          note: note,
         )
         .then((_) => notifyListeners());
   }
 
   Future<void> update({
     required String id,
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required DateTime issuedAt,
     required String debitVaultId,
     required String creditVaultId,
+    String? note,
     double? fee,
   }) {
     return transferService
         .update(
           id: id,
-          amount: amount,
+          debitAmount: debitAmount,
+          creditAmount: creditAmount,
           fee: fee,
           issuedAt: issuedAt,
           debitVaultId: debitVaultId,
           creditVaultId: creditVaultId,
+          note: note,
         )
         .then((_) => notifyListeners());
   }

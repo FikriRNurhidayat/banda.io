@@ -24,11 +24,12 @@ class TransferRepository extends Repository {
   save(Transfer transfer) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO transfers (id, note, amount, fee, debit_id, debit_vault_id, exchange_id, credit_id, credit_vault_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_vault_id = excluded.debit_vault_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_vault_id = excluded.credit_vault_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO transfers (id, note, debit_amount, credit_amount, fee, debit_id, debit_vault_id, exchange_id, credit_id, credit_vault_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, debit_amount = excluded.debit_amount, credit_amount = excluded.credit_amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_vault_id = excluded.debit_vault_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_vault_id = excluded.credit_vault_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         transfer.id,
         transfer.note,
-        transfer.amount,
+        transfer.debitAmount,
+        transfer.creditAmount,
         transfer.fee,
         transfer.debitId,
         transfer.debitVaultId,

@@ -1,3 +1,4 @@
+import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/common/entities/controlable.dart';
@@ -87,6 +88,87 @@ class Entry extends Entity {
 
   get labelIds {
     return labels.map((l) => l.id).toList();
+  }
+
+  get isDisbursement {
+    return labels.any(
+      (label) =>
+          label.readOnly &&
+          label.name == ReadOnlyLabel.disbursement.label,
+    );
+  }
+
+  get isFee {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.fee.label,
+    );
+  }
+
+  get isWithdraw {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.withdraw.label,
+    );
+  }
+
+  get isDeposit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.deposit.label,
+    );
+  }
+
+  get isCommitment {
+    return labels.any(
+      (label) =>
+          label.readOnly &&
+          label.name == ReadOnlyLabel.commitment.label,
+    );
+  }
+
+  get isDebit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.debit.label,
+    );
+  }
+
+  get isCredit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.credit.label,
+    );
+  }
+
+  get isReleased {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.released.label,
+    );
+  }
+
+  get isRetracted {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.retracted.label,
+    );
+  }
+
+  get hasReadOnlyLabels {
+    return labels.any((label) => label.readOnly);
+  }
+
+  get readOnlyLabels {
+    return labels.where((label) => label.readOnly);
+  }
+
+  get hasWritableLabels {
+    return labels.any((label) => !label.readOnly);
+  }
+
+  get writableLabels {
+    return labels.where((label) => !label.readOnly);
   }
 
   Entry withAnnotations(Map<String, dynamic>? annotations) {

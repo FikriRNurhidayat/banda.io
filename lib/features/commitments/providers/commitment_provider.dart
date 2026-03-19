@@ -28,6 +28,7 @@ class CommitmentProvider extends ChangeNotifier {
     required String categoryId,
     required String partyId,
     required String vaultId,
+    List<String>? labelIds,
   }) async {
     await commitmentService.create(
       amount: amount,
@@ -36,6 +37,7 @@ class CommitmentProvider extends ChangeNotifier {
       categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
+      labelIds: labelIds,
       fee: fee ?? 0,
       issuedAt: issuedAt,
       settledAt: settledAt,
@@ -55,6 +57,7 @@ class CommitmentProvider extends ChangeNotifier {
     required String categoryId,
     required String partyId,
     required String vaultId,
+    List<String>? labelIds,
   }) async {
     await commitmentService.update(
       id,
@@ -64,6 +67,7 @@ class CommitmentProvider extends ChangeNotifier {
       categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
+      labelIds: labelIds,
       fee: fee,
       issuedAt: issuedAt,
       settledAt: settledAt,

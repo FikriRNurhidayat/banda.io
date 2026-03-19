@@ -2,7 +2,6 @@ import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/money_helper.dart';
-import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -61,19 +60,17 @@ class TransferTile extends StatelessWidget {
         spacing: 8,
         children: [
           Text(
-            MoneyHelper.normalize(transfer.amount),
+            MoneyHelper.normalize(transfer.creditAmount),
+            style: theme.textTheme.bodySmall,
+          ),
+          Icon(
+            Icons.sync_alt_outlined,
+            size: theme.textTheme.bodySmall?.fontSize,
+          ),
+          Text(
+            MoneyHelper.normalize(transfer.debitAmount),
             style: theme.textTheme.bodyMedium,
           ),
-          if (!isZero(transfer.fee)) ...[
-            Icon(
-              Icons.sync_alt_outlined,
-              size: theme.textTheme.bodySmall?.fontSize,
-            ),
-            Text(
-              MoneyHelper.normalize(transfer.fee!),
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
         ],
       ),
     );
@@ -132,7 +129,9 @@ class TransferTile extends StatelessWidget {
 
     return Dismissible(
       key: Key(transfer.id),
-      direction: readOnly ? DismissDirection.none : DismissDirection.horizontal,
+      direction: readOnly
+          ? DismissDirection.none
+          : DismissDirection.horizontal,
       background: Container(
         color: theme.colorScheme.surfaceContainer,
         alignment: Alignment.center,

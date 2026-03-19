@@ -9,6 +9,8 @@ import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+typedef IterateCallback = Future<void> Function(Entry entry);
+
 class EntryRepository extends Repository {
   WithArgs withArgs;
 
@@ -65,6 +67,35 @@ class EntryRepository extends Repository {
     }
   }
 
+  iterate(Filter? filter, IterateCallback callback) async {
+    String? lastId;
+
+    while (true) {
+      var baseQuery = "SELECT entries.* FROM entries";
+
+      final query = defineQuery(baseQuery, {
+        "id_gt": lastId,
+        ...?filter,
+      });
+
+      final sqlString =
+          "${query.first} ORDER BY entries.id ASC LIMIT 1";
+      final sqlArgs = query.second;
+
+      final client = await getClient();
+      final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+      if (entryRows.isEmpty) break;
+
+      final entries = await entities(entryRows);
+
+      for (var entry in entries) {
+        lastId = entry.id;
+        await callback(entry);
+      }
+    }
+  }
+
   save(Entry entry) async {
     return bulkSave([entry]);
   }
@@ -92,6 +123,15 @@ class EntryRepository extends Repository {
     client.execute(
       "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${annotations.entries.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
       arguments,
+    );
+  }
+
+  applyLabels(String entryId, Iterable<(bool, String)> diffIds) {
+    return applyEntityLabels(
+      entityId: entryId,
+      diffIds: diffIds,
+      junctionTable: "entry_labels",
+      junctionKey: "entry_id",
     );
   }
 
@@ -270,6 +310,22 @@ class EntryRepository extends Repository {
       "query": <String>[],
       "sql": null,
     };
+
+    if (filter.containsKey("id_is")) {
+      final value = filter["id_is"];
+      if (value != null && value.isNotEmpty) {
+        where["query"].add("entries.id = ?");
+        where["args"].add(filter["id_is"]);
+      }
+    }
+
+    if (filter.containsKey("id_gt")) {
+      final value = filter["id_gt"];
+      if (value != null && value.isNotEmpty) {
+        where["query"].add("entries.id > ?");
+        where["args"].add(filter["id_gt"]);
+      }
+    }
 
     if (filter.containsKey("note_regex")) {
       final value = filter["note_regex"];

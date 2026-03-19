@@ -1,7 +1,11 @@
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:flutter/material.dart';
 
-labelsBuilder(BuildContext context, List<Label> labels, {TextStyle? style}) {
+labelsBuilder(
+  BuildContext context,
+  Iterable<Label> labels, {
+  TextStyle? style,
+}) {
   final theme = Theme.of(context);
   return Row(
     spacing: 8,
@@ -16,7 +20,11 @@ labelsBuilder(BuildContext context, List<Label> labels, {TextStyle? style}) {
             ),
           ),
       if (labels.length > 2)
-        Icon(Icons.more_horiz, size: 8, color: theme.colorScheme.primary),
+        Icon(
+          Icons.more_horiz,
+          size: 8,
+          color: theme.colorScheme.primary,
+        ),
     ],
   );
 }
@@ -24,6 +32,7 @@ labelsBuilder(BuildContext context, List<Label> labels, {TextStyle? style}) {
 tileBuilder(
   BuildContext context, {
   GestureTapCallback? onTap,
+  GestureLongPressCallback? onLongPress,
   required Widget child,
 }) {
   final theme = Theme.of(context);
@@ -31,6 +40,7 @@ tileBuilder(
     color: theme.cardColor,
     child: InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(padding: EdgeInsets.all(16), child: child),
     ),
   );

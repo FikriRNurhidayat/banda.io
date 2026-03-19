@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS commitment_payments (
     issued_at TEXT NOT NULL,
     PRIMARY KEY (commitment_id, entry_id)
 );
+
+CREATE TABLE IF NOT EXISTS commitment_labels (
+    label_id TEXT NOT NULL REFERENCES labels (id) ON DELETE CASCADE,
+    commitment_id TEXT NOT NULL REFERENCES commitments (id) ON DELETE CASCADE,
+    PRIMARY KEY (label_id, commitment_id)
+);

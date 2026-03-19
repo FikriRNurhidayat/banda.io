@@ -38,7 +38,9 @@ class _TransferEditorState extends State<TransferEditor> {
 
         if (isNull(widget.id)) {
           await transferProvider.create(
-            amount: _d["amount"],
+            note: _d["note"],
+            debitAmount: _d["debit_amount"],
+            creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
             debitVaultId: _d["debitVaultId"],
@@ -49,7 +51,9 @@ class _TransferEditorState extends State<TransferEditor> {
         if (!isNull(widget.id)) {
           await transferProvider.update(
             id: widget.id!,
-            amount: _d["amount"],
+            note: _d["note"],
+            debitAmount: _d["debit_amount"],
+            creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
             debitVaultId: _d["debitVaultId"],
@@ -138,26 +142,54 @@ class _TransferEditorState extends State<TransferEditor> {
                 child: Column(
                   spacing: 16,
                   children: [
+                    if (!widget.readOnly ||
+                        (transfer?.note != null &&
+                            transfer!.note!.isNotEmpty))
+                      TextFormField(
+                        readOnly: widget.readOnly,
+                        decoration: InputStyles.field(
+                          labelText: "Note",
+                          hintText: "Enter note...",
+                        ),
+                        initialValue: _d["note"] ?? transfer?.note,
+                        onSaved: (value) => _d["note"] = value ?? '',
+                      ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["amount"] ?? transfer?.amount,
-                      onSaved: (value) => _d["amount"] = value,
+                      initialValue:
+                          _d["debit_amount"] ?? transfer?.debitAmount,
+                      onSaved: (value) => _d["debit_amount"] = value,
                       decoration: InputStyles.field(
-                        hintText: "Enter amount...",
-                        labelText: "Amount",
+                        hintText: "Enter debit amount...",
+                        labelText: "Debit amount",
                       ),
-                      validator: (value) =>
-                          value == null ? "Amount is required" : null,
+                      validator: (value) => value == null
+                          ? "Debit amount is required"
+                          : null,
                     ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["fee"] ?? transfer?.fee,
-                      onSaved: (value) => _d["fee"] = value,
+                      initialValue:
+                          _d["credit_amount"] ?? transfer?.creditAmount,
+                      onSaved: (value) => _d["credit_amount"] = value,
                       decoration: InputStyles.field(
-                        hintText: "Enter fee...",
-                        labelText: "Fee",
+                        hintText: "Enter credit amount...",
+                        labelText: "Credit amount",
                       ),
+                      validator: (value) => value == null
+                          ? "Debit amount is required"
+                          : null,
                     ),
+                    if (!widget.readOnly || transfer?.fee != null)
+                      AmountFormField(
+                        readOnly: widget.readOnly,
+                        initialValue: _d["fee"] ?? transfer?.fee,
+                        onSaved: (value) => _d["fee"] = value,
+                        decoration: InputStyles.field(
+                          hintText: "Enter fee...",
+                          labelText: "Fee",
+                        ),
+                      ),
                     WhenFormField(
                       readOnly: widget.readOnly,
                       options: WhenOption.min,
@@ -243,8 +275,7 @@ class _TransferEditorState extends State<TransferEditor> {
                           ),
                       ],
                       initialValue:
-                          _d["debitVaultId"] ??
-                          transfer?.debitVaultId,
+                          _d["debitVaultId"] ?? transfer?.debitVaultId,
                       onSaved: (value) =>
                           _d["debitVaultId"] = value ?? '',
                       validator: (_) => null,

@@ -52,7 +52,9 @@ makeProvider({
   final vaultRepository = VaultRepository(dbManager);
   final transferRepository = TransferRepository(dbManager);
   final commitmentRepository = CommitmentRepository(dbManager);
-  final commitmentPaymentRepository = CommitmentPaymentRepository(dbManager);
+  final commitmentPaymentRepository = CommitmentPaymentRepository(
+    dbManager,
+  );
   final labelRepository = LabelRepository(dbManager);
   final partyRepository = PartyRepository(dbManager);
   final poolRepository = PoolRepository(dbManager);
@@ -89,6 +91,7 @@ makeProvider({
     paymentRepository: commitmentPaymentRepository,
     partyRepository: partyRepository,
     notificationManager: notificationManager,
+    labelRepository: labelRepository,
   );
   final poolService = PoolService(
     vaultRepository: vaultRepository,
@@ -99,21 +102,22 @@ makeProvider({
   );
 
   final scheduleService = ScheduleService(
-    vaultRepository: vaultRepository,
-    scheduleRepository: scheduleRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
+    scheduleRepository: scheduleRepository,
+    vaultRepository: vaultRepository,
   );
 
   final commitmentPaymentService = CommitmentPaymentService(
-    vaultRepository: vaultRepository,
-    entryRepository: entryRepository,
     categoryRepository: categoryRepository,
-    commitmentRepository: commitmentRepository,
     commitmentPaymentRepository: commitmentPaymentRepository,
-    partyRepository: partyRepository,
+    commitmentRepository: commitmentRepository,
+    entryRepository: entryRepository,
+    labelRepository: labelRepository,
     notificationManager: notificationManager,
+    partyRepository: partyRepository,
+    vaultRepository: vaultRepository,
   );
 
   final toolService = ToolService(dbManager);
@@ -128,19 +132,22 @@ makeProvider({
     ChangeNotifierProvider(
       create: (_) => CategoryProvider(categoryRepository),
     ),
-    ChangeNotifierProvider(
-      create: (_) => VaultProvider(vaultService),
-    ),
+    ChangeNotifierProvider(create: (_) => VaultProvider(vaultService)),
     ChangeNotifierProvider(create: (_) => EntryProvider(entryService)),
     ChangeNotifierProvider(
       create: (_) => TransferProvider(transferService),
     ),
     ChangeNotifierProvider(create: (_) => PoolProvider(poolService)),
-    ChangeNotifierProvider(create: (_) => CommitmentProvider(commitmentService)),
     ChangeNotifierProvider(
-      create: (_) => CommitmentPaymentProvider(commitmentPaymentService),
+      create: (_) => CommitmentProvider(commitmentService),
     ),
-    ChangeNotifierProvider(create: (_) => ScheduleProvider(scheduleService)),
+    ChangeNotifierProvider(
+      create: (_) =>
+          CommitmentPaymentProvider(commitmentPaymentService),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => ScheduleProvider(scheduleService),
+    ),
     ChangeNotifierProvider(
       create: (_) => LabelProvider(labelRepository),
     ),

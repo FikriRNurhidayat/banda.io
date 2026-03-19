@@ -3,7 +3,6 @@ import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/money_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/features/vaults/widgets/vault_text.dart';
-import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
 class PoolTile extends StatelessWidget {
@@ -15,7 +14,9 @@ class PoolTile extends StatelessWidget {
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/pools/${pool.id}/detail" : "/pools/${pool.id}/transactions",
+      readOnly
+          ? "/pools/${pool.id}/detail"
+          : "/pools/${pool.id}/transactions",
     );
   }
 
@@ -37,7 +38,8 @@ class PoolTile extends StatelessWidget {
     return [
       if (pool.status == PoolStatus.released)
         Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
-      if (pool.status != PoolStatus.released && pool.balance == pool.goal)
+      if (pool.status != PoolStatus.released &&
+          pool.balance == pool.goal)
         Icon(Icons.done_all, size: 8, color: theme.colorScheme.primary),
     ];
   }
@@ -76,7 +78,7 @@ class PoolTile extends StatelessWidget {
         SizedBox(
           height: 8,
           child: LinearProgressIndicator(
-            value: pool.getProgress(),
+            value: pool.progress,
             backgroundColor: theme.colorScheme.surfaceContainer,
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
@@ -86,14 +88,13 @@ class PoolTile extends StatelessWidget {
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            MoneyText(
-              pool.balance,
-              useSymbol: false,
-              style: theme.textTheme.labelSmall,
+            Text(
+              pool.category.name,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
             ),
-            MoneyText(
-              pool.goal,
-              useSymbol: false,
+            Text(
+              "${(pool.completion * 100).floor()}%",
               style: theme.textTheme.labelSmall,
             ),
           ],

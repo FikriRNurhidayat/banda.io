@@ -1,8 +1,11 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
@@ -54,6 +57,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
             categoryId: _d["categoryId"],
             partyId: _d["partyId"],
             vaultId: _d["vaultId"],
+            labelIds: _d["labelIds"],
           );
         }
 
@@ -69,6 +73,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
             categoryId: _d["categoryId"],
             partyId: _d["partyId"],
             vaultId: _d["vaultId"],
+            labelIds: _d["labelIds"],
           );
         }
       }).then((_) => navigator.pop()).catchError((error, stackTrace) {
@@ -94,6 +99,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
     final categoryProvider = context.watch<CategoryProvider>();
     final partyProvider = context.watch<PartyProvider>();
     final vaultProvider = context.watch<VaultProvider>();
+    final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -140,6 +146,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
               partyProvider.search(),
               vaultProvider.search(),
               categoryProvider.search(),
+              labelProvider.search(),
               if (widget.id != null) commitmentProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
@@ -154,8 +161,9 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
               final parties = snapshot.data![0] as List<Party>;
               final vaults = snapshot.data![1] as List<Vault>;
               final categories = snapshot.data![2] as List<Category>;
+              final labels = snapshot.data![3] as List<Label>;
               final commitment = widget.id != null
-                  ? (snapshot.data![3] as Commitment)
+                  ? (snapshot.data![4] as Commitment)
                   : null;
 
               return Form(
@@ -165,7 +173,8 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                   children: [
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["amount"] ?? commitment?.amount.abs(),
+                      initialValue:
+                          _d["amount"] ?? commitment?.amount.abs(),
                       decoration: InputStyles.field(
                         hintText: "Enter amount...",
                         labelText: "Amount",
@@ -243,7 +252,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                           ),
                       ],
                       options: categories
-                          .where((c) => widget.readOnly || !c.readonly)
+                          .where((c) => widget.readOnly || !c.readOnly)
                           .map((c) {
                             return SelectItem(
                               value: c.id,
@@ -383,6 +392,47 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                       decoration: InputStyles.field(
                         labelText: "Party",
                         hintText: "Select party...",
+                      ),
+                    ),
+                    MultiSelectFormField<String>(
+                      readOnly: widget.readOnly,
+                      initialValue:
+                          _d["labelIds"] ?? commitment?.labelIds ?? [],
+                      onSaved: (value) => _d["labelIds"] = value,
+                      actions: [
+                        if (!widget.readOnly)
+                          ActionChip(
+                            avatar: Icon(
+                              Icons.add,
+                              color: theme.colorScheme.outline,
+                            ),
+                            label: Text(
+                              "New label",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w100,
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                            onPressed: () {
+                              redirect(context, "/labels/edit");
+                            },
+                          ),
+                      ],
+                      options: labels
+                          .where(
+                            (label) =>
+                                widget.readOnly || !label.readOnly,
+                          )
+                          .map((label) {
+                            return MultiSelectItem(
+                              value: label.id,
+                              label: label.name,
+                            );
+                          })
+                          .toList(),
+                      decoration: InputStyles.field(
+                        labelText: "Labels",
+                        hintText: "Select labels...",
                       ),
                     ),
                   ],
