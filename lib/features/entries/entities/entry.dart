@@ -60,7 +60,7 @@ class Entry extends Entity {
 
   get transactionType {
     if (isIncome()) {
-      return TransactionType.withdrawal;
+      return TransactionType.withdraw;
     }
 
     return TransactionType.deposit;
