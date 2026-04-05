@@ -1,3 +1,4 @@
+import 'package:bandha/features/analytics/views/metrics.dart';
 import 'package:bandha/features/vaults/views/vault_editor.dart';
 import 'package:bandha/features/vaults/views/vault_entries.dart';
 import 'package:bandha/features/vaults/views/vault_menu.dart';
@@ -41,6 +42,11 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => MainMenu(),
+        );
+      case '/analytics':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Metrics(),
         );
       case '/entries':
         return MaterialPageRoute(

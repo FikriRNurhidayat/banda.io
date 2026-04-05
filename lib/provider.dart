@@ -1,3 +1,5 @@
+import 'package:bandha/features/analytics/providers/analytic_provider.dart';
+import 'package:bandha/features/analytics/services/analytic_service.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/schedules/services/schedule_service.dart';
@@ -121,6 +123,9 @@ makeProvider({
   );
 
   final toolService = ToolService(dbManager);
+  final analyticService = AnalyticService(
+    entryRepository: entryRepository,
+  );
 
   await notificationManager.init(
     notificationHandler,
@@ -128,6 +133,9 @@ makeProvider({
   );
 
   final providers = [
+    ChangeNotifierProvider(
+      create: (_) => AnalyticProvider(analyticService),
+    ),
     ChangeNotifierProvider(create: (_) => ToolProvider(toolService)),
     ChangeNotifierProvider(
       create: (_) => CategoryProvider(categoryRepository),

@@ -92,9 +92,7 @@ class EntryService extends Service {
     return work<Entry>(() async {
       final vault = await vaultRepository.get(vaultId);
       final category = await categoryRepository.get(categoryId);
-      final labels = (labelIds != null && labelIds.isNotEmpty)
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final labels = await labelRepository.getByIds(labelIds);
 
       final entry = Entry.writeable(
         note: note,
@@ -149,9 +147,7 @@ class EntryService extends Service {
 
       final newVault = await vaultRepository.get(vaultId);
       final newCategory = await categoryRepository.get(categoryId);
-      final newLabels = (labelIds != null && labelIds.isNotEmpty)
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final newLabels = await labelRepository.getByIds(labelIds);
       final newEntry = entry
           .copyWith(
             note: note,

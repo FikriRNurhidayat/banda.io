@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
 
-class MainMenu extends StatelessWidget {
-  MainMenu({super.key});
+class AnalyticMenu extends StatelessWidget {
+  AnalyticMenu({super.key});
 
   final Map<String, String> menu = {
-    "Analytics": "/analytics",
-    "Commitments": "/commitments",
-    "Entries": "/entries",
-    "Info": "/info",
-    "Pools": "/pools",
-    "Schedules": "/schedules",
-    "Tools": "/tools",
-    "Transfers": "/transfers",
-    "Vaults": "/vaults",
+    ""
   };
 
   @override

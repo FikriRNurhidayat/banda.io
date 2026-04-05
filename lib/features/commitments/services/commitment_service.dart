@@ -57,9 +57,7 @@ class CommitmentService extends Service {
       final category = await categoryRepository.get(categoryId);
       final party = await partyRepository.get(partyId);
       final vault = await vaultRepository.get(vaultId);
-      final labels = labelIds != null
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final labels = await labelRepository.getByIds(labelIds);
 
       final entry = Entry.readOnly(
         amount: Commitment.entryAmount(type, amount: amount),
@@ -131,9 +129,7 @@ class CommitmentService extends Service {
 
       final nParty = await partyRepository.get(partyId);
       final nVault = await vaultRepository.get(vaultId);
-      final labels = labelIds != null
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final labels = await labelRepository.getByIds(labelIds);
       final nEntry = commitment.entry.copyWith(
         amount: Commitment.entryAmount(type, amount: amount),
         issuedAt: issuedAt,

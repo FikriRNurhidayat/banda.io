@@ -30,7 +30,11 @@ class Information extends StatelessWidget {
 
           return ListTile(
             title: Text(i["title"]!, style: theme.textTheme.titleSmall),
-            subtitle: Text(i["subtitle"]!, style: theme.textTheme.bodySmall),
+            subtitle: Text(
+              i["subtitle"]!,
+              style: theme.textTheme.bodySmall,
+            ),
+            dense: true,
           );
         },
       ),

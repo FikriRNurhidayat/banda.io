@@ -33,6 +33,45 @@ class EntryRepository extends Repository {
     return EntryRepository(db, withArgs: {...withArgs, "category"});
   }
 
+  Future<double> sum(Filter? filter) async {
+    var baseQuery = "SELECT SUM(entries.amount) as sum FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["sum"] ?? 0;
+  }
+
+  Future<double> average(Filter? filter) async {
+    var baseQuery = "SELECT AVG(entries.amount) as avg FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["avg"] ?? 0;
+  }
+
+  Future<int> count(Filter? filter) async {
+    var baseQuery = "SELECT count(entries.id) as count FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["count"] ?? 0;
+  }
+
   bulkSave(Iterable<Entry> entries) async {
     final client = await getClient();
     client.execute(

@@ -74,7 +74,11 @@ class LabelRepository extends Repository {
     return Label.row(rows.first);
   }
 
-  getByIds(List<String> ids) async {
+  Future<List<Label>> getByIds(List<String>? ids) async {
+    if (ids == null || ids.isEmpty) {
+      return <Label>[];
+    }
+
     final client = await getClient();
     final List<Map> rows = client.select(
       "SELECT * FROM labels WHERE id IN (${ids.map((_) => "?").join(", ")})",
