@@ -55,7 +55,8 @@ class _EntryFilterState extends State<EntryFilter> {
       }
 
       if (widget.specification!.containsKey("issued_between")) {
-        _formData["issued_between"] = widget.specification!["issued_between"];
+        _formData["issued_between"] =
+            widget.specification!["issued_between"];
       }
     }
   }
@@ -116,7 +117,7 @@ class _EntryFilterState extends State<EntryFilter> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        centerTitle: true,
+
         title: const Text(
           "Filter entries",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
@@ -124,7 +125,10 @@ class _EntryFilterState extends State<EntryFilter> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+            child: IconButton(
+              onPressed: _submit,
+              icon: Icon(Icons.check),
+            ),
           ),
         ],
       ),
@@ -158,7 +162,8 @@ class _EntryFilterState extends State<EntryFilter> {
                   children: [
                     TextFormField(
                       initialValue: _formData["note_regex"],
-                      onSaved: (value) => _formData["note_regex"] = value,
+                      onSaved: (value) =>
+                          _formData["note_regex"] = value,
                       decoration: InputStyles.field(
                         labelText: "Note",
                         hintText: "Search note...",
@@ -166,7 +171,8 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     DateTimeRangeFormField(
                       initialValue: _formData["issued_between"],
-                      onSaved: (value) => _formData["issued_between"] = value,
+                      onSaved: (value) =>
+                          _formData["issued_between"] = value,
                       decoration: InputStyles.field(
                         labelText: "Issued between",
                         hintText: "Select date range...",
@@ -174,10 +180,16 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     MultiSelectFormField<EntryStatus>(
                       initialValue: _formData["status_in"] ?? [],
-                      onSaved: (value) => _formData["status_in"] = value,
+                      onSaved: (value) =>
+                          _formData["status_in"] = value,
                       options: EntryStatus.values
                           .where((i) => i != EntryStatus.unknown)
-                          .map((i) => MultiSelectItem(value: i, label: i.label))
+                          .map(
+                            (i) => MultiSelectItem(
+                              value: i,
+                              label: i.label,
+                            ),
+                          )
                           .toList(),
                       decoration: InputStyles.field(
                         labelText: "Status",
@@ -186,10 +198,14 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     MultiSelectFormField<String>(
                       initialValue: _formData["category_in"] ?? [],
-                      onSaved: (value) => _formData["category_in"] = value,
+                      onSaved: (value) =>
+                          _formData["category_in"] = value,
                       options: categories
                           .map(
-                            (i) => MultiSelectItem(value: i.id, label: i.name),
+                            (i) => MultiSelectItem(
+                              value: i.id,
+                              label: i.name,
+                            ),
                           )
                           .toList(),
                       decoration: InputStyles.field(
@@ -200,7 +216,8 @@ class _EntryFilterState extends State<EntryFilter> {
                     if (vaults.isNotEmpty)
                       MultiSelectFormField<String>(
                         initialValue: _formData["vault_in"] ?? [],
-                        onSaved: (value) => _formData["vault_in"] = value,
+                        onSaved: (value) =>
+                            _formData["vault_in"] = value,
                         options: vaults
                             .map(
                               (i) => MultiSelectItem(
@@ -217,11 +234,14 @@ class _EntryFilterState extends State<EntryFilter> {
                     if (labels.isNotEmpty)
                       MultiSelectFormField<String>(
                         initialValue: _formData["label_in"] ?? [],
-                        onSaved: (value) => _formData["label_in"] = value,
+                        onSaved: (value) =>
+                            _formData["label_in"] = value,
                         options: labels
                             .map(
-                              (i) =>
-                                  MultiSelectItem(value: i.id, label: i.name),
+                              (i) => MultiSelectItem(
+                                value: i.id,
+                                label: i.name,
+                              ),
                             )
                             .toList(),
                         decoration: InputStyles.field(

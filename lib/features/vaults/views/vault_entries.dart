@@ -29,7 +29,7 @@ class VaultEntries extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text("Vault", style: theme.textTheme.titleLarge),
-      centerTitle: true,
+
       actions: [
         IconButton(
           onPressed: () {
@@ -53,7 +53,7 @@ class VaultEntries extends StatelessWidget {
         ),
         builder: futureBuilder<List<Entry>>((context, snapshot) {
           final entries = snapshot.data!;
-      
+
           return ListView.builder(
             itemCount: entries.length,
             itemBuilder: (BuildContext context, int index) {

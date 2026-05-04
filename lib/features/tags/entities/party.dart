@@ -17,7 +17,6 @@ class Party extends Tagable {
     required this.updatedAt,
   });
 
-  
   static Party? tryRow(Map<dynamic, dynamic>? row) {
     if (row == null) return null;
     return Party.row(row);

@@ -20,7 +20,10 @@ class VaultFormField extends SelectFormField<String> {
            return [
              if (!readOnly)
                ActionChip(
-                 avatar: Icon(Icons.add, color: theme.colorScheme.outline),
+                 avatar: Icon(
+                   Icons.add,
+                   color: theme.colorScheme.outline,
+                 ),
                  label: Text(
                    "New vault",
                    style: TextStyle(

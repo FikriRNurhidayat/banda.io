@@ -69,8 +69,11 @@ class NumericFormatter extends PatternFormatter {
           locale: locale,
         );
     this.separator = separator ?? formatter.symbols.DECIMAL_SEP;
-    this.thousandSeparator = thousandSeparator ?? formatter.symbols.GROUP_SEP;
-    regex = RegExp(allowFraction ? '[0-9]+([${this.separator}])?' : r'\d+');
+    this.thousandSeparator =
+        thousandSeparator ?? formatter.symbols.GROUP_SEP;
+    regex = RegExp(
+      allowFraction ? '[0-9]+([${this.separator}])?' : r'\d+',
+    );
     filteringInputFormatter = FilteringTextInputFormatter.allow(regex);
 
     assert(
@@ -178,7 +181,10 @@ class NumericFormatter extends PatternFormatter {
   @override
   String? original(String value) => DecimalFormatter(formatter)
       .tryParse(
-        value.replaceAll(thousandSeparator, formatter.symbols.GROUP_SEP),
+        value.replaceAll(
+          thousandSeparator,
+          formatter.symbols.GROUP_SEP,
+        ),
       )
       ?.toString();
 

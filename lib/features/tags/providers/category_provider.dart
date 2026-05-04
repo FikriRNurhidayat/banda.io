@@ -19,7 +19,10 @@ class CategoryProvider extends TagableProvider<Category> {
   }
 
   @override
-  Future<void> update({required String id, required String name}) async {
+  Future<void> update({
+    required String id,
+    required String name,
+  }) async {
     await _repository.update(id: id, name: name);
     notifyListeners();
   }

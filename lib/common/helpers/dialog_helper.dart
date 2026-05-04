@@ -279,20 +279,20 @@ Future<bool?> confirmCommitmentPaymentDeletion(
         "You're about to delete this payment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final commitmentPaymentProvider = context.read<CommitmentPaymentProvider>();
+      final commitmentPaymentProvider = context
+          .read<CommitmentPaymentProvider>();
 
-      await commitmentPaymentProvider.delete(commitment.id, entry.id).catchError((
-        error,
-        stackTrace,
-      ) {
-        if (kDebugMode) {
-          print(error);
-          print(stackTrace);
-        }
+      await commitmentPaymentProvider
+          .delete(commitment.id, entry.id)
+          .catchError((error, stackTrace) {
+            if (kDebugMode) {
+              print(error);
+              print(stackTrace);
+            }
 
-        alert(messenger, "Delete payment failed");
-        throw error;
-      });
+            alert(messenger, "Delete payment failed");
+            throw error;
+          });
     },
   );
 }

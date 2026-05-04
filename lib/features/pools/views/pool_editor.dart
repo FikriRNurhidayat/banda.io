@@ -92,7 +92,7 @@ class _PoolEditorState extends State<PoolEditor> {
         !widget.readOnly ? "Enter pool details" : "Pool details",
         style: theme.textTheme.titleLarge,
       ),
-      centerTitle: true,
+
       actions: [
         if (!widget.readOnly)
           IconButton(

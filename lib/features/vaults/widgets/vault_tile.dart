@@ -51,10 +51,7 @@ class VaultTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      vault.name,
-                      style: theme.textTheme.titleSmall,
-                    ),
+                    Text(vault.name, style: theme.textTheme.titleSmall),
                     Text(
                       vault.holderName,
                       style: theme.textTheme.bodySmall,

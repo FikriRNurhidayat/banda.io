@@ -21,7 +21,10 @@ class GrowableMultiSelectFormField<T> extends MultiSelectFormField<T> {
            return [
              if (!readOnly)
                ActionChip(
-                 avatar: Icon(Icons.add, color: theme.colorScheme.outline),
+                 avatar: Icon(
+                   Icons.add,
+                   color: theme.colorScheme.outline,
+                 ),
                  label: Text(
                    actionText,
                    style: TextStyle(

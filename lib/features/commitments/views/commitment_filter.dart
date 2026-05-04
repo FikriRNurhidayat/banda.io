@@ -44,7 +44,8 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
         _formData["type_in"] = widget.specs!["type_in"];
       }
 
-      if (_formData["party_in"] != null && _formData["party_in"]!.isNotEmpty) {
+      if (_formData["party_in"] != null &&
+          _formData["party_in"]!.isNotEmpty) {
         _formData["party_in"] = widget.specs!["party_in"];
       }
 
@@ -60,7 +61,8 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_formData["type_in"] != null && _formData["type_in"]!.isNotEmpty) {
+      if (_formData["type_in"] != null &&
+          _formData["type_in"]!.isNotEmpty) {
         query["type_in"] = _formData["type_in"];
       }
 
@@ -74,7 +76,8 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
         query["vault_in"] = _formData["vault_in"];
       }
 
-      if (_formData["party_in"] != null && _formData["party_in"]!.isNotEmpty) {
+      if (_formData["party_in"] != null &&
+          _formData["party_in"]!.isNotEmpty) {
         query["party_in"] = _formData["party_in"];
       }
 
@@ -106,7 +109,10 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+            child: IconButton(
+              onPressed: _submit,
+              icon: Icon(Icons.check),
+            ),
           ),
         ],
       ),
@@ -142,7 +148,8 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
                         hintText: "Select date...",
                       ),
                       initialValue: _formData["issued_between"],
-                      onSaved: (value) => _formData["issued_between"] = value,
+                      onSaved: (value) =>
+                          _formData["issued_between"] = value,
                     ),
                     MultiSelectFormField<CommitmentStatus>(
                       decoration: InputStyles.field(
@@ -151,9 +158,15 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
                       ),
                       initialValue: _formData["status_in"] ?? [],
                       options: CommitmentStatus.values
-                          .map((i) => MultiSelectItem(value: i, label: i.label))
+                          .map(
+                            (i) => MultiSelectItem(
+                              value: i,
+                              label: i.label,
+                            ),
+                          )
                           .toList(),
-                      onSaved: (value) => _formData["status_in"] = value,
+                      onSaved: (value) =>
+                          _formData["status_in"] = value,
                     ),
                     if (parties.isNotEmpty)
                       MultiSelectFormField<String>(
@@ -164,11 +177,14 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
                         initialValue: _formData["party_in"] ?? [],
                         options: parties
                             .map(
-                              (i) =>
-                                  MultiSelectItem(value: i.id, label: i.name),
+                              (i) => MultiSelectItem(
+                                value: i.id,
+                                label: i.name,
+                              ),
                             )
                             .toList(),
-                        onSaved: (value) => _formData["party_in"] = value,
+                        onSaved: (value) =>
+                            _formData["party_in"] = value,
                       ),
                     if (vaults.isNotEmpty)
                       MultiSelectFormField<String>(
@@ -185,7 +201,8 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
                               ),
                             )
                             .toList(),
-                        onSaved: (value) => _formData["vault_in"] = value,
+                        onSaved: (value) =>
+                            _formData["vault_in"] = value,
                       ),
                   ],
                 ),

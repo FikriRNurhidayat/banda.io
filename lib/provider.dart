@@ -1,5 +1,4 @@
-import 'package:bandha/features/analytics/providers/analytic_provider.dart';
-import 'package:bandha/features/analytics/services/analytic_service.dart';
+import 'package:bandha/features/schedules/providers/schedule_filter_provider.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/schedules/services/schedule_service.dart';
@@ -9,6 +8,7 @@ import 'package:bandha/features/commitments/services/commitment_payment_service.
 import 'package:bandha/features/commitments/services/commitment_service.dart';
 import 'package:bandha/features/main/providers/tool_provider.dart';
 import 'package:bandha/features/main/services/tool_service.dart';
+import 'package:bandha/features/transfers/providers/transfer_filter_provider.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/features/transfers/services/transfer_service.dart';
@@ -123,9 +123,6 @@ makeProvider({
   );
 
   final toolService = ToolService(dbManager);
-  final analyticService = AnalyticService(
-    entryRepository: entryRepository,
-  );
 
   await notificationManager.init(
     notificationHandler,
@@ -133,9 +130,6 @@ makeProvider({
   );
 
   final providers = [
-    ChangeNotifierProvider(
-      create: (_) => AnalyticProvider(analyticService),
-    ),
     ChangeNotifierProvider(create: (_) => ToolProvider(toolService)),
     ChangeNotifierProvider(
       create: (_) => CategoryProvider(categoryRepository),
@@ -166,6 +160,8 @@ makeProvider({
     ChangeNotifierProvider(create: (_) => CommitmentFilterProvider()),
     ChangeNotifierProvider(create: (_) => CommitmentTabProvider()),
     ChangeNotifierProvider(create: (_) => PoolFilterProvider()),
+    ChangeNotifierProvider(create: (_) => ScheduleFilterProvider()),
+    ChangeNotifierProvider(create: (_) => TransferFilterProvider()),
   ];
 
   return MultiProvider(providers: providers, child: child);

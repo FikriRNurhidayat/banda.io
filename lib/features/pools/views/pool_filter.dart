@@ -109,11 +109,14 @@ class _PoolFilterState extends State<PoolFilter> {
           "Filter pool",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
-        centerTitle: true,
+
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+            child: IconButton(
+              onPressed: _submit,
+              icon: Icon(Icons.check),
+            ),
           ),
         ],
       ),

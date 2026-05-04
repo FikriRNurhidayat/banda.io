@@ -26,7 +26,9 @@ class NotificationHandler {
         return;
       }
 
-      final Map<String, dynamic> payload = jsonDecode(response.payload!);
+      final Map<String, dynamic> payload = jsonDecode(
+        response.payload!,
+      );
       final controller = Controller(
         ControllerType.parse(payload["controller_type"]),
         payload["controller_id"],

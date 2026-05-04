@@ -32,7 +32,9 @@ class VaultService extends Service {
       await vaultRepository.save(vault);
 
       if (!isZero(balance)) {
-        final category = await categoryRepository.getByName("Adjustment");
+        final category = await categoryRepository.getByName(
+          "Adjustment",
+        );
 
         final entry = Entry.readOnly(
           amount: balance,
@@ -59,7 +61,9 @@ class VaultService extends Service {
       final vault = await vaultRepository.get(id);
 
       if (vault.balance != balance) {
-        final category = await categoryRepository.getByName("Adjustment");
+        final category = await categoryRepository.getByName(
+          "Adjustment",
+        );
         final delta = balance - vault.balance;
         final entry = Entry.readOnly(
           amount: delta,

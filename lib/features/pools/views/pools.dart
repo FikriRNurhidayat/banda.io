@@ -1,9 +1,8 @@
+import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/pools/entities/pool.dart';
-import 'package:bandha/features/pools/views/pool_filter.dart';
 import 'package:bandha/features/pools/providers/pool_filter_provider.dart';
 import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/features/pools/widgets/pool_tile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,13 +23,23 @@ class Pools extends StatelessWidget {
         ),
       IconButton(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => PoolFilter(specs: filterProvider.get()),
-            ),
+          Navigator.pushNamed(
+            context,
+            "/pools/filter",
+            arguments: filterProvider.get(),
           );
         },
         icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/pools/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
       ),
     ];
   }
@@ -43,51 +52,26 @@ class Pools extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Pools",
-          style: theme.textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Pools", style: theme.textTheme.titleLarge),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: poolProvider.search(filterProvider.get()),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            if (kDebugMode) {
-              print(snapshot.error);
-              print(snapshot.stackTrace);
-            }
-
-            return Center(child: Text("..."));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
+        builder: futureBuilder((context, snapshot) {
+          final pools = snapshot.data as List<Pool>;
 
           return SafeArea(
             child: ListView.builder(
-              itemCount: snapshot.data?.length ?? 0,
+              itemCount: pools.length,
               itemBuilder: (BuildContext context, int index) {
-                final Pool pool = snapshot.data![index];
+                final Pool pool = pools[index];
                 return PoolTile(pool);
               },
             ),
           );
-        },
+        }),
       ),
     );
   }

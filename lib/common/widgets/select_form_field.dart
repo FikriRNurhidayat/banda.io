@@ -48,11 +48,12 @@ class SelectFormField<T> extends FormField<T> {
                        )
                        as Widget;
                  }).toList()
-               : options.where((option) => state.value == option.value).map((
-                   option,
-                 ) {
-                   return Text(option.label) as Widget;
-                 }).toList();
+               : options
+                     .where((option) => state.value == option.value)
+                     .map((option) {
+                       return Text(option.label) as Widget;
+                     })
+                     .toList();
 
            if (actions != null) {
              chips.addAll(actions);

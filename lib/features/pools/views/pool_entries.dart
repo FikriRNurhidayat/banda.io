@@ -27,7 +27,7 @@ class PoolEntries extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text("Pool", style: theme.textTheme.titleLarge),
-      centerTitle: true,
+
       actions: [
         IconButton(
           onPressed: () {
@@ -60,7 +60,9 @@ class PoolEntries extends StatelessWidget {
       future: poolProvider.get(poolId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasError) {
@@ -90,9 +92,12 @@ class PoolEntries extends StatelessWidget {
                 PoolTile(pool, readOnly: true),
                 Divider(height: 1),
                 FutureBuilder(
-                  future: poolProvider.searchTransactions(poolId: pool.id),
+                  future: poolProvider.searchTransactions(
+                    poolId: pool.id,
+                  ),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     }
 
@@ -105,7 +110,8 @@ class PoolEntries extends StatelessWidget {
                         child: Center(
                           child: Icon(
                             Icons.dashboard_customize_outlined,
-                            size: theme.textTheme.displayLarge!.fontSize,
+                            size:
+                                theme.textTheme.displayLarge!.fontSize,
                           ),
                         ),
                       );

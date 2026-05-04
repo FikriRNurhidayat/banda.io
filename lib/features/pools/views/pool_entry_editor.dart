@@ -98,7 +98,7 @@ class _PoolEntryEditorState extends State<PoolEntryEditor> {
         !widget.readOnly ? "Enter entry details" : "Entry details",
         style: theme.textTheme.titleLarge,
       ),
-      centerTitle: true,
+
       actions: [
         if (!widget.readOnly)
           Padding(

@@ -1,3 +1,4 @@
+import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/vaults/widgets/vault_tile.dart';
@@ -14,43 +15,22 @@ class Vaults extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Vaults",
-          style: theme.textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Vaults", style: theme.textTheme.titleLarge),
         actionsPadding: EdgeInsets.all(8),
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: vaultProvider.search(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text("...", style: theme.textTheme.bodySmall));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
-
+        builder: futureBuilder((context, snapshot) {
+          final vaults = snapshot.data as List<Vault>;
           return ListView.builder(
-            itemCount: snapshot.data?.length ?? 0,
+            itemCount: vaults.length,
             itemBuilder: (BuildContext context, int index) {
-              final Vault vault = snapshot.data![index];
+              final Vault vault = vaults[index];
               return VaultTile(vault);
             },
           );
-        },
+        }),
       ),
     );
   }

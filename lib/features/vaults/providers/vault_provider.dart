@@ -17,11 +17,7 @@ class VaultProvider extends ChangeNotifier {
     required double balance,
   }) {
     return vaultService
-        .create(
-          name: name,
-          holderName: holderName,
-          balance: balance,
-        )
+        .create(name: name, holderName: holderName, balance: balance)
         .then((_) => notifyListeners());
   }
 

@@ -10,7 +10,8 @@ import 'package:bandha/features/tags/entities/label.dart';
 class ScheduleRepository extends Repository {
   WithArgs withArgs;
 
-  ScheduleRepository(super.db, {WithArgs? withArgs}) : withArgs = withArgs ?? {};
+  ScheduleRepository(super.db, {WithArgs? withArgs})
+    : withArgs = withArgs ?? {};
 
   ScheduleRepository withLabels() {
     withArgs.add("labels");
@@ -76,7 +77,8 @@ class ScheduleRepository extends Repository {
     var baseQuery = "SELECT schedules.* FROM schedules";
 
     final query = defineQuery(baseQuery, filter);
-    final sqlString = "${query.first} ORDER BY schedules.updated_at DESC";
+    final sqlString =
+        "${query.first} ORDER BY schedules.updated_at DESC";
     final sqlArgs = query.second;
 
     final rows = client.select(sqlString, sqlArgs);
@@ -86,12 +88,19 @@ class ScheduleRepository extends Repository {
 
   Future<Schedule?> get(String id) async {
     final client = await getClient();
-    final rows = client.select("SELECT schedules.* FROM schedules WHERE id = ?", [id]);
+    final rows = client.select(
+      "SELECT schedules.* FROM schedules WHERE id = ?",
+      [id],
+    );
     return (await entities(rows)).firstOrNull;
   }
 
   populateLabels(List<Map> rows) {
-    return super.populateEntityLabels(rows, "schedule_labels", "schedule_id");
+    return super.populateEntityLabels(
+      rows,
+      "schedule_labels",
+      "schedule_id",
+    );
   }
 
   Future<List<Schedule>> entities(List<Map> rows) async {

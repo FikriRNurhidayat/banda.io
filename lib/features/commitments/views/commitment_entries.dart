@@ -63,7 +63,7 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
         onPressed: () => Navigator.pop(context),
       ),
       title: Text("Commitment", style: theme.textTheme.titleLarge),
-      centerTitle: true,
+
       actions: [
         IconButton(
           onPressed: () {

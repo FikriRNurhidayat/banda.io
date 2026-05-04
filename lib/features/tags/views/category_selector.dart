@@ -10,7 +10,8 @@ class CategorySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return TagableSelector<Category, CategoryProvider>(
       title: "Edit categories",
-      deletePromptText: "Are you sure you want to delete this category?",
+      deletePromptText:
+          "Are you sure you want to delete this category?",
       deletePromptTitle: "Delete category",
       hintText: "Create new category",
     );

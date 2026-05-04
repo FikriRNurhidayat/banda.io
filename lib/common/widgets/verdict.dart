@@ -63,7 +63,10 @@ class Verdict extends StatelessWidget {
                             navigator.pop(false);
                           });
                     },
-                    child: Text("Yes", style: theme.textTheme.bodySmall),
+                    child: Text(
+                      "Yes",
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                 ],
               ),

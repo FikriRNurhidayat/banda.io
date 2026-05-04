@@ -24,7 +24,10 @@ class TagableSelector<I extends Tagable, P extends TagableProvider<I>>
   State<StatefulWidget> createState() => _TagableSelectorState<I, P>();
 }
 
-class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
+class _TagableSelectorState<
+  I extends Tagable,
+  P extends TagableProvider<I>
+>
     extends State<TagableSelector> {
   String? editId;
 
@@ -120,7 +123,6 @@ class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
           widget.title,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
-        centerTitle: true,
       ),
       body: FutureBuilder<List<I>>(
         future: itemableProvider.search(),
@@ -146,7 +148,10 @@ class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
                   ),
                 ),
                 trailing: _createFocus.hasFocus
-                    ? GestureDetector(onTap: _create, child: Icon(Icons.check))
+                    ? GestureDetector(
+                        onTap: _create,
+                        child: Icon(Icons.check),
+                      )
                     : null,
               ),
               ...items.where((i) => !i.readOnly!).map((item) {

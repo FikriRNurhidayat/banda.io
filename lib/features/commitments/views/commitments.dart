@@ -1,9 +1,9 @@
+import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/commitments/entities/commitment.dart';
 import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
 import 'package:bandha/features/commitments/providers/commitment_provider.dart';
 import 'package:bandha/features/commitments/views/commitment_filter.dart';
 import 'package:bandha/features/commitments/widgets/commitment_tile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,13 +24,23 @@ class Commitments extends StatefulWidget {
         ),
       IconButton(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => CommitmentFilter(specs: filterProvider.get()),
-            ),
+          Navigator.pushNamed(
+            context,
+            "/commiments/filter",
+            arguments: filterProvider.get(),
           );
         },
         icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/commiments/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
       ),
     ];
   }
@@ -57,51 +67,26 @@ class _CommitmentsState extends State<Commitments> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Commitments",
-          style: theme.textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Commitments", style: theme.textTheme.titleLarge),
         actions: widget.actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),
       floatingActionButton: widget.fabBuilder(context),
       body: FutureBuilder(
         future: commitmentProvider.search(filterProvider.get()),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            if (kDebugMode) {
-              print(snapshot.error);
-              print(snapshot.stackTrace);
-            }
-
-            return Center(child: Text("..."));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
+        builder: futureBuilder((context, snapshot) {
+          final commitments = snapshot.data as List<Commitment>;
 
           return SafeArea(
             child: ListView.builder(
-              itemCount: snapshot.data?.length ?? 0,
+              itemCount: commitments.length,
               itemBuilder: (BuildContext context, int index) {
-                final Commitment commitment = snapshot.data![index];
+                final Commitment commitment = commitments[index];
                 return CommitmentTile(commitment);
               },
             ),
           );
-        },
+        }),
       ),
     );
   }

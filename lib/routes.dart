@@ -1,4 +1,3 @@
-import 'package:bandha/features/analytics/views/metrics.dart';
 import 'package:bandha/features/vaults/views/vault_editor.dart';
 import 'package:bandha/features/vaults/views/vault_entries.dart';
 import 'package:bandha/features/vaults/views/vault_menu.dart';
@@ -42,11 +41,6 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => MainMenu(),
-        );
-      case '/analytics':
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => Metrics(),
         );
       case '/entries':
         return MaterialPageRoute(
@@ -156,7 +150,8 @@ class Routes {
     }
 
     final uri = Uri.parse(settings.name!);
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "edit") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "edit") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
@@ -193,7 +188,8 @@ class Routes {
       }
     }
 
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "menu") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "menu") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
@@ -230,7 +226,8 @@ class Routes {
       }
     }
 
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "payments") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "payments") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
@@ -255,7 +252,8 @@ class Routes {
       }
     }
 
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "history") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "history") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
@@ -267,7 +265,8 @@ class Routes {
       }
     }
 
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "entries") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "entries") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
@@ -289,14 +288,16 @@ class Routes {
       }
     }
 
-    if (uri.pathSegments.length == 3 && uri.pathSegments.last == "detail") {
+    if (uri.pathSegments.length == 3 &&
+        uri.pathSegments.last == "detail") {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
         case 'schedules':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => ScheduleEditor(id: id, readOnly: true),
+            builder: (context) =>
+                ScheduleEditor(id: id, readOnly: true),
           );
         case 'entries':
           return MaterialPageRoute(
@@ -306,7 +307,8 @@ class Routes {
         case 'commitments':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => CommitmentEditor(id: id, readOnly: true),
+            builder: (context) =>
+                CommitmentEditor(id: id, readOnly: true),
           );
         case 'vaults':
           return MaterialPageRoute(
@@ -316,7 +318,8 @@ class Routes {
         case 'transfers':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => TransferEditor(id: id, readOnly: true),
+            builder: (context) =>
+                TransferEditor(id: id, readOnly: true),
           );
         case 'pools':
           return MaterialPageRoute(
@@ -332,7 +335,8 @@ class Routes {
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => PoolEntryEditor(poolId: uri.pathSegments[1]),
+          builder: (context) =>
+              PoolEntryEditor(poolId: uri.pathSegments[1]),
         );
       }
     }
@@ -343,7 +347,8 @@ class Routes {
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => CommitmentEntryEditor(commitmentId: uri.pathSegments[1]),
+          builder: (context) =>
+              CommitmentEntryEditor(commitmentId: uri.pathSegments[1]),
         );
       }
     }

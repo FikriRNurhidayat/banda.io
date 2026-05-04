@@ -27,7 +27,8 @@ class CommitmentEntryEditor extends StatefulWidget {
   });
 
   @override
-  State<CommitmentEntryEditor> createState() => CommitmentEntryEditorState();
+  State<CommitmentEntryEditor> createState() =>
+      CommitmentEntryEditorState();
 }
 
 class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
@@ -46,7 +47,8 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final commitmentPaymentProvider = context.read<CommitmentPaymentProvider>();
+    final commitmentPaymentProvider = context
+        .read<CommitmentPaymentProvider>();
 
     if (form.currentState!.validate()) {
       try {
@@ -93,12 +95,12 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
     final theme = Theme.of(context);
     final vaultProvider = context.watch<VaultProvider>();
     final commitmentProvider = context.watch<CommitmentProvider>();
-    final commitmentPaymentProvider = context.watch<CommitmentPaymentProvider>();
+    final commitmentPaymentProvider = context
+        .watch<CommitmentPaymentProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -129,7 +131,10 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
               vaultProvider.search(),
               commitmentProvider.get(widget.commitmentId),
               if (widget.entryId != null)
-                commitmentPaymentProvider.get(widget.commitmentId, widget.entryId!),
+                commitmentPaymentProvider.get(
+                  widget.commitmentId,
+                  widget.entryId!,
+                ),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

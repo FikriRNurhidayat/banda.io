@@ -10,7 +10,10 @@ class PoolMenu extends StatelessWidget {
 
   const PoolMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Pool pool) {
+  Map<String, GestureTapCallback> menuBuilder(
+    BuildContext context,
+    Pool pool,
+  ) {
     final navigator = Navigator.of(context);
     final poolProvider = context.read<PoolProvider>();
 
@@ -34,7 +37,10 @@ class PoolMenu extends StatelessWidget {
         await poolProvider
             .sync(id)
             .catchError(
-              showError(context: context, content: "Balance pool failed"),
+              showError(
+                context: context,
+                content: "Balance pool failed",
+              ),
             );
         navigator.pop();
       },
@@ -45,7 +51,10 @@ class PoolMenu extends StatelessWidget {
         await poolProvider
             .release(id)
             .catchError(
-              showError(context: context, content: "Release pool failed"),
+              showError(
+                context: context,
+                content: "Release pool failed",
+              ),
             );
         navigator.pop();
       };
@@ -56,7 +65,10 @@ class PoolMenu extends StatelessWidget {
         await poolProvider
             .retract(id)
             .catchError(
-              showError(context: context, content: "Retract pool failed"),
+              showError(
+                context: context,
+                content: "Retract pool failed",
+              ),
             );
         navigator.pop();
       };
@@ -100,7 +112,10 @@ class PoolMenu extends StatelessWidget {
               itemBuilder: (context, index) {
                 final callback = menu.entries.elementAt(index);
                 return ListTile(
-                  title: Text(callback.key, textAlign: TextAlign.center),
+                  title: Text(
+                    callback.key,
+                    textAlign: TextAlign.center,
+                  ),
                   onTap: callback.value,
                 );
               },

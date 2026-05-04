@@ -53,7 +53,8 @@ class CommitmentPaymentRepository extends Repository {
   }
 
   Future<List<CommitmentPayment>> search({Filter? filter}) async {
-    var baseQuery = "SELECT commitment_payments.* FROM commitment_payments";
+    var baseQuery =
+        "SELECT commitment_payments.* FROM commitment_payments";
 
     final query = _defineQuery(baseQuery, filter);
     final sqlString =
@@ -66,7 +67,9 @@ class CommitmentPaymentRepository extends Repository {
     return await _entities(commitmentRows);
   }
 
-  Future<List<CommitmentPayment>> getByCommitmentId(String commitmentId) {
+  Future<List<CommitmentPayment>> getByCommitmentId(
+    String commitmentId,
+  ) {
     return search(
       filter: {
         "commitment_in": [commitmentId],
@@ -74,7 +77,10 @@ class CommitmentPaymentRepository extends Repository {
     );
   }
 
-  Future<CommitmentPayment> get(String commitmentId, String entryId) async {
+  Future<CommitmentPayment> get(
+    String commitmentId,
+    String entryId,
+  ) async {
     final client = await getClient();
     final rows = client.select(
       "SELECT * FROM commitment_payments WHERE commitment_id = ? AND entry_id = ?",
@@ -135,7 +141,9 @@ class CommitmentPaymentRepository extends Repository {
 
     if (specification.containsKey("created_between")) {
       final value = specification["created_between"] as DateTimeRange;
-      where["query"].add("(commitment_payments.created_at BETWEEN ? AND ?)");
+      where["query"].add(
+        "(commitment_payments.created_at BETWEEN ? AND ?)",
+      );
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -144,7 +152,9 @@ class CommitmentPaymentRepository extends Repository {
 
     if (specification.containsKey("updated_between")) {
       final value = specification["updated_between"] as DateTimeRange;
-      where["query"].add("(commitment_payments.updated_at BETWEEN ? AND ?)");
+      where["query"].add(
+        "(commitment_payments.updated_at BETWEEN ? AND ?)",
+      );
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -153,7 +163,9 @@ class CommitmentPaymentRepository extends Repository {
 
     if (specification.containsKey("issued_between")) {
       final value = specification["issued_between"] as DateTimeRange;
-      where["query"].add("(commitment_payments.issued_at BETWEEN ? AND ?)");
+      where["query"].add(
+        "(commitment_payments.issued_at BETWEEN ? AND ?)",
+      );
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -217,8 +229,7 @@ class CommitmentPaymentRepository extends Repository {
           return {
             ...row,
             "vault": vaultRows.firstWhere(
-              (vaultRow) =>
-                  vaultRow["id"] == row["entry"]["vault_id"],
+              (vaultRow) => vaultRow["id"] == row["entry"]["vault_id"],
             ),
           };
         }).toList();
@@ -235,7 +246,8 @@ class CommitmentPaymentRepository extends Repository {
         return {
           ...row,
           "commitment": commitmentRows.firstWhere(
-            (commitmentRow) => commitmentRow["id"] == row["commitment_id"],
+            (commitmentRow) =>
+                commitmentRow["id"] == row["commitment_id"],
           ),
         };
       }).toList();
@@ -252,9 +264,10 @@ class CommitmentPaymentRepository extends Repository {
         row["entry"],
       )?.withCategory(category).withVault(vault);
 
-      return CommitmentPayment.fromRow(
-        row,
-      ).withAddition(addition).withCommitment(commitment).withEntry(entry);
+      return CommitmentPayment.fromRow(row)
+          .withAddition(addition)
+          .withCommitment(commitment)
+          .withEntry(entry);
     }).toList();
   }
 }

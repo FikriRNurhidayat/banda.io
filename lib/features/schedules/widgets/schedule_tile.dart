@@ -28,7 +28,9 @@ class ScheduleTile extends StatelessWidget {
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/schedules/${schedule.id}/detail" : "/schedules/${schedule.id}/history",
+      readOnly
+          ? "/schedules/${schedule.id}/detail"
+          : "/schedules/${schedule.id}/history",
     );
   }
 
@@ -42,7 +44,11 @@ class ScheduleTile extends StatelessWidget {
           size: 8,
         );
       case ScheduleStatus.overdue:
-        return Icon(Icons.warning, color: theme.colorScheme.primary, size: 8);
+        return Icon(
+          Icons.warning,
+          color: theme.colorScheme.primary,
+          size: 8,
+        );
       default:
         return SizedBox(width: 8);
     }
@@ -78,7 +84,10 @@ class ScheduleTile extends StatelessWidget {
       children: [
         Text(schedule.category.name, style: theme.textTheme.titleSmall),
         Text(schedule.cycle.label, style: theme.textTheme.labelSmall),
-        Text("x${schedule.iteration.toString()}", style: theme.textTheme.labelSmall),
+        Text(
+          "x${schedule.iteration.toString()}",
+          style: theme.textTheme.labelSmall,
+        ),
         statusBuilder(context),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/providers/schedule_filter_provider.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/schedules/widgets/schedule_tile.dart';
 import 'package:flutter/material.dart';
@@ -17,16 +18,47 @@ class Schedules extends StatelessWidget {
     );
   }
 
+  List<Widget> actionsBuilder(BuildContext context) {
+    final filterProvider = context.watch<ScheduleFilterProvider>();
+    final filter = filterProvider.get();
+
+    return [
+      if (filter != null)
+        IconButton(
+          onPressed: () {
+            filterProvider.reset();
+          },
+          icon: Icon(Icons.close),
+        ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/schedules/filter",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/schedules/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
+      ),
+    ];
+  }
+
   PreferredSizeWidget appBarBuilder(BuildContext context) {
     final theme = Theme.of(context);
 
     return AppBar(
-      title: Text(
-        "Schedules",
-        style: theme.textTheme.titleLarge,
-        textAlign: TextAlign.center,
-      ),
-      centerTitle: true,
+      title: Text("Schedules", style: theme.textTheme.titleLarge),
+      actions: actionsBuilder(context),
       actionsPadding: EdgeInsets.all(8),
     );
   }

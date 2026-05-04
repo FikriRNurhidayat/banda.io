@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 class MainMenu extends StatelessWidget {
   MainMenu({super.key});
 
-  final Map<String, String> menu = {
-    "Analytics": "/analytics",
-    "Commitments": "/commitments",
-    "Entries": "/entries",
-    "Info": "/info",
-    "Pools": "/pools",
-    "Schedules": "/schedules",
-    "Tools": "/tools",
-    "Transfers": "/transfers",
-    "Vaults": "/vaults",
-  };
+  final List<List<String>> menu = [
+    ["Commitments", "/commitments"],
+    ["Entries", "/entries"],
+    ["Information", "/info"],
+    ["Pools", "/pools"],
+    ["Schedules", "/schedules"],
+    ["Tools", "/tools"],
+    ["Transfers", "/transfers"],
+    ["Vaults", "/vaults"],
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: Center(
         child: ListView.builder(
@@ -24,11 +25,15 @@ class MainMenu extends StatelessWidget {
           shrinkWrap: true,
           itemCount: menu.length,
           itemBuilder: (context, index) {
-            final item = menu.entries.elementAt(index);
+            final [name, redirect] = menu[index];
             return ListTile(
-              title: Text(item.key, textAlign: TextAlign.center),
+              title: Text(
+                name,
+                style: theme.textTheme.titleSmall,
+                textAlign: TextAlign.center,
+              ),
               onTap: () {
-                Navigator.pushNamed(context, item.value);
+                Navigator.pushNamed(context, redirect);
               },
             );
           },

@@ -75,7 +75,10 @@ class EntryMenu extends StatelessWidget {
               itemBuilder: (context, index) {
                 final callback = menu.entries.elementAt(index);
                 return ListTile(
-                  title: Text(callback.key, textAlign: TextAlign.center),
+                  title: Text(
+                    callback.key,
+                    textAlign: TextAlign.center,
+                  ),
                   onTap: callback.value,
                 );
               },

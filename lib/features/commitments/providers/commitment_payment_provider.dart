@@ -54,7 +54,10 @@ class CommitmentPaymentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<CommitmentPayment> get(String commitmentId, String entryId) async {
+  Future<CommitmentPayment> get(
+    String commitmentId,
+    String entryId,
+  ) async {
     return paymentService.get(commitmentId, entryId);
   }
 

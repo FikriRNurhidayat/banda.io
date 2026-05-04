@@ -15,26 +15,42 @@ AsyncWidgetBuilder<T> futureBuilder<T>(AsyncWidgetBuilder<T> callback) {
         print(snapshot.stackTrace);
       }
 
-      return Center(child: Text("..."));
+      return Center(child: Text("ERROR"));
     }
 
     if (!snapshot.hasData) {
-      return Center(
-        child: Icon(
-          Icons.dashboard_customize_outlined,
-          size: theme.textTheme.displayLarge!.fontSize,
-        ),
+      return ListView(
+        children: [
+          ListTile(
+            dense: true,
+            title: Text(
+              "List is empty",
+              style: theme.textTheme.titleSmall,
+            ),
+            subtitle: Text(
+              "Tap the add button to create your first entry.",
+            ),
+          ),
+        ],
       );
     }
 
     if (snapshot.data is List<dynamic>) {
       final data = snapshot.data as List<dynamic>;
       if (data.isEmpty) {
-        return Center(
-          child: Icon(
-            Icons.dashboard_customize_outlined,
-            size: theme.textTheme.displayLarge!.fontSize,
-          ),
+        return ListView(
+          children: [
+            ListTile(
+              dense: true,
+              title: Text(
+                "List is empty",
+                style: theme.textTheme.titleSmall,
+              ),
+              subtitle: Text(
+                "Tap the add button to create your first entry.",
+              ),
+            ),
+          ],
         );
       }
     }

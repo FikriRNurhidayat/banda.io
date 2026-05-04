@@ -96,7 +96,7 @@ class _TransferEditorState extends State<TransferEditor> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        centerTitle: true,
+
         title: Text(
           !widget.readOnly
               ? "Enter transfer details"

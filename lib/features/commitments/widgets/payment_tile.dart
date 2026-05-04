@@ -13,7 +13,11 @@ class PaymentTile extends StatelessWidget {
   final CommitmentPayment payment;
   final dateFormatter = DateFormat("yyyy/MM/dd");
 
-  PaymentTile({super.key, required this.payment, required this.commitment});
+  PaymentTile({
+    super.key,
+    required this.payment,
+    required this.commitment,
+  });
 
   Future<bool?> handleDismiss(
     BuildContext context,

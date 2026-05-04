@@ -30,7 +30,7 @@ class TransferEntries extends StatelessWidget {
         "Transfer",
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
       ),
-      centerTitle: true,
+
       actions: [
         IconButton(
           onPressed: () {

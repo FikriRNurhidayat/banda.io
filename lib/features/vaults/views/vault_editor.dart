@@ -72,7 +72,7 @@ class VaultEditor extends StatelessWidget {
           !readOnly ? "Enter vault details" : "Vault details",
           style: theme.textTheme.titleLarge,
         ),
-        centerTitle: true,
+
         actions: [
           if (!readOnly)
             Padding(
@@ -111,9 +111,7 @@ class VaultEditor extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final vault = id != null
-              ? snapshot.data![0] as Vault
-              : null;
+          final vault = id != null ? snapshot.data![0] as Vault : null;
 
           return Padding(
             padding: EdgeInsets.all(16),
@@ -140,8 +138,7 @@ class VaultEditor extends StatelessWidget {
                       labelText: "Holder",
                       hintText: "Enter holder name...",
                     ),
-                    initialValue:
-                        _d["holderName"] ?? vault?.holderName,
+                    initialValue: _d["holderName"] ?? vault?.holderName,
                     onSaved: (value) => _d["holderName"] = value ?? '',
                     validator: (value) => value == null || value.isEmpty
                         ? "Holder is required"

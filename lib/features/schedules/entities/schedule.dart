@@ -333,7 +333,9 @@ enum ScheduleStatus {
   }
 
   static parse(String value) {
-    return ScheduleStatus.values.firstWhere((status) => status.label == value);
+    return ScheduleStatus.values.firstWhere(
+      (status) => status.label == value,
+    );
   }
 
   final String label;
@@ -411,7 +413,7 @@ enum ScheduleCycle {
         return _nextYear(dateTime, 1);
     }
   }
-  
+
   static ScheduleCycle? tryParse(String? value) {
     if (value == null) return null;
     try {
@@ -422,7 +424,9 @@ enum ScheduleCycle {
   }
 
   static ScheduleCycle parse(String value) {
-    return ScheduleCycle.values.firstWhere((cycle) => cycle.label == value);
+    return ScheduleCycle.values.firstWhere(
+      (cycle) => cycle.label == value,
+    );
   }
 
   final String label;

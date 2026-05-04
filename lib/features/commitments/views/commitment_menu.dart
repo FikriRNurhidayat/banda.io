@@ -10,7 +10,10 @@ class CommitmentMenu extends StatelessWidget {
 
   const CommitmentMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Commitment commitment) {
+  Map<String, GestureTapCallback> menuBuilder(
+    BuildContext context,
+    Commitment commitment,
+  ) {
     final navigator = Navigator.of(context);
     final commitmentProvider = context.read<CommitmentProvider>();
 
@@ -80,7 +83,10 @@ class CommitmentMenu extends StatelessWidget {
               itemBuilder: (context, index) {
                 final callback = menu.entries.elementAt(index);
                 return ListTile(
-                  title: Text(callback.key, textAlign: TextAlign.center),
+                  title: Text(
+                    callback.key,
+                    textAlign: TextAlign.center,
+                  ),
                   onTap: callback.value,
                 );
               },

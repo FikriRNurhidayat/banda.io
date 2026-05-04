@@ -1,3 +1,4 @@
+import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
@@ -16,44 +17,26 @@ class Entries extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Entries",
-          style: theme.textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Entries", style: theme.textTheme.titleLarge),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
-        future: entryProvider.search(specification: filterProvider.get()),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text("..."));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
+        future: entryProvider.search(
+          specification: filterProvider.get(),
+        ),
+        builder: futureBuilder((context, snapshot) {
+          final entries = snapshot.data as List<Entry>;
 
           return ListView.builder(
-            itemCount: snapshot.data?.length ?? 0,
+            itemCount: entries.length,
             itemBuilder: (BuildContext context, int index) {
-              final Entry entry = snapshot.data![index];
+              final Entry entry = entries[index];
               return EntryTile(entry);
             },
           );
-        },
+        }),
       ),
     );
   }
@@ -82,6 +65,16 @@ class Entries extends StatelessWidget {
           );
         },
         icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/entries/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
       ),
     ];
   }

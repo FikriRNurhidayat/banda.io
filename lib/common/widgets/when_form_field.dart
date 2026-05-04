@@ -122,7 +122,8 @@ class WhenFormField extends FormField<When> {
                          selected: option == state.value?.option,
                          onSelected: !readOnly
                              ? (selected) {
-                                 if (selected) field.didChange(When(option));
+                                 if (selected)
+                                   field.didChange(When(option));
                                }
                              : null,
                        );

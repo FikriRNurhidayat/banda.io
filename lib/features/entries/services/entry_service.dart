@@ -26,10 +26,9 @@ class EntryService extends Service {
 
   Future<void> snooze(String id) async {
     return work(() async {
-      final entry = await entryRepository
-          .withVault()
-          .withLabels()
-          .get(id);
+      final entry = await entryRepository.withVault().withLabels().get(
+        id,
+      );
       await entryRepository.save(
         entry.copyWith(issuedAt: entry.issuedAt.add(Duration(days: 1))),
       );
@@ -38,10 +37,9 @@ class EntryService extends Service {
 
   Future<void> markAsDone(String id) async {
     return work(() async {
-      final entry = await entryRepository
-          .withVault()
-          .withLabels()
-          .get(id);
+      final entry = await entryRepository.withVault().withLabels().get(
+        id,
+      );
       await entryRepository.save(
         entry.copyWith(status: EntryStatus.done),
       );
@@ -50,10 +48,9 @@ class EntryService extends Service {
 
   delete(String id) {
     return work(() async {
-      final entry = await entryRepository
-          .withVault()
-          .withLabels()
-          .get(id);
+      final entry = await entryRepository.withVault().withLabels().get(
+        id,
+      );
       final vault = entry.vault.revokeEntry(entry);
       await entryRepository.delete(id);
       await vaultRepository.save(vault);
@@ -64,11 +61,9 @@ class EntryService extends Service {
   }
 
   get(String id) {
-    return entryRepository
-        .withLabels()
-        .withVault()
-        .withCategory()
-        .get(id);
+    return entryRepository.withLabels().withVault().withCategory().get(
+      id,
+    );
   }
 
   search({Filter? specification}) {

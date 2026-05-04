@@ -103,7 +103,6 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

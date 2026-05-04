@@ -272,7 +272,9 @@ class ScheduleService extends Service {
 
       await scheduleRepository.delete(schedule.id);
 
-      final entries = await entryRepository.withVault().controlledBy(schedule);
+      final entries = await entryRepository.withVault().controlledBy(
+        schedule,
+      );
       final entryIds = entries.map((entry) => entry.id).toList();
       final vaults = entries
           .map((entry) => entry.vault)
