@@ -13,6 +13,7 @@ import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/features/transfers/services/transfer_service.dart';
 import 'package:bandha/features/commitments/repositories/commitment_payment_repository.dart';
+import 'package:bandha/features/vaults/providers/vault_filter_provider.dart';
 import 'package:bandha/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -162,6 +163,7 @@ makeProvider({
     ChangeNotifierProvider(create: (_) => PoolFilterProvider()),
     ChangeNotifierProvider(create: (_) => ScheduleFilterProvider()),
     ChangeNotifierProvider(create: (_) => TransferFilterProvider()),
+    ChangeNotifierProvider(create: (_) => VaultFilterProvider()),
   ];
 
   return MultiProvider(providers: providers, child: child);

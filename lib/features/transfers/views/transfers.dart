@@ -60,7 +60,7 @@ class Transfers extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Transfers", style: theme.textTheme.titleLarge),
+        title: Text("Transfers", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),

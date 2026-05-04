@@ -57,7 +57,7 @@ class Schedules extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppBar(
-      title: Text("Schedules", style: theme.textTheme.titleLarge),
+      title: Text("Schedules", style: theme.textTheme.titleMedium),
       actions: actionsBuilder(context),
       actionsPadding: EdgeInsets.all(8),
     );

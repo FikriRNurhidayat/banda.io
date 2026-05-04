@@ -62,7 +62,7 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Commitment", style: theme.textTheme.titleLarge),
+      title: Text("Commitment", style: theme.textTheme.titleMedium),
 
       actions: [
         IconButton(

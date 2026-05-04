@@ -67,7 +67,7 @@ class _CommitmentsState extends State<Commitments> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Commitments", style: theme.textTheme.titleLarge),
+        title: Text("Commitments", style: theme.textTheme.titleMedium),
         actions: widget.actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),

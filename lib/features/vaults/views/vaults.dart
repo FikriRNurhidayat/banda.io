@@ -1,5 +1,6 @@
 import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/vaults/providers/vault_filter_provider.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
 import 'package:bandha/features/vaults/widgets/vault_tile.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +16,9 @@ class Vaults extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Vaults", style: theme.textTheme.titleLarge),
+        title: Text("Vaults", style: theme.textTheme.titleMedium),
         actionsPadding: EdgeInsets.all(8),
+        actions: actionsBuilder(context),
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
@@ -33,6 +35,41 @@ class Vaults extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  List<Widget> actionsBuilder(BuildContext context) {
+    final filterProvider = context.watch<VaultFilterProvider>();
+    final filter = filterProvider.get();
+
+    return [
+      if (filter != null)
+        IconButton(
+          onPressed: () {
+            filterProvider.reset();
+          },
+          icon: Icon(Icons.close),
+        ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/vaults/filter",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/vaults/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
+      ),
+    ];
   }
 
   Widget fabBuilder(BuildContext context) {

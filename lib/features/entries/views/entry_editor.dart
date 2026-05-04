@@ -106,7 +106,7 @@ class _EditorState extends State<EntryEditor> {
         ),
         title: Text(
           widget.readOnly ? "Entry details" : "Enter entry details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
         actions: [
           if (!widget.readOnly)

@@ -90,7 +90,7 @@ class _PoolEditorState extends State<PoolEditor> {
       ),
       title: Text(
         !widget.readOnly ? "Enter pool details" : "Pool details",
-        style: theme.textTheme.titleLarge,
+        style: theme.textTheme.titleMedium,
       ),
 
       actions: [

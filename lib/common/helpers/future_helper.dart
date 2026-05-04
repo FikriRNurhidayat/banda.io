@@ -15,7 +15,18 @@ AsyncWidgetBuilder<T> futureBuilder<T>(AsyncWidgetBuilder<T> callback) {
         print(snapshot.stackTrace);
       }
 
-      return Center(child: Text("ERROR"));
+      return ListView(
+        children: [
+          ListTile(
+            dense: true,
+            title: Text(
+              snapshot.error.runtimeType.toString(),
+              style: theme.textTheme.titleSmall,
+            ),
+            subtitle: Text(snapshot.error.toString()),
+          ),
+        ],
+      );
     }
 
     if (!snapshot.hasData) {

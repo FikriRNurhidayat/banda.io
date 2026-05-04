@@ -107,7 +107,7 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
         ),
         title: Text(
           widget.readOnly ? "Payment details" : "Edit payment details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
         actions: [
           if (!widget.readOnly)

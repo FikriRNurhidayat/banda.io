@@ -17,7 +17,7 @@ class Entries extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Entries", style: theme.textTheme.titleLarge),
+        title: Text("Entries", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),

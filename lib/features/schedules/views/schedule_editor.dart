@@ -110,7 +110,7 @@ class ScheduleEditor extends StatelessWidget {
         ),
         title: Text(
           readOnly ? "Schedule details" : "Enter schedule details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
         actions: [
           if (!readOnly)

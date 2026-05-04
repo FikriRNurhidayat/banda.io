@@ -70,7 +70,7 @@ class VaultEditor extends StatelessWidget {
         ),
         title: Text(
           !readOnly ? "Enter vault details" : "Vault details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
 
         actions: [

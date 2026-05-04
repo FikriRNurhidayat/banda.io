@@ -101,7 +101,7 @@ class _TransferEditorState extends State<TransferEditor> {
           !widget.readOnly
               ? "Enter transfer details"
               : "Transfer details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
         actions: [
           if (!widget.readOnly)

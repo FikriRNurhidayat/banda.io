@@ -26,7 +26,7 @@ class PoolEntries extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Pool", style: theme.textTheme.titleLarge),
+      title: Text("Pool", style: theme.textTheme.titleMedium),
 
       actions: [
         IconButton(

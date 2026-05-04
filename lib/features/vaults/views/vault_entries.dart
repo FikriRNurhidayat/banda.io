@@ -28,7 +28,7 @@ class VaultEntries extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text("Vault", style: theme.textTheme.titleLarge),
+      title: Text("Vault", style: theme.textTheme.titleMedium),
 
       actions: [
         IconButton(

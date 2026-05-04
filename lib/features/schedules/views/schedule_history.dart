@@ -27,7 +27,7 @@ class ScheduleHistory extends StatelessWidget {
       ),
       title: Text(
         "Schedule History",
-        style: theme.textTheme.titleLarge,
+        style: theme.textTheme.titleMedium,
       ),
 
       actions: [

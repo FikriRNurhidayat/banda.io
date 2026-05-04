@@ -52,7 +52,7 @@ class Pools extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pools", style: theme.textTheme.titleLarge),
+        title: Text("Pools", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
       ),
