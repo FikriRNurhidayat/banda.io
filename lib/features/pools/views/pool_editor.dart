@@ -84,15 +84,11 @@ class _PoolEditorState extends State<PoolEditor> {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
+      automaticallyImplyLeading: false,
       title: Text(
         !widget.readOnly ? "Enter pool details" : "Pool details",
         style: theme.textTheme.titleMedium,
       ),
-
       actions: [
         if (!widget.readOnly)
           IconButton(

@@ -103,16 +103,13 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           !widget.readOnly
               ? "Enter commitment details"
               : "Commitment details",
           style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             Padding(

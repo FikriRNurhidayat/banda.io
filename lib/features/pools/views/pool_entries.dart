@@ -22,12 +22,7 @@ class PoolEntries extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text("Pool", style: theme.textTheme.titleMedium),
-
       actions: [
         IconButton(
           onPressed: () {
@@ -37,6 +32,7 @@ class PoolEntries extends StatelessWidget {
         ),
       ],
       actionsPadding: EdgeInsets.all(8.0),
+      automaticallyImplyLeading: false,
     );
   }
 

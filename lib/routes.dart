@@ -1,3 +1,4 @@
+import 'package:bandha/features/entries/views/entries_insights.dart';
 import 'package:bandha/features/vaults/views/vault_editor.dart';
 import 'package:bandha/features/vaults/views/vault_entries.dart';
 import 'package:bandha/features/vaults/views/vault_menu.dart';
@@ -56,6 +57,11 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => EntryFilter(),
+        );
+      case '/entries/insights':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => EntriesInsights(),
         );
       case '/schedules':
         return MaterialPageRoute(

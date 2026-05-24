@@ -19,6 +19,7 @@ class Entries extends StatelessWidget {
       appBar: AppBar(
         title: Text("Entries", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
+        automaticallyImplyLeading: false,
         actionsPadding: EdgeInsets.all(8),
       ),
       floatingActionButton: fabBuilder(context),

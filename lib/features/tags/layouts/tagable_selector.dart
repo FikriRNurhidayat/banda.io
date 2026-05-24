@@ -112,17 +112,12 @@ class _TagableSelectorState<
   @override
   Widget build(BuildContext context) {
     final itemableProvider = context.watch<P>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-        ),
+        title: Text(widget.title, style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<I>>(
         future: itemableProvider.search(),

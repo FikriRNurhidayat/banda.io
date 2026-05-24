@@ -1,4 +1,5 @@
 import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/types/metric.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/services/entry_service.dart';
 import 'package:bandha/common/types/specification.dart';
@@ -9,8 +10,12 @@ class EntryProvider extends ChangeNotifier {
 
   EntryProvider(this.entryService);
 
+  Future<List<Metric>> insights({Filter? specification}) {
+    return entryService.insights(filter: specification);
+  }
+
   Future<List<Entry>> search({Filter? specification}) {
-    return entryService.search(specification: specification);
+    return entryService.search(filter: specification);
   }
 
   Future<List<Entry>> getByController(
@@ -21,7 +26,7 @@ class EntryProvider extends ChangeNotifier {
     final controller = controlable.toController();
     entrySpecification["controller_id_is"] = controller.id;
     entrySpecification["controller_type_is"] = controller.type.label;
-    return entryService.search(specification: entrySpecification);
+    return entryService.search(filter: entrySpecification);
   }
 
   Future<Entry?> get(String id) async {

@@ -104,14 +104,11 @@ class ScheduleEditor extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           readOnly ? "Schedule details" : "Enter schedule details",
           style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!readOnly)
             Padding(

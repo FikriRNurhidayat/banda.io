@@ -1,5 +1,6 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
@@ -100,14 +101,11 @@ class _EditorState extends State<EntryEditor> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           widget.readOnly ? "Entry details" : "Enter entry details",
           style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             Padding(
@@ -143,25 +141,12 @@ class _EditorState extends State<EntryEditor> {
               labelProvider.search(),
               if (widget.id != null) entryProvider.get(widget.id!),
             ]),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (snapshot.hasError) {
-                return const Center(child: Text("..."));
-              }
-
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final categories = snapshot.data![0] as List<Category>;
-              final vaults = snapshot.data![1] as List<Vault>;
-              final labels = snapshot.data![2] as List<Label>;
-              final entry = widget.id != null
-                  ? snapshot.data![3] as Entry
-                  : null;
+            builder: futureBuilder((context, snapshot) {
+              final data = snapshot.data as List<dynamic>;
+              final categories = data[0] as List<Category>;
+              final vaults = data[1] as List<Vault>;
+              final labels = data[2] as List<Label>;
+              final entry = widget.id != null ? data[3] as Entry : null;
 
               return Form(
                 key: _form,
@@ -367,7 +352,7 @@ class _EditorState extends State<EntryEditor> {
                   ],
                 ),
               );
-            },
+            }),
           ),
         ),
       ),

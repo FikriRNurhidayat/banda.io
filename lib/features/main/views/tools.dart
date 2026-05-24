@@ -124,6 +124,7 @@ class _ToolsState extends State<Tools> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Tools", style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: ListView.builder(
         itemCount: menus.length,

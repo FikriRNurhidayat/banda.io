@@ -101,14 +101,11 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           widget.readOnly ? "Payment details" : "Edit payment details",
           style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             Padding(

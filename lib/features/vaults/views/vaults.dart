@@ -19,6 +19,7 @@ class Vaults extends StatelessWidget {
         title: Text("Vaults", style: theme.textTheme.titleMedium),
         actionsPadding: EdgeInsets.all(8),
         actions: actionsBuilder(context),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(

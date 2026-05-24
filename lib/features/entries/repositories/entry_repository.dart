@@ -33,8 +33,8 @@ class EntryRepository extends Repository {
     return EntryRepository(db, withArgs: {...withArgs, "category"});
   }
 
-  Future<double> sum(Filter? filter) async {
-    var baseQuery = "SELECT SUM(entries.amount) as sum FROM entries";
+  Future<double> min(Filter? filter) async {
+    var baseQuery = "SELECT MIN(entries.amount) as min FROM entries";
 
     final query = defineQuery(baseQuery, filter);
     final sqlString = query.first;
@@ -43,7 +43,20 @@ class EntryRepository extends Repository {
     final client = await getClient();
     final ResultSet entryRows = client.select(sqlString, sqlArgs);
 
-    return entryRows.first["sum"] ?? 0;
+    return entryRows.first["min"] ?? 0;
+  }
+
+  Future<double> max(Filter? filter) async {
+    var baseQuery = "SELECT MAX(entries.amount) as max FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["max"] ?? 0;
   }
 
   Future<double> average(Filter? filter) async {
@@ -57,6 +70,19 @@ class EntryRepository extends Repository {
     final ResultSet entryRows = client.select(sqlString, sqlArgs);
 
     return entryRows.first["avg"] ?? 0;
+  }
+
+  Future<double> sum(Filter? filter) async {
+    var baseQuery = "SELECT SUM(entries.amount) as sum FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["sum"] ?? 0;
   }
 
   Future<int> count(Filter? filter) async {

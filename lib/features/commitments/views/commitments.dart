@@ -70,6 +70,7 @@ class _CommitmentsState extends State<Commitments> {
         title: Text("Commitments", style: theme.textTheme.titleMedium),
         actions: widget.actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: widget.fabBuilder(context),
       body: FutureBuilder(

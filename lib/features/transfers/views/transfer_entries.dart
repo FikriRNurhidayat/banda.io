@@ -22,15 +22,11 @@ class TransferEntries extends StatelessWidget {
 
   appBarBuilder(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text(
         "Transfer",
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
       ),
-
+      automaticallyImplyLeading: false,
       actions: [
         IconButton(
           onPressed: () {

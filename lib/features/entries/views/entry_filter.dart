@@ -106,6 +106,7 @@ class _EntryFilterState extends State<EntryFilter> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final categoryProvider = context.watch<CategoryProvider>();
     final vaultProvider = context.watch<VaultProvider>();
     final labelProvider = context.watch<LabelProvider>();
@@ -113,15 +114,11 @@ class _EntryFilterState extends State<EntryFilter> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-
-        title: const Text(
+        title: Text(
           "Filter entries",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+          style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

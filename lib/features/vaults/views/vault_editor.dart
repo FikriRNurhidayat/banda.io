@@ -64,15 +64,11 @@ class VaultEditor extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           !readOnly ? "Enter vault details" : "Vault details",
           style: theme.textTheme.titleMedium,
         ),
-
+        automaticallyImplyLeading: false,
         actions: [
           if (!readOnly)
             Padding(

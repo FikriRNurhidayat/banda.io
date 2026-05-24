@@ -1,4 +1,6 @@
+import 'package:bandha/common/helpers/money_helper.dart';
 import 'package:bandha/common/services/service.dart';
+import 'package:bandha/common/types/metric.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
 import 'package:bandha/features/vaults/repositories/vault_repository.dart';
@@ -66,12 +68,53 @@ class EntryService extends Service {
     );
   }
 
-  search({Filter? specification}) {
+  Future<List<Metric>> insights({Filter? filter}) async {
+    final count = await entryRepository.count(filter);
+    final sum = await entryRepository.sum(filter);
+    final max = await entryRepository.max(filter);
+    final min = await entryRepository.min(filter);
+    final average = await entryRepository.average(filter);
+
+    return [
+      Metric(
+        name: 'COUNT',
+        label: 'Total entries',
+        value: count.toDouble(),
+        displayValue: count.toString(),
+      ),
+      Metric(
+        name: 'SUM',
+        label: 'Total amount',
+        value: sum,
+        displayValue: MoneyHelper.format(sum),
+      ),
+      Metric(
+        name: 'MAX',
+        label: 'Maximum amount',
+        value: max,
+        displayValue: MoneyHelper.format(max),
+      ),
+      Metric(
+        name: 'MIN',
+        label: 'Minimum amount',
+        value: min,
+        displayValue: MoneyHelper.format(min),
+      ),
+      Metric(
+        name: 'AVG',
+        label: 'Average amount',
+        value: average,
+        displayValue: MoneyHelper.format(average),
+      ),
+    ];
+  }
+
+  search({Filter? filter}) {
     return entryRepository
         .withLabels()
         .withVault()
         .withCategory()
-        .search(specification);
+        .search(filter);
   }
 
   Future<Entry> create({

@@ -24,12 +24,8 @@ class VaultEntries extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text("Vault", style: theme.textTheme.titleMedium),
-
+      automaticallyImplyLeading: false,
       actions: [
         IconButton(
           onPressed: () {

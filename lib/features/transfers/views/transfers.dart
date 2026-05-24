@@ -63,6 +63,7 @@ class Transfers extends StatelessWidget {
         title: Text("Transfers", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(

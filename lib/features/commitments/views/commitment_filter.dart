@@ -92,20 +92,18 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final vaultProvider = context.watch<VaultProvider>();
     final partyProvider = context.watch<PartyProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
+        title: Text(
           "Filter commitments",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+          style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

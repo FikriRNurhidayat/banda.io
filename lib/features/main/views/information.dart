@@ -17,6 +17,7 @@ class Information extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Info", style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: ListView.builder(
         itemCount: info.length,

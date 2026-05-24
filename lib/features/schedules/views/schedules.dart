@@ -60,6 +60,7 @@ class Schedules extends StatelessWidget {
       title: Text("Schedules", style: theme.textTheme.titleMedium),
       actions: actionsBuilder(context),
       actionsPadding: EdgeInsets.all(8),
+      automaticallyImplyLeading: false,
     );
   }
 

@@ -55,6 +55,7 @@ class Pools extends StatelessWidget {
         title: Text("Pools", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(

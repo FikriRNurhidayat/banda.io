@@ -92,17 +92,13 @@ class _TransferEditorState extends State<TransferEditor> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-
         title: Text(
           !widget.readOnly
               ? "Enter transfer details"
               : "Transfer details",
           style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             IconButton(
