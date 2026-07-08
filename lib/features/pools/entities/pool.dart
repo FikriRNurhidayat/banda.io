@@ -11,7 +11,7 @@ class Pool extends Controlable {
   @override
   final String id;
   final String? note;
-  final double goal;
+  final double amount;
   final double balance;
   final PoolStatus status;
   final String categoryId;
@@ -40,7 +40,7 @@ class Pool extends Controlable {
   Pool({
     required this.id,
     this.note,
-    required this.goal,
+    required this.amount,
     required this.balance,
     required this.status,
     required this.vaultId,
@@ -54,7 +54,7 @@ class Pool extends Controlable {
     return {
       id: id,
       note: note,
-      goal: goal,
+      amount: amount,
       balance: balance,
       status: status,
       categoryId: categoryId,
@@ -71,7 +71,7 @@ class Pool extends Controlable {
 
   factory Pool.create({
     String? note,
-    required double goal,
+    required double amount,
     required double balance,
     required PoolStatus status,
     required String categoryId,
@@ -80,7 +80,7 @@ class Pool extends Controlable {
     return Pool(
       id: Entity.getId(),
       note: note,
-      goal: goal,
+      amount: amount,
       balance: balance,
       status: status,
       vaultId: vaultId,
@@ -96,12 +96,12 @@ class Pool extends Controlable {
   }
 
   get canGrow {
-    return status != PoolStatus.released && balance < goal;
+    return status != PoolStatus.released && balance < amount;
   }
 
   copyWith({
     String? note,
-    double? goal,
+    double? amount,
     double? balance,
     PoolStatus? status,
     String? categoryId,
@@ -113,7 +113,7 @@ class Pool extends Controlable {
     return Pool(
       id: id,
       note: note ?? this.note,
-      goal: goal ?? this.goal,
+      amount: amount ?? this.amount,
       balance: balance ?? this.balance,
       status: status ?? this.status,
       categoryId: categoryId ?? this.categoryId,
@@ -125,11 +125,11 @@ class Pool extends Controlable {
   }
 
   double get progress {
-    return (balance.toDouble() / goal.toDouble());
+    return (balance.toDouble() / amount.toDouble());
   }
 
   double get completion {
-    return (balance.toDouble() / goal.toDouble()).abs();
+    return (balance.toDouble() / amount.toDouble()).abs();
   }
 
   Pool applyDelta(EntryType type, double delta) {
@@ -170,7 +170,7 @@ class Pool extends Controlable {
     return Pool(
       id: row["id"],
       note: row["note"],
-      goal: row["goal"],
+      amount: row["goal"],
       balance: row["balance"],
       status: PoolStatus.values.firstWhere(
         (e) => e.label == row["status"],

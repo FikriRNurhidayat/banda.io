@@ -1,26 +1,26 @@
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/entries/widgets/entry_tile.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
+import 'package:bandha/features/settlements/entities/settlement_payment.dart';
 import 'package:bandha/common/helpers/future_helper.dart';
-import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
-import 'package:bandha/features/commitments/widgets/payment_tile.dart';
-import 'package:bandha/features/commitments/widgets/commitment_tile.dart';
+import 'package:bandha/features/settlements/providers/settlement_payment_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
+import 'package:bandha/features/settlements/widgets/payment_tile.dart';
+import 'package:bandha/features/settlements/widgets/settlement_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommitmentEntries extends StatefulWidget {
+class SettlementEntries extends StatefulWidget {
   final String id;
 
-  const CommitmentEntries({super.key, required this.id});
+  const SettlementEntries({super.key, required this.id});
 
   @override
-  State<CommitmentEntries> createState() => _CommitmentEntriesState();
+  State<SettlementEntries> createState() => _SettlementEntriesState();
 }
 
-class _CommitmentEntriesState extends State<CommitmentEntries>
+class _SettlementEntriesState extends State<SettlementEntries>
     with TickerProviderStateMixin {
   late TabController tabController;
 
@@ -38,17 +38,17 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
   }
 
   handleMore(BuildContext context) {
-    Navigator.of(context).pushNamed("/commitments/${widget.id}/menu");
+    Navigator.of(context).pushNamed("/settlements/${widget.id}/menu");
   }
 
-  fabBuilder(BuildContext context, Commitment commitment) {
-    if (commitment.status.isSettled) return null;
+  fabBuilder(BuildContext context, Settlement settlement) {
+    if (settlement.status.isSettled) return null;
 
     return FloatingActionButton(
       onPressed: () {
         Navigator.of(
           context,
-        ).pushNamed("/commitments/${widget.id}/payments/new");
+        ).pushNamed("/settlements/${widget.id}/payments/new");
       },
       child: Icon(Icons.add),
     );
@@ -58,7 +58,7 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
     final theme = Theme.of(context);
 
     return AppBar(
-      title: Text("Commitment", style: theme.textTheme.titleMedium),
+      title: Text("Settlement", style: theme.textTheme.titleMedium),
       automaticallyImplyLeading: false,
       actions: [
         IconButton(
@@ -72,9 +72,9 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
     );
   }
 
-  tabBuilder(Commitment commitment) {
-    final commitmentPaymentProvider = context
-        .watch<CommitmentPaymentProvider>();
+  tabBuilder(Settlement settlement) {
+    final settlementPaymentProvider = context
+        .watch<SettlementPaymentProvider>();
     final entryProvider = context.watch<EntryProvider>();
 
     return [
@@ -90,10 +90,10 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
           controller: tabController,
           children: [
             FutureBuilder(
-              future: commitmentPaymentProvider.search(widget.id),
+              future: settlementPaymentProvider.search(widget.id),
               builder: futureBuilder((context, snapshot) {
                 final payments =
-                    snapshot.data as List<CommitmentPayment>;
+                    snapshot.data as List<SettlementPayment>;
 
                 return ListView.builder(
                   itemCount: payments.length,
@@ -101,14 +101,14 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
                     final payment = payments[index];
                     return PaymentTile(
                       payment: payment,
-                      commitment: commitment,
+                      settlement: settlement,
                     );
                   },
                 );
               }),
             ),
             FutureBuilder(
-              future: entryProvider.getByController(commitment),
+              future: entryProvider.getByController(settlement),
               builder: futureBuilder((context, snapshot) {
                 final entries = snapshot.data as List<Entry>;
 
@@ -129,20 +129,20 @@ class _CommitmentEntriesState extends State<CommitmentEntries>
 
   @override
   Widget build(BuildContext context) {
-    final commitmentProvider = context.watch<CommitmentProvider>();
+    final settlementProvider = context.watch<SettlementProvider>();
 
     return FutureBuilder(
-      future: commitmentProvider.get(widget.id),
+      future: settlementProvider.get(widget.id),
       builder: futureBuilder((context, snapshot) {
-        final commitment = snapshot.data as Commitment;
+        final settlement = snapshot.data as Settlement;
 
         return Scaffold(
           appBar: appBarBuilder(context),
-          floatingActionButton: fabBuilder(context, commitment),
+          floatingActionButton: fabBuilder(context, settlement),
           body: Column(
             children: [
-              CommitmentTile(commitment, readOnly: true),
-              ...tabBuilder(commitment),
+              SettlementTile(settlement, readOnly: true),
+              ...tabBuilder(settlement),
             ],
           ),
         );

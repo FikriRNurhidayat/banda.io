@@ -10,10 +10,10 @@ class Transfer extends Controlable {
   final String? note;
   final double debitAmount;
   final double creditAmount;
-  final double? fee;
+  final double? feeAmount;
   final String debitId;
   final String debitVaultId;
-  final String? exchangeId;
+  final String? feeId;
   final String creditId;
   final String creditVaultId;
   final DateTime issuedAt;
@@ -22,7 +22,7 @@ class Transfer extends Controlable {
 
   late final Entry debit;
   late final Vault debitVault;
-  late final Entry? exchange;
+  late final Entry? fee;
   late final Vault creditVault;
   late final Entry credit;
 
@@ -31,10 +31,10 @@ class Transfer extends Controlable {
     this.note,
     required this.debitAmount,
     required this.creditAmount,
-    this.fee,
+    this.feeAmount,
     required this.debitId,
     required this.debitVaultId,
-    this.exchangeId,
+    this.feeId,
     required this.creditId,
     required this.creditVaultId,
     required this.issuedAt,
@@ -43,11 +43,11 @@ class Transfer extends Controlable {
   });
 
   Iterable<Entry> get credits {
-    return [credit, exchange].whereType<Entry>();
+    return [credit, fee].whereType<Entry>();
   }
 
   Iterable<Entry> get entries {
-    return [debit, credit, exchange].whereType<Entry>();
+    return [debit, credit, fee].whereType<Entry>();
   }
 
   Iterable<String> get entryIds {
@@ -68,7 +68,7 @@ class Transfer extends Controlable {
       "note": note,
       "creditAmount": creditAmount,
       "debitAmount": debitAmount,
-      "fee": fee,
+      "feeAmount": feeAmount,
       "debitId": debitId,
       "debitVaultId": debitVaultId,
       "creditId": creditId,
@@ -90,10 +90,10 @@ class Transfer extends Controlable {
       note: row["note"],
       debitAmount: row["debit_amount"],
       creditAmount: row["credit_amount"],
-      fee: row["fee"],
+      feeAmount: row["fee_amount"],
       debitId: row["debit_id"],
       debitVaultId: row["debit_vault_id"],
-      exchangeId: row["exchange_id"],
+      feeId: row["fee_id"],
       creditId: row["credit_id"],
       creditVaultId: row["credit_vault_id"],
       issuedAt: DateTime.parse(row["issued_at"]),
@@ -106,10 +106,10 @@ class Transfer extends Controlable {
     String? note,
     required double debitAmount,
     required double creditAmount,
-    double? fee,
+    double? feeAmount,
     required String debitId,
     required String debitVaultId,
-    String? exchangeId,
+    String? feeId,
     required String creditId,
     required String creditVaultId,
     required DateTime issuedAt,
@@ -119,10 +119,10 @@ class Transfer extends Controlable {
       note: note,
       debitAmount: debitAmount,
       creditAmount: creditAmount,
-      fee: fee,
+      feeAmount: feeAmount,
       debitId: debitId,
       debitVaultId: debitVaultId,
-      exchangeId: exchangeId,
+      feeId: feeId,
       creditId: creditId,
       creditVaultId: creditVaultId,
       issuedAt: issuedAt,
@@ -131,16 +131,16 @@ class Transfer extends Controlable {
     );
   }
 
-  Transfer setExchangeId(String? exchangeId) {
+  Transfer setFeeId(String? feeId) {
     return Transfer(
       id: id,
       note: note,
       debitAmount: debitAmount,
       creditAmount: creditAmount,
-      fee: fee,
+      feeAmount: feeAmount,
       debitId: debitId,
       debitVaultId: debitVaultId,
-      exchangeId: exchangeId,
+      feeId: feeId,
       creditId: creditId,
       creditVaultId: creditVaultId,
       issuedAt: issuedAt,
@@ -154,8 +154,8 @@ class Transfer extends Controlable {
     return this;
   }
 
-  Transfer withExchange(Entry? exchange) {
-    this.exchange = exchange;
+  Transfer withFee(Entry? fee) {
+    this.fee = fee;
     return this;
   }
 
@@ -180,10 +180,10 @@ class Transfer extends Controlable {
     String? note,
     double? debitAmount,
     double? creditAmount,
-    double? fee,
+    double? feeAmount,
     String? debitId,
     String? debitVaultId,
-    String? exchangeId,
+    String? feeId,
     String? creditId,
     String? creditVaultId,
     DateTime? issuedAt,
@@ -193,10 +193,10 @@ class Transfer extends Controlable {
       note: note ?? this.note,
       debitAmount: debitAmount ?? this.debitAmount,
       creditAmount: creditAmount ?? this.creditAmount,
-      fee: fee ?? this.fee,
+      feeAmount: feeAmount ?? this.feeAmount,
       debitId: debitId ?? this.debitId,
       debitVaultId: debitVaultId ?? this.debitVaultId,
-      exchangeId: exchangeId ?? this.exchangeId,
+      feeId: feeId ?? this.feeId,
       creditId: creditId ?? this.creditId,
       creditVaultId: creditVaultId ?? this.creditVaultId,
       issuedAt: issuedAt ?? this.issuedAt,
@@ -205,8 +205,8 @@ class Transfer extends Controlable {
     );
   }
 
-  get hasExchange {
-    return exchangeId != null;
+  get hasFee {
+    return feeId != null;
   }
 
   @override

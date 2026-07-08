@@ -1,10 +1,10 @@
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
 
-class CommitmentPayment extends Entity {
-  final String commitmentId;
+class SettlementPayment extends Entity {
+  final String settlementId;
   final String entryId;
   final String? additionId;
   final double amount;
@@ -15,10 +15,10 @@ class CommitmentPayment extends Entity {
 
   late final Entry? addition;
   late final Entry entry;
-  late final Commitment commitment;
+  late final Settlement settlement;
 
-  CommitmentPayment({
-    required this.commitmentId,
+  SettlementPayment({
+    required this.settlementId,
     required this.entryId,
     this.additionId,
     required this.amount,
@@ -28,48 +28,48 @@ class CommitmentPayment extends Entity {
     required this.issuedAt,
   });
 
-  static double additionAmount(Commitment commitment, double? fee) {
+  static double additionAmount(Settlement settlement, double? fee) {
     return (fee ?? 0) * -1;
   }
 
-  static String additionNote(Commitment commitment) {
-    if (commitment.isIncome) {
-      return commitment.status.isSettled
-          ? "Commitment settlement fee"
-          : "Commitment payment fee";
+  static String additionNote(Settlement settlement) {
+    if (settlement.isIncome) {
+      return settlement.status.isSettled
+          ? "Settlement settlement fee"
+          : "Settlement payment fee";
     }
 
-    return commitment.status.isSettled
-        ? "Commitment settlement fee"
-        : "Commitment payment fee";
+    return settlement.status.isSettled
+        ? "Settlement settlement fee"
+        : "Settlement payment fee";
   }
 
-  static double entryAmount(Commitment commitment, double amount) {
-    return amount * (commitment.isIncome ? -1 : 1);
+  static double entryAmount(Settlement settlement, double amount) {
+    return amount * (settlement.isIncome ? -1 : 1);
   }
 
-  static String entryNote(Commitment commitment) {
-    if (commitment.isIncome) {
-      return commitment.status.isSettled
-          ? "Commitment settlement to ${commitment.party.name}"
-          : "Commitment payment to ${commitment.party.name}";
+  static String entryNote(Settlement settlement) {
+    if (settlement.isIncome) {
+      return settlement.status.isSettled
+          ? "Settlement settlement to ${settlement.party.name}"
+          : "Settlement payment to ${settlement.party.name}";
     }
 
-    return commitment.status.isSettled
-        ? "Commitment settlement from ${commitment.party.name}"
-        : "Commitment payment from ${commitment.party.name}";
+    return settlement.status.isSettled
+        ? "Settlement settlement from ${settlement.party.name}"
+        : "Settlement payment from ${settlement.party.name}";
   }
 
-  factory CommitmentPayment.create({
+  factory SettlementPayment.create({
     required double amount,
     double? fee,
-    required String commitmentId,
+    required String settlementId,
     required String entryId,
     String? additionId,
     required DateTime issuedAt,
   }) {
-    return CommitmentPayment(
-      commitmentId: commitmentId,
+    return SettlementPayment(
+      settlementId: settlementId,
       amount: amount,
       fee: fee,
       entryId: entryId,
@@ -80,20 +80,20 @@ class CommitmentPayment extends Entity {
     );
   }
 
-  CommitmentPayment withAddition(Entry? value) {
+  SettlementPayment withAddition(Entry? value) {
     addition = value;
     return this;
   }
 
-  CommitmentPayment withEntry(Entry? value) {
+  SettlementPayment withEntry(Entry? value) {
     if (value == null) return this;
     entry = value;
     return this;
   }
 
-  CommitmentPayment withCommitment(Commitment? value) {
+  SettlementPayment withSettlement(Settlement? value) {
     if (value == null) return this;
-    commitment = value;
+    settlement = value;
     return this;
   }
 
@@ -117,13 +117,13 @@ class CommitmentPayment extends Entity {
     return addition != null;
   }
 
-  CommitmentPayment copyWith({
+  SettlementPayment copyWith({
     double? amount,
     double? fee,
     DateTime? issuedAt,
   }) {
-    return CommitmentPayment(
-      commitmentId: commitmentId,
+    return SettlementPayment(
+      settlementId: settlementId,
       entryId: entryId,
       additionId: additionId,
       amount: amount ?? this.amount,
@@ -134,9 +134,9 @@ class CommitmentPayment extends Entity {
     );
   }
 
-  factory CommitmentPayment.fromRow(Map row) {
-    return CommitmentPayment(
-      commitmentId: row["commitment_id"],
+  factory SettlementPayment.fromRow(Map row) {
+    return SettlementPayment(
+      settlementId: row["settlement_id"],
       entryId: row["entry_id"],
       additionId: row["addition_id"],
       amount: row["amount"],

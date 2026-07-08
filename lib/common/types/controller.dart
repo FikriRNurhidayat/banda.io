@@ -17,12 +17,12 @@ class Controller {
     return Controller(ControllerType.pool, id);
   }
 
-  factory Controller.commitmentPayment(String id) {
-    return Controller(ControllerType.commitmentPayment, id);
+  factory Controller.settlementPayment(String id) {
+    return Controller(ControllerType.settlementPayment, id);
   }
 
-  factory Controller.commitment(String id) {
-    return Controller(ControllerType.commitment, id);
+  factory Controller.settlement(String id) {
+    return Controller(ControllerType.settlement, id);
   }
 
   factory Controller.budget(String id) {

@@ -97,7 +97,7 @@ class PoolService extends Service {
 
   Future<Pool> create({
     String? note,
-    required double goal,
+    required double amount,
     required String categoryId,
     required String vaultId,
     List<String>? labelIds,
@@ -105,7 +105,7 @@ class PoolService extends Service {
     return await work<Pool>(() async {
       final pool = Pool.create(
         note: note,
-        goal: goal,
+        amount: amount,
         balance: 0,
         categoryId: categoryId,
         vaultId: vaultId,
@@ -124,7 +124,7 @@ class PoolService extends Service {
   update(
     String id, {
     String? note,
-    required double goal,
+    required double amount,
     String? categoryId,
     List<String>? labelIds,
   }) async {
@@ -132,7 +132,7 @@ class PoolService extends Service {
       final ePool = await poolRepository.withLabels().get(id);
       final nPool = ePool.copyWith(
         note: note,
-        goal: goal,
+        amount: amount,
         categoryId: categoryId,
       );
 

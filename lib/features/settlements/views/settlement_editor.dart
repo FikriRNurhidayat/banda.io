@@ -7,10 +7,10 @@ import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
@@ -20,34 +20,34 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommitmentEditor extends StatefulWidget {
+class SettlementEditor extends StatefulWidget {
   final String? id;
   final bool readOnly;
-  const CommitmentEditor({super.key, this.id, this.readOnly = false});
+  const SettlementEditor({super.key, this.id, this.readOnly = false});
 
   @override
-  State<CommitmentEditor> createState() => _CommitmentEditorState();
+  State<SettlementEditor> createState() => _SettlementEditorState();
 }
 
-class _CommitmentEditorState extends State<CommitmentEditor> {
+class _SettlementEditorState extends State<SettlementEditor> {
   final _form = GlobalKey<FormState>();
   final FormData _d = {};
 
   void handleMoreTap(BuildContext context) async {
-    Navigator.pushNamed(context, "/commitments/${widget.id!}/menu");
+    Navigator.pushNamed(context, "/settlements/${widget.id!}/menu");
   }
 
   void handleSubmit() {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final commitmentProvider = context.read<CommitmentProvider>();
+    final settlementProvider = context.read<SettlementProvider>();
 
     if (_form.currentState!.validate()) {
       _form.currentState!.save();
 
       Future(() async {
         if (widget.id == null) {
-          await commitmentProvider.create(
+          await settlementProvider.create(
             fee: _d["fee"],
             amount: _d["amount"],
             issuedAt: _d["issuedAt"].dateTime,
@@ -62,7 +62,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
         }
 
         if (widget.id != null) {
-          await commitmentProvider.update(
+          await settlementProvider.update(
             widget.id!,
             fee: _d["fee"],
             amount: _d["amount"],
@@ -82,7 +82,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
           print(stackTrace);
         }
 
-        alert(messenger, "Edit commitment details failed");
+        alert(messenger, "Edit settlement details failed");
       });
     }
   }
@@ -95,7 +95,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final commitmentProvider = context.watch<CommitmentProvider>();
+    final settlementProvider = context.watch<SettlementProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
     final partyProvider = context.watch<PartyProvider>();
     final vaultProvider = context.watch<VaultProvider>();
@@ -105,8 +105,8 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
       appBar: AppBar(
         title: Text(
           !widget.readOnly
-              ? "Enter commitment details"
-              : "Commitment details",
+              ? "Enter settlement details"
+              : "Settlement details",
           style: theme.textTheme.titleMedium,
         ),
         automaticallyImplyLeading: false,
@@ -143,7 +143,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
               vaultProvider.search(),
               categoryProvider.search(),
               labelProvider.search(),
-              if (widget.id != null) commitmentProvider.get(widget.id!),
+              if (widget.id != null) settlementProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -158,8 +158,8 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
               final vaults = snapshot.data![1] as List<Vault>;
               final categories = snapshot.data![2] as List<Category>;
               final labels = snapshot.data![3] as List<Label>;
-              final commitment = widget.id != null
-                  ? (snapshot.data![4] as Commitment)
+              final settlement = widget.id != null
+                  ? (snapshot.data![4] as Settlement)
                   : null;
 
               return Form(
@@ -170,7 +170,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     AmountFormField(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["amount"] ?? commitment?.amount.abs(),
+                          _d["amount"] ?? settlement?.amount.abs(),
                       decoration: InputStyles.field(
                         hintText: "Enter amount...",
                         labelText: "Amount",
@@ -181,7 +181,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["fee"] ?? commitment?.fee,
+                      initialValue: _d["fee"] ?? settlement?.feeAmount,
                       decoration: InputStyles.field(
                         hintText: "Enter fee...",
                         labelText: "Fee",
@@ -190,7 +190,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     ),
                     SelectFormField<EntryType>(
                       readOnly: widget.readOnly,
-                      initialValue: _d["type"] ?? commitment?.entryType,
+                      initialValue: _d["type"] ?? settlement?.entryType,
                       onSaved: (value) => _d["type"] = value,
                       validator: (value) =>
                           value == null ? "Type is required" : null,
@@ -199,19 +199,19 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                       }).toList(),
                       decoration: InputStyles.field(
                         labelText: "Type",
-                        hintText: "Select commitment type...",
+                        hintText: "Select settlement type...",
                       ),
                     ),
-                    SelectFormField<CommitmentStatus>(
+                    SelectFormField<SettlementStatus>(
                       readOnly: widget.readOnly,
                       onSaved: (value) => _d["status"] = value,
                       initialValue:
                           _d["status"] ??
-                          commitment?.status ??
-                          CommitmentStatus.active,
+                          settlement?.status ??
+                          SettlementStatus.active,
                       validator: (value) =>
                           value == null ? "Status is required" : null,
-                      options: CommitmentStatus.values.map((v) {
+                      options: SettlementStatus.values.map((v) {
                         return SelectItem(value: v, label: v.label);
                       }).toList(),
                       decoration: InputStyles.field(
@@ -222,7 +222,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["categoryId"] ?? commitment?.categoryId,
+                          _d["categoryId"] ?? settlement?.categoryId,
                       onSaved: (value) => _d["categoryId"] = value,
                       decoration: InputStyles.field(
                         labelText: "Category",
@@ -277,8 +277,8 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                       ),
                       initialValue:
                           _d["issuedAt"] ??
-                          (commitment?.issuedAt != null
-                              ? When.specificTime(commitment!.issuedAt)
+                          (settlement?.issuedAt != null
+                              ? When.specificTime(settlement!.issuedAt)
                               : When.now()),
                       onSaved: (value) => _d["issuedAt"] = value,
                       validator: (value) => value == null
@@ -306,9 +306,9 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                       ),
                       initialValue:
                           _d["settledAt"] ??
-                          (commitment?.settledAt != null
+                          (settlement?.settledAt != null
                               ? When.specificTime(
-                                  commitment!.settledAt!,
+                                  settlement!.settledAt!,
                                 )
                               : When.whenever()),
                       onSaved: (value) => _d["settledAt"] = value,
@@ -319,7 +319,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["vaultId"] ?? commitment?.vaultId,
+                          _d["vaultId"] ?? settlement?.vaultId,
                       onSaved: (value) => _d["vaultId"] = value,
                       validator: (value) =>
                           value == null ? "Vault is required" : null,
@@ -356,7 +356,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     SelectFormField<String>(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["partyId"] ?? commitment?.partyId,
+                          _d["partyId"] ?? settlement?.partyId,
                       onSaved: (value) => _d["partyId"] = value,
                       validator: (value) =>
                           value == null ? "Party is required" : null,
@@ -393,7 +393,7 @@ class _CommitmentEditorState extends State<CommitmentEditor> {
                     MultiSelectFormField<String>(
                       readOnly: widget.readOnly,
                       initialValue:
-                          _d["labelIds"] ?? commitment?.labelIds ?? [],
+                          _d["labelIds"] ?? settlement?.labelIds ?? [],
                       onSaved: (value) => _d["labelIds"] = value,
                       actions: [
                         if (!widget.readOnly)

@@ -1,11 +1,11 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
+import 'package:bandha/features/settlements/entities/settlement_payment.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_payment_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/select_form_field.dart';
@@ -14,31 +14,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommitmentEntryEditor extends StatefulWidget {
-  final String commitmentId;
+class SettlementEntryEditor extends StatefulWidget {
+  final String settlementId;
   final String? entryId;
   final bool readOnly;
 
-  const CommitmentEntryEditor({
+  const SettlementEntryEditor({
     super.key,
-    required this.commitmentId,
+    required this.settlementId,
     this.entryId,
     this.readOnly = false,
   });
 
   @override
-  State<CommitmentEntryEditor> createState() =>
-      CommitmentEntryEditorState();
+  State<SettlementEntryEditor> createState() =>
+      SettlementEntryEditorState();
 }
 
-class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
+class SettlementEntryEditorState extends State<SettlementEntryEditor> {
   final form = GlobalKey<FormState>();
   final FormData d = {};
 
   void handleMoreTap(BuildContext context) async {
     Navigator.pushNamed(
       context,
-      "/commitments/${widget.commitmentId}/payments/${widget.entryId!}/menu",
+      "/settlements/${widget.settlementId}/payments/${widget.entryId!}/menu",
     );
   }
 
@@ -47,14 +47,14 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final commitmentPaymentProvider = context
-        .read<CommitmentPaymentProvider>();
+    final settlementPaymentProvider = context
+        .read<SettlementPaymentProvider>();
 
     if (form.currentState!.validate()) {
       try {
         if (isNull(widget.entryId)) {
-          await commitmentPaymentProvider.create(
-            widget.commitmentId,
+          await settlementPaymentProvider.create(
+            widget.settlementId,
             amount: d["amount"],
             fee: d["fee"],
             vaultId: d["vaultId"],
@@ -63,8 +63,8 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
         }
 
         if (!isNull(widget.entryId)) {
-          await commitmentPaymentProvider.update(
-            widget.commitmentId,
+          await settlementPaymentProvider.update(
+            widget.settlementId,
             widget.entryId!,
             amount: d["amount"],
             fee: d["fee"],
@@ -80,7 +80,7 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
           print(stackTrace);
         }
 
-        alert(messenger, "Edit commitment payment details failed!");
+        alert(messenger, "Edit settlement payment details failed!");
       }
     }
   }
@@ -94,9 +94,9 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final vaultProvider = context.watch<VaultProvider>();
-    final commitmentProvider = context.watch<CommitmentProvider>();
-    final commitmentPaymentProvider = context
-        .watch<CommitmentPaymentProvider>();
+    final settlementProvider = context.watch<SettlementProvider>();
+    final settlementPaymentProvider = context
+        .watch<SettlementPaymentProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -126,10 +126,10 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
           child: FutureBuilder(
             future: Future.wait([
               vaultProvider.search(),
-              commitmentProvider.get(widget.commitmentId),
+              settlementProvider.get(widget.settlementId),
               if (widget.entryId != null)
-                commitmentPaymentProvider.get(
-                  widget.commitmentId,
+                settlementPaymentProvider.get(
+                  widget.settlementId,
                   widget.entryId!,
                 ),
             ]),
@@ -147,8 +147,8 @@ class CommitmentEntryEditorState extends State<CommitmentEntryEditor> {
               }
 
               final vaults = snapshot.data![0] as List<Vault>;
-              final CommitmentPayment? payment = !isNull(widget.entryId)
-                  ? snapshot.data![2] as CommitmentPayment
+              final SettlementPayment? payment = !isNull(widget.entryId)
+                  ? snapshot.data![2] as SettlementPayment
                   : null;
 
               return Form(

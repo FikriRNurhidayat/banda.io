@@ -2,16 +2,15 @@ CREATE TABLE IF NOT EXISTS entries (
     id TEXT PRIMARY KEY,
     note TEXT,
     amount REAL NOT NULL,
-    issued_at TEXT NOT NULL,
     status TEXT NOT NULL,
     readonly BOOLEAN DEFAULT FALSE,
     category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
     vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
     controller_id TEXT,
     controller_type TEXT,
+    issued_at TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    deleted_at TEXT
+    updated_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS entry_labels (

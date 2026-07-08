@@ -24,16 +24,16 @@ class TransferRepository extends Repository {
   save(Transfer transfer) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO transfers (id, note, debit_amount, credit_amount, fee, debit_id, debit_vault_id, exchange_id, credit_id, credit_vault_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, debit_amount = excluded.debit_amount, credit_amount = excluded.credit_amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_vault_id = excluded.debit_vault_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_vault_id = excluded.credit_vault_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO transfers (id, note, debit_amount, credit_amount, fee_amount, debit_id, debit_vault_id, fee_id, credit_id, credit_vault_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, debit_amount = excluded.debit_amount, credit_amount = excluded.credit_amount, fee_amount = excluded.fee_amount, debit_id = excluded.debit_id, debit_vault_id = excluded.debit_vault_id, fee_id = excluded.fee_id, credit_id = excluded.credit_id, credit_vault_id = excluded.credit_vault_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         transfer.id,
         transfer.note,
         transfer.debitAmount,
         transfer.creditAmount,
-        transfer.fee,
+        transfer.feeAmount,
         transfer.debitId,
         transfer.debitVaultId,
-        transfer.exchangeId,
+        transfer.feeId,
         transfer.creditId,
         transfer.creditVaultId,
         transfer.issuedAt.toIso8601String(),
@@ -91,7 +91,7 @@ class TransferRepository extends Repository {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .expand(
-            (t) => [t["debit_id"], t["exchange_id"], t["credit_id"]],
+            (t) => [t["debit_id"], t["fee_id"], t["credit_id"]],
           )
           .whereType<String>()
           .toList();
@@ -106,8 +106,8 @@ class TransferRepository extends Repository {
           "credit": entryRows.firstWhere(
             (e) => e["id"] == t["credit_id"],
           ),
-          "exchange": !isNull(t["exchange_id"])
-              ? entryRows.firstWhere((e) => e["id"] == t["exchange_id"])
+          "exchange": !isNull(t["fee_id"])
+              ? entryRows.firstWhere((e) => e["id"] == t["fee_id"])
               : null,
         };
       }).toList();
@@ -117,7 +117,7 @@ class TransferRepository extends Repository {
       return Transfer.fromRow(r)
           .withDebit(Entry.row(r["debit"]))
           .withDebitVault(Vault.row(r["debit_vault"]))
-          .withExchange(Entry.tryRow(r["exchange"]))
+          .withFee(Entry.tryRow(r["exchange"]))
           .withCredit(Entry.row(r["credit"]))
           .withCreditVault(Vault.row(r["credit_vault"]));
     }).toList();

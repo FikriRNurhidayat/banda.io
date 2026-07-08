@@ -4,23 +4,23 @@ import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
+import 'package:bandha/features/settlements/entities/settlement_payment.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/types/controller.dart';
 
-class Commitment extends Controlable {
+class Settlement extends Controlable {
   @override
   final String id;
-  final CommitmentStatus status;
+  final SettlementStatus status;
   final double amount;
-  final double? fee;
+  final String? feeId;
+  final double? feeAmount;
   final double remainder;
   final String categoryId;
   final String partyId;
   final String vaultId;
   final String entryId;
-  final String? additionId;
   final DateTime issuedAt;
   final DateTime? settledAt;
   final DateTime createdAt;
@@ -29,37 +29,37 @@ class Commitment extends Controlable {
   late final Party party;
   late final Category category;
   late final Entry entry;
-  late final Entry? addition;
+  late final Entry? fee;
   late final Vault vault;
   late List<Label> labels;
 
-  static double additionAmount(double fee) {
+  static double getFee(double fee) {
     return fee * -1;
   }
 
-  static String additionNote(EntryType type) {
-    return "Commitment fee";
+  static String getFeeNote(EntryType type) {
+    return "Settlement fee";
   }
 
   static String entryNote(EntryType type, Party party) {
     final preposition = type.isIncome ? "for" : "from";
-    return "Commitment $preposition ${party.name}";
+    return "Settlement $preposition ${party.name}";
   }
 
   static double entryAmount(EntryType type, {required double amount}) {
     return amount * (type.isIncome ? 1 : -1);
   }
 
-  Commitment({
+  Settlement({
     required this.id,
     required this.status,
     required this.amount,
-    this.fee,
+    this.feeAmount,
     required this.remainder,
     required this.partyId,
     required this.entryId,
     required this.categoryId,
-    this.additionId,
+    this.feeId,
     required this.vaultId,
     required this.issuedAt,
     this.settledAt,
@@ -80,7 +80,7 @@ class Commitment extends Controlable {
   }
 
   Iterable<Entry> get entries {
-    return [entry, addition].whereType<Entry>();
+    return [entry, fee].whereType<Entry>();
   }
 
   Iterable<String> get entryIds {
@@ -95,44 +95,44 @@ class Commitment extends Controlable {
     return labels.isNotEmpty;
   }
 
-  Commitment withEntry(Entry? value) {
+  Settlement withEntry(Entry? value) {
     if (value != null) entry = value;
     return this;
   }
 
-  Commitment withAddition(Entry? value) {
-    addition = value;
+  Settlement withFee(Entry? value) {
+    fee = value;
     return this;
   }
 
-  Commitment withVault(Vault? value) {
+  Settlement withVault(Vault? value) {
     if (value != null) vault = value;
     return this;
   }
 
-  Commitment withParty(Party? value) {
+  Settlement withParty(Party? value) {
     if (value != null) party = value;
     return this;
   }
 
-  Commitment withCategory(Category? value) {
+  Settlement withCategory(Category? value) {
     if (value != null) category = value;
     return this;
   }
 
-  Commitment withLabels(List<Label>? value) {
+  Settlement withLabels(List<Label>? value) {
     if (value != null) labels = value;
     return this;
   }
 
-  Commitment pay(double paymentAmount) {
+  Settlement pay(double paymentAmount) {
     final newRemainder = remainder - paymentAmount;
     final isSettled = amount >= 0
         ? newRemainder <= 0
         : newRemainder >= 0;
     return copyWith(
       remainder: newRemainder,
-      status: isSettled ? CommitmentStatus.settled : status,
+      status: isSettled ? SettlementStatus.settled : status,
     );
   }
 
@@ -145,15 +145,15 @@ class Commitment extends Controlable {
 
     return copyWith(
       remainder: newRemainder,
-      status: isSettled ? CommitmentStatus.settled : status,
+      status: isSettled ? SettlementStatus.settled : status,
     );
   }
 
-  Commitment applyPayment(CommitmentPayment payment) {
+  Settlement applyPayment(SettlementPayment payment) {
     return pay(payment.amount);
   }
 
-  Commitment revokePayment(CommitmentPayment payment) {
+  Settlement revokePayment(SettlementPayment payment) {
     return revoke(payment.amount);
   }
 
@@ -170,7 +170,7 @@ class Commitment extends Controlable {
       "id": id,
       "status": status,
       "amount": amount,
-      "fee": fee,
+      "fee": feeAmount,
       "partyId": partyId,
       "vaultId": vaultId,
       "entryId": entryId,
@@ -181,30 +181,30 @@ class Commitment extends Controlable {
     };
   }
 
-  Commitment copyWith({
-    CommitmentStatus? status,
+  Settlement copyWith({
+    SettlementStatus? status,
     double? amount,
-    double? fee,
+    double? feeAmount,
     double? remainder,
     String? categoryId,
     String? partyId,
     String? vaultId,
     String? entryId,
-    String? additionId,
+    String? feeId,
     DateTime? issuedAt,
     DateTime? settledAt,
   }) {
-    return Commitment(
+    return Settlement(
       id: id,
-      status: status ?? this.status,
       amount: amount ?? this.amount,
-      fee: fee ?? this.fee,
-      remainder: remainder ?? this.remainder,
       categoryId: categoryId ?? this.categoryId,
-      partyId: partyId ?? this.partyId,
-      vaultId: vaultId ?? this.vaultId,
       entryId: entryId ?? this.entryId,
-      additionId: additionId ?? this.additionId,
+      feeAmount: feeAmount ?? this.feeAmount,
+      feeId: feeId ?? this.feeId,
+      partyId: partyId ?? this.partyId,
+      remainder: remainder ?? this.remainder,
+      status: status ?? this.status,
+      vaultId: vaultId ?? this.vaultId,
       issuedAt: issuedAt ?? this.issuedAt,
       settledAt: settledAt ?? this.settledAt,
       createdAt: createdAt,
@@ -212,30 +212,30 @@ class Commitment extends Controlable {
     );
   }
 
-  factory Commitment.create({
-    required CommitmentStatus status,
+  factory Settlement.create({
+    required SettlementStatus status,
     required double amount,
-    required double? fee,
+    required double? feeAmount,
     double? remainder,
     required String categoryId,
     required String partyId,
     required String vaultId,
     required String entryId,
-    String? additionId,
+    String? feeId,
     required DateTime issuedAt,
     DateTime? settledAt,
   }) {
-    return Commitment(
+    return Settlement(
       id: Entity.getId(),
       status: status,
       amount: amount,
-      fee: fee,
+      feeAmount: feeAmount,
       remainder: remainder ?? amount,
       categoryId: categoryId,
       partyId: partyId,
       vaultId: vaultId,
       entryId: entryId,
-      additionId: additionId,
+      feeId: feeId,
       issuedAt: issuedAt,
       settledAt: settledAt,
       createdAt: DateTime.now(),
@@ -245,28 +245,26 @@ class Commitment extends Controlable {
 
   @override
   Controller toController() {
-    return Controller.commitment(id);
+    return Controller.settlement(id);
   }
 
-  static Commitment? tryParse(Map<dynamic, dynamic>? row) {
+  static Settlement? tryParse(Map<dynamic, dynamic>? row) {
     if (isNull(row)) return null;
-    return Commitment.parse(row!);
+    return Settlement.parse(row!);
   }
 
-  factory Commitment.parse(Map<dynamic, dynamic> row) {
-    return Commitment(
+  factory Settlement.parse(Map<dynamic, dynamic> row) {
+    return Settlement(
       id: row["id"],
-      status: CommitmentStatus.values.firstWhere(
-        (e) => e.label == row["status"],
-      ),
+      status: SettlementStatus.parse(row["status"]),
       amount: row["amount"],
-      fee: row["fee"],
+      feeAmount: row["fee_amount"],
       remainder: row["remainder"],
       categoryId: row["category_id"],
       partyId: row["party_id"],
       vaultId: row["vault_id"],
       entryId: row["entry_id"],
-      additionId: row["addition_id"],
+      feeId: row["fee_id"],
       issuedAt: DateTime.parse(row["issued_at"]),
       settledAt: DateTime.tryParse(row["settled_at"] ?? ""),
       createdAt: DateTime.parse(row["created_at"]),
@@ -275,24 +273,28 @@ class Commitment extends Controlable {
   }
 }
 
-enum CommitmentStatus {
+enum SettlementStatus {
   overdue('Overdue'),
   settled('Settled'),
   active('Active');
 
   final String label;
-  const CommitmentStatus(this.label);
+  const SettlementStatus(this.label);
+
+  static SettlementStatus parse(String value) {
+    return values.firstWhere((e) => e.label == value);
+  }
 
   bool get isSettled {
-    return this == CommitmentStatus.settled;
+    return this == SettlementStatus.settled;
   }
 
   EntryStatus get entryStatus {
     switch (this) {
-      case CommitmentStatus.settled:
+      case SettlementStatus.settled:
         return EntryStatus.done;
-      case CommitmentStatus.overdue:
-      case CommitmentStatus.active:
+      case SettlementStatus.overdue:
+      case SettlementStatus.active:
         return EntryStatus.pending;
     }
   }

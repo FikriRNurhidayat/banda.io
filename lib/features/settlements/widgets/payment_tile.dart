@@ -1,7 +1,6 @@
-import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/widgets/date_time_text.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
+import 'package:bandha/features/settlements/entities/settlement_payment.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/common/widgets/money_text.dart';
@@ -9,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class PaymentTile extends StatelessWidget {
-  final Commitment commitment;
-  final CommitmentPayment payment;
+  final Settlement settlement;
+  final SettlementPayment payment;
   final dateFormatter = DateFormat("yyyy/MM/dd");
 
   PaymentTile({
     super.key,
     required this.payment,
-    required this.commitment,
+    required this.settlement,
   });
 
   Future<bool?> handleDismiss(
@@ -24,29 +23,29 @@ class PaymentTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return await confirmCommitmentPaymentDeletion(
+      return await confirmSettlementPaymentDeletion(
         context,
-        commitment,
+        settlement,
         payment.entry,
       );
     }
 
     Navigator.pushNamed(
       context,
-      "/commitments/${commitment.id}/payments/${payment.entry.id}/edit",
+      "/settlements/${settlement.id}/payments/${payment.entry.id}/edit",
     );
 
     return false;
   }
 
-  handleTap(BuildContext context, CommitmentPayment payment) {
+  handleTap(BuildContext context, SettlementPayment payment) {
     Navigator.pushNamed(
       context,
-      "/commitments/${commitment.id}/payments/${payment.entry.id}/detail",
+      "/settlements/${settlement.id}/payments/${payment.entry.id}/detail",
     );
   }
 
-  infoBuilder(BuildContext context, CommitmentPayment payment) {
+  infoBuilder(BuildContext context, SettlementPayment payment) {
     final theme = Theme.of(context);
 
     return Column(
@@ -63,11 +62,11 @@ class PaymentTile extends StatelessWidget {
     );
   }
 
-  amountBuilder(BuildContext context, CommitmentPayment payment) {
+  amountBuilder(BuildContext context, SettlementPayment payment) {
     return MoneyText(payment.amount.abs(), useSymbol: false);
   }
 
-  paymentBuilder(BuildContext context, CommitmentPayment payment) {
+  paymentBuilder(BuildContext context, SettlementPayment payment) {
     return tileBuilder(
       context,
       onTap: () {
@@ -89,7 +88,7 @@ class PaymentTile extends StatelessWidget {
     return dismissibleBuilder(
       context,
       key: payment.entry.id,
-      dismissable: !commitment.status.isSettled,
+      dismissable: !settlement.status.isSettled,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);
       },

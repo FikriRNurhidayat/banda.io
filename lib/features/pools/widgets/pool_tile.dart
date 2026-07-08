@@ -39,7 +39,7 @@ class PoolTile extends StatelessWidget {
       if (pool.status == PoolStatus.released)
         Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       if (pool.status != PoolStatus.released &&
-          pool.balance == pool.goal)
+          pool.balance == pool.amount)
         Icon(Icons.done_all, size: 8, color: theme.colorScheme.primary),
     ];
   }
@@ -120,7 +120,7 @@ class PoolTile extends StatelessWidget {
             ),
             Text("/", style: theme.textTheme.bodySmall),
             Text(
-              MoneyHelper.normalize(pool.goal),
+              MoneyHelper.normalize(pool.amount),
               style: theme.textTheme.bodySmall,
             ),
           ],

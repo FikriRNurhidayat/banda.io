@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/features/vaults/providers/vault_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_filter_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/types/specification.dart';
@@ -12,18 +12,18 @@ import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommitmentFilter extends StatefulWidget {
+class SettlementFilter extends StatefulWidget {
   final Filter? specs;
 
-  const CommitmentFilter({super.key, this.specs});
+  const SettlementFilter({super.key, this.specs});
 
   @override
   State<StatefulWidget> createState() {
-    return _CommitmentFilterState();
+    return _SettlementFilterState();
   }
 }
 
-class _CommitmentFilterState extends State<CommitmentFilter> {
+class _SettlementFilterState extends State<SettlementFilter> {
   final _formKey = GlobalKey<FormState>();
   final FormData _formData = {};
 
@@ -85,7 +85,7 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
         query["issued_between"] = _formData["issued_between"];
       }
 
-      context.read<CommitmentFilterProvider>().set(query);
+      context.read<SettlementFilterProvider>().set(query);
       Navigator.pop(context);
     }
   }
@@ -100,7 +100,7 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          "Filter commitments",
+          "Filter settlements",
           style: theme.textTheme.titleMedium,
         ),
         automaticallyImplyLeading: false,
@@ -149,13 +149,13 @@ class _CommitmentFilterState extends State<CommitmentFilter> {
                       onSaved: (value) =>
                           _formData["issued_between"] = value,
                     ),
-                    MultiSelectFormField<CommitmentStatus>(
+                    MultiSelectFormField<SettlementStatus>(
                       decoration: InputStyles.field(
                         labelText: "Status",
                         hintText: "Select status...",
                       ),
                       initialValue: _formData["status_in"] ?? [],
-                      options: CommitmentStatus.values
+                      options: SettlementStatus.values
                           .map(
                             (i) => MultiSelectItem(
                               value: i,

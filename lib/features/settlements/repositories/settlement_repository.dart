@@ -2,109 +2,109 @@ import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/features/vaults/entities/vault.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
 import 'package:bandha/features/tags/entities/party.dart';
 import 'package:bandha/common/repositories/repository.dart';
 import 'package:bandha/common/types/pair.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
-class CommitmentRepository extends Repository {
+class SettlementRepository extends Repository {
   WithArgs withArgs;
 
-  CommitmentRepository(super.db, {WithArgs? withArgs})
+  SettlementRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  CommitmentRepository withVault() {
+  SettlementRepository withVault() {
     withArgs.add("vault");
     return this;
   }
 
-  CommitmentRepository withLabels() {
+  SettlementRepository withLabels() {
     withArgs.add("labels");
     return this;
   }
 
-  CommitmentRepository withEntries() {
+  SettlementRepository withEntries() {
     withArgs.add("entries");
     return this;
   }
 
-  CommitmentRepository withCategory() {
+  SettlementRepository withCategory() {
     withArgs.add("category");
     return this;
   }
 
-  CommitmentRepository withParty() {
+  SettlementRepository withParty() {
     withArgs.add("party");
     return this;
   }
 
-  save(Commitment commitment) async {
+  save(Settlement settlement) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO commitments (id, status, amount, fee, remainder, category_id, party_id, vault_id, entry_id, addition_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET status = excluded.status, amount = excluded.amount, fee = excluded.fee, remainder = excluded.remainder, category_id = excluded.category_id, party_id = excluded.party_id, vault_id = excluded.vault_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
+      "INSERT INTO settlements (id, status, amount, fee_amount, remainder, category_id, party_id, vault_id, entry_id, fee_id, issued_at, settled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET status = excluded.status, amount = excluded.amount, fee_amount = excluded.fee_amount, remainder = excluded.remainder, category_id = excluded.category_id, party_id = excluded.party_id, vault_id = excluded.vault_id, entry_id = excluded.entry_id, fee_id = excluded.fee_id, issued_at = excluded.issued_at, settled_at = excluded.settled_at, updated_at = excluded.updated_at",
       [
-        commitment.id,
-        commitment.status.label,
-        commitment.amount,
-        commitment.fee,
-        commitment.remainder,
-        commitment.categoryId,
-        commitment.partyId,
-        commitment.vaultId,
-        commitment.entryId,
-        commitment.additionId,
-        commitment.issuedAt.toIso8601String(),
-        commitment.settledAt?.toIso8601String(),
-        commitment.createdAt.toIso8601String(),
-        commitment.updatedAt.toIso8601String(),
+        settlement.id,
+        settlement.status.label,
+        settlement.amount,
+        settlement.feeAmount,
+        settlement.remainder,
+        settlement.categoryId,
+        settlement.partyId,
+        settlement.vaultId,
+        settlement.entryId,
+        settlement.feeId,
+        settlement.issuedAt.toIso8601String(),
+        settlement.settledAt?.toIso8601String(),
+        settlement.createdAt.toIso8601String(),
+        settlement.updatedAt.toIso8601String(),
       ],
     );
   }
 
-  Future<Commitment> sync(String id) async {
+  Future<Settlement> sync(String id) async {
     final client = await getClient();
     final rows = client.select(
-      "SELECT SUM(amount) as paid FROM commitment_payments WHERE commitment_id = ?",
+      "SELECT SUM(amount) as paid FROM settlement_payments WHERE settlement_id = ?",
       [id],
     );
     final paid = rows.first["paid"] ?? 0;
 
     client.execute(
-      "UPDATE commitments SET remainder = amount - ? WHERE id = ?",
+      "UPDATE settlements SET remainder = amount - ? WHERE id = ?",
       [paid, id],
     );
 
     return get(id);
   }
 
-  Future<List<Commitment>> search(Filter? specification) async {
-    var baseQuery = "SELECT commitments.* FROM commitments";
+  Future<List<Settlement>> search(Filter? specification) async {
+    var baseQuery = "SELECT settlements.* FROM settlements";
 
     final query = _defineQuery(baseQuery, specification);
     final sqlString =
-        "${query.first} ORDER BY commitments.issued_at DESC";
+        "${query.first} ORDER BY settlements.issued_at DESC";
     final sqlArgs = query.second;
 
     final client = await getClient();
-    final commitmentRows = client.select(sqlString, sqlArgs);
+    final settlementRows = client.select(sqlString, sqlArgs);
 
-    return await _entities(commitmentRows);
+    return await _entities(settlementRows);
   }
 
-  Future<Commitment> get(String id) async {
+  Future<Settlement> get(String id) async {
     final client = await getClient();
     final rows = client.select(
-      "SELECT * FROM commitments WHERE id = ?",
+      "SELECT * FROM settlements WHERE id = ?",
       [id],
     );
-    return _entities(rows).then((commitments) => commitments.first);
+    return _entities(rows).then((settlements) => settlements.first);
   }
 
   delete(String id) async {
     final client = await getClient();
-    client.execute("DELETE FROM commitments WHERE id = ?", [id]);
+    client.execute("DELETE FROM settlements WHERE id = ?", [id]);
   }
 
   _defineQuery(String baseQuery, Filter? spec) {
@@ -131,7 +131,7 @@ class CommitmentRepository extends Repository {
 
     if (spec.containsKey("issued_between")) {
       final value = spec["issued_between"] as DateTimeRange;
-      where["query"].add("(commitments.issued_at BETWEEN ? AND ?)");
+      where["query"].add("(settlements.issued_at BETWEEN ? AND ?)");
       where["args"].addAll([
         value.start.toIso8601String(),
         value.end.toIso8601String(),
@@ -142,17 +142,17 @@ class CommitmentRepository extends Repository {
       final value = spec["vault_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(commitments.vault_id IN (${value.map((_) => '?').join(', ')}))",
+          "(settlements.vault_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
     }
 
     if (spec.containsKey("status_in")) {
-      final value = spec["status_in"] as List<CommitmentStatus>;
+      final value = spec["status_in"] as List<SettlementStatus>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(commitments.status IN (${value.map((_) => '?').join(', ')}))",
+          "(settlements.status IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value.map((v) => v.label).toList());
       }
@@ -162,7 +162,7 @@ class CommitmentRepository extends Repository {
       final value = spec["category_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(commitments.category_id IN (${value.map((_) => '?').join(', ')}))",
+          "(settlements.category_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -172,7 +172,7 @@ class CommitmentRepository extends Repository {
       final value = spec["party_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(commitments.party_id IN (${value.map((_) => '?').join(', ')}))",
+          "(settlements.party_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -182,7 +182,7 @@ class CommitmentRepository extends Repository {
       final value = spec["party_nin"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(commitments.party_id NOT IN (${value.map((_) => '?').join(', ')}))",
+          "(settlements.party_id NOT IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -192,7 +192,7 @@ class CommitmentRepository extends Repository {
     return where;
   }
 
-  Future<List<Commitment>> _entities(List<Map> rows) async {
+  Future<List<Settlement>> _entities(List<Map> rows) async {
     if (withArgs.contains("entries")) {
       rows = await populateEntries(rows);
     }
@@ -218,8 +218,8 @@ class CommitmentRepository extends Repository {
     }
 
     return rows.map((row) {
-      return Commitment.parse(row)
-          .withAddition(Entry.tryRow(row["addition"]))
+      return Settlement.parse(row)
+          .withFee(Entry.tryRow(row["fee"]))
           .withEntry(Entry.tryRow(row["entry"]))
           .withCategory(Category.tryRow(row["category"]))
           .withLabels(Label.tryRows(row["labels"]))
@@ -228,28 +228,28 @@ class CommitmentRepository extends Repository {
     }).toList();
   }
 
-  saveLabels(String commitmentId, Iterable<String> labelIds) {
+  saveLabels(String settlementId, Iterable<String> labelIds) {
     return setEntityLabels(
-      entityId: commitmentId,
+      entityId: settlementId,
       labelIds: labelIds,
-      junctionTable: "commitment_labels",
-      junctionKey: "commitment_id",
+      junctionTable: "settlement_labels",
+      junctionKey: "settlement_id",
     );
   }
 
-  removeLabels(Commitment commitment) async {
+  removeLabels(Settlement settlement) async {
     return resetEntityLabels(
-      entityId: commitment.id,
-      junctionTable: "commitment_labels",
-      junctionKey: "commitment_id",
+      entityId: settlement.id,
+      junctionTable: "settlement_labels",
+      junctionKey: "settlement_id",
     );
   }
 
   populateLabels(List<Map> rows) {
     return super.populateEntityLabels(
       rows,
-      "commitment_labels",
-      "commitment_id",
+      "settlement_labels",
+      "settlement_id",
     );
   }
 }

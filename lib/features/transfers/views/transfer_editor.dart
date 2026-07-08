@@ -176,10 +176,10 @@ class _TransferEditorState extends State<TransferEditor> {
                           ? "Debit amount is required"
                           : null,
                     ),
-                    if (!widget.readOnly || transfer?.fee != null)
+                    if (!widget.readOnly || transfer?.feeAmount != null)
                       AmountFormField(
                         readOnly: widget.readOnly,
-                        initialValue: _d["fee"] ?? transfer?.fee,
+                        initialValue: _d["fee"] ?? transfer?.feeAmount,
                         onSaved: (value) => _d["fee"] = value,
                         decoration: InputStyles.field(
                           hintText: "Enter fee...",

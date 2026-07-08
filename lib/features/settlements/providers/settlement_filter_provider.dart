@@ -1,3 +1,3 @@
 import 'package:bandha/common/providers/filter_provider.dart';
 
-class CommitmentFilterProvider extends FilterProvider {}
+class SettlementFilterProvider extends FilterProvider {}

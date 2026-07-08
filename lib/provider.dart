@@ -2,17 +2,17 @@ import 'package:bandha/features/schedules/providers/schedule_filter_provider.dar
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
 import 'package:bandha/features/schedules/services/schedule_service.dart';
-import 'package:bandha/features/commitments/providers/commitment_payment_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_tab_provider.dart';
-import 'package:bandha/features/commitments/services/commitment_payment_service.dart';
-import 'package:bandha/features/commitments/services/commitment_service.dart';
+import 'package:bandha/features/settlements/providers/settlement_payment_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_tab_provider.dart';
+import 'package:bandha/features/settlements/services/settlement_payment_service.dart';
+import 'package:bandha/features/settlements/services/settlement_service.dart';
 import 'package:bandha/features/main/providers/tool_provider.dart';
 import 'package:bandha/features/main/services/tool_service.dart';
 import 'package:bandha/features/transfers/providers/transfer_filter_provider.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/features/transfers/services/transfer_service.dart';
-import 'package:bandha/features/commitments/repositories/commitment_payment_repository.dart';
+import 'package:bandha/features/settlements/repositories/settlement_payment_repository.dart';
 import 'package:bandha/features/vaults/providers/vault_filter_provider.dart';
 import 'package:bandha/infra/db.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +29,9 @@ import 'package:bandha/features/entries/services/entry_service.dart';
 import 'package:bandha/features/pools/providers/pool_provider.dart';
 import 'package:bandha/features/pools/repositories/pool_repository.dart';
 import 'package:bandha/features/pools/services/pool_service.dart';
-import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
-import 'package:bandha/features/commitments/repositories/commitment_repository.dart';
+import 'package:bandha/features/settlements/providers/settlement_filter_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
+import 'package:bandha/features/settlements/repositories/settlement_repository.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
 import 'package:bandha/features/tags/providers/party_provider.dart';
@@ -54,8 +54,8 @@ makeProvider({
   final entryRepository = EntryRepository(dbManager);
   final vaultRepository = VaultRepository(dbManager);
   final transferRepository = TransferRepository(dbManager);
-  final commitmentRepository = CommitmentRepository(dbManager);
-  final commitmentPaymentRepository = CommitmentPaymentRepository(
+  final settlementRepository = SettlementRepository(dbManager);
+  final settlementPaymentRepository = SettlementPaymentRepository(
     dbManager,
   );
   final labelRepository = LabelRepository(dbManager);
@@ -86,12 +86,12 @@ makeProvider({
     labelRepository: labelRepository,
     transferRepository: transferRepository,
   );
-  final commitmentService = CommitmentService(
+  final settlementService = SettlementService(
     vaultRepository: vaultRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
-    commitmentRepository: commitmentRepository,
-    paymentRepository: commitmentPaymentRepository,
+    settlementRepository: settlementRepository,
+    paymentRepository: settlementPaymentRepository,
     partyRepository: partyRepository,
     notificationManager: notificationManager,
     labelRepository: labelRepository,
@@ -112,10 +112,10 @@ makeProvider({
     vaultRepository: vaultRepository,
   );
 
-  final commitmentPaymentService = CommitmentPaymentService(
+  final settlementPaymentService = SettlementPaymentService(
     categoryRepository: categoryRepository,
-    commitmentPaymentRepository: commitmentPaymentRepository,
-    commitmentRepository: commitmentRepository,
+    settlementPaymentRepository: settlementPaymentRepository,
+    settlementRepository: settlementRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
     notificationManager: notificationManager,
@@ -142,11 +142,11 @@ makeProvider({
     ),
     ChangeNotifierProvider(create: (_) => PoolProvider(poolService)),
     ChangeNotifierProvider(
-      create: (_) => CommitmentProvider(commitmentService),
+      create: (_) => SettlementProvider(settlementService),
     ),
     ChangeNotifierProvider(
       create: (_) =>
-          CommitmentPaymentProvider(commitmentPaymentService),
+          SettlementPaymentProvider(settlementPaymentService),
     ),
     ChangeNotifierProvider(
       create: (_) => ScheduleProvider(scheduleService),
@@ -158,8 +158,8 @@ makeProvider({
       create: (_) => PartyProvider(partyRepository),
     ),
     ChangeNotifierProvider(create: (_) => EntryFilterProvider()),
-    ChangeNotifierProvider(create: (_) => CommitmentFilterProvider()),
-    ChangeNotifierProvider(create: (_) => CommitmentTabProvider()),
+    ChangeNotifierProvider(create: (_) => SettlementFilterProvider()),
+    ChangeNotifierProvider(create: (_) => SettlementTabProvider()),
     ChangeNotifierProvider(create: (_) => PoolFilterProvider()),
     ChangeNotifierProvider(create: (_) => ScheduleFilterProvider()),
     ChangeNotifierProvider(create: (_) => TransferFilterProvider()),

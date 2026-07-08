@@ -1,9 +1,9 @@
 import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:bandha/common/services/service.dart';
 import 'package:bandha/common/types/specification.dart';
-import 'package:bandha/features/commitments/entities/commitment_payment.dart';
-import 'package:bandha/features/commitments/repositories/commitment_payment_repository.dart';
-import 'package:bandha/features/commitments/repositories/commitment_repository.dart';
+import 'package:bandha/features/settlements/entities/settlement_payment.dart';
+import 'package:bandha/features/settlements/repositories/settlement_payment_repository.dart';
+import 'package:bandha/features/settlements/repositories/settlement_repository.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
@@ -14,20 +14,20 @@ import 'package:bandha/features/tags/repositories/party_repository.dart';
 import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/vaults/repositories/vault_repository.dart';
 
-class CommitmentPaymentService extends Service {
+class SettlementPaymentService extends Service {
   final CategoryRepository categoryRepository;
-  final CommitmentPaymentRepository commitmentPaymentRepository;
-  final CommitmentRepository commitmentRepository;
+  final SettlementPaymentRepository settlementPaymentRepository;
+  final SettlementRepository settlementRepository;
   final EntryRepository entryRepository;
   final LabelRepository labelRepository;
   final NotificationManager notificationManager;
   final PartyRepository partyRepository;
   final VaultRepository vaultRepository;
 
-  CommitmentPaymentService({
+  SettlementPaymentService({
     required this.categoryRepository,
-    required this.commitmentPaymentRepository,
-    required this.commitmentRepository,
+    required this.settlementPaymentRepository,
+    required this.settlementRepository,
     required this.entryRepository,
     required this.labelRepository,
     required this.notificationManager,
@@ -36,96 +36,96 @@ class CommitmentPaymentService extends Service {
   });
 
   create(
-    String commitmentId, {
+    String settlementId, {
     required double amount,
     double? fee = 0,
     required String vaultId,
     required DateTime issuedAt,
   }) {
-    return work<CommitmentPayment>(() async {
-      final commitment = await commitmentRepository
+    return work<SettlementPayment>(() async {
+      final settlement = await settlementRepository
           .withCategory()
           .withParty()
           .withVault()
           .withLabels()
-          .get(commitmentId);
+          .get(settlementId);
 
       final vault = await vaultRepository.get(vaultId);
       final entry = Entry.readOnly(
-        note: CommitmentPayment.entryNote(commitment),
-        amount: CommitmentPayment.entryAmount(commitment, amount),
+        note: SettlementPayment.entryNote(settlement),
+        amount: SettlementPayment.entryAmount(settlement, amount),
         status: EntryStatus.done,
         issuedAt: issuedAt,
         vaultId: vault.id,
-        categoryId: commitment.category.id,
+        categoryId: settlement.category.id,
       ).withVault(vault);
       final addition = (!isZero(fee)
           ? (Entry.readOnly(
-              note: CommitmentPayment.additionNote(commitment),
-              amount: CommitmentPayment.additionAmount(commitment, fee),
+              note: SettlementPayment.additionNote(settlement),
+              amount: SettlementPayment.additionAmount(settlement, fee),
               status: EntryStatus.done,
               issuedAt: issuedAt,
               vaultId: vaultId,
-              categoryId: commitment.category.id,
+              categoryId: settlement.category.id,
             ))
           : null);
-      final paymentAmount = amount * (commitment.isIncome ? 1 : -1);
+      final paymentAmount = amount * (settlement.isIncome ? 1 : -1);
 
       final payment =
-          CommitmentPayment.create(
+          SettlementPayment.create(
                 amount: paymentAmount,
                 fee: fee,
-                commitmentId: commitment.id,
+                settlementId: settlement.id,
                 entryId: entry.id,
                 additionId: addition?.id,
                 issuedAt: issuedAt,
               )
               .withAddition(addition)
               .withEntry(entry)
-              .withCommitment(commitment);
+              .withSettlement(settlement);
 
       return await apply(payment);
     });
   }
 
-  Future<CommitmentPayment> update(
-    String commitmentId,
+  Future<SettlementPayment> update(
+    String settlementId,
     String entryId, {
     required double amount,
     double? fee = 0,
     required String vaultId,
     required DateTime issuedAt,
   }) {
-    return work<CommitmentPayment>(() async {
-      var commitment = await commitmentRepository
+    return work<SettlementPayment>(() async {
+      var settlement = await settlementRepository
           .withEntries()
           .withVault()
           .withCategory()
           .withParty()
           .withLabels()
-          .get(commitmentId);
+          .get(settlementId);
 
-      var payment = await commitmentPaymentRepository
+      var payment = await settlementPaymentRepository
           .withEntries()
           .withVault()
-          .get(commitmentId, entryId);
+          .get(settlementId, entryId);
 
       await vaultRepository.save(
         payment.vault.revokeEntries(payment.entries),
       );
 
-      commitment = commitment
+      settlement = settlement
           .revokePayment(payment)
           .withVault(payment.vault)
-          .withEntry(commitment.entry)
-          .withParty(commitment.party)
-          .withAddition(commitment.addition);
+          .withEntry(settlement.entry)
+          .withParty(settlement.party)
+          .withFee(settlement.fee);
 
       final vault = await vaultRepository.get(vaultId);
       final entry = payment.entry
           .copyWith(
-            note: CommitmentPayment.entryNote(commitment),
-            amount: CommitmentPayment.entryAmount(commitment, amount),
+            note: SettlementPayment.entryNote(settlement),
+            amount: SettlementPayment.entryAmount(settlement, amount),
             status: EntryStatus.done,
             issuedAt: issuedAt,
             vaultId: vault.id,
@@ -133,115 +133,115 @@ class CommitmentPaymentService extends Service {
           .withVault(vault);
       final addition = (!payment.hasAddition && !isZero(fee)
           ? Entry.readOnly(
-              note: CommitmentPayment.additionNote(commitment),
-              amount: CommitmentPayment.additionAmount(commitment, fee),
+              note: SettlementPayment.additionNote(settlement),
+              amount: SettlementPayment.additionAmount(settlement, fee),
               status: EntryStatus.done,
               issuedAt: issuedAt,
               vaultId: vault.id,
-              categoryId: commitment.category.id,
+              categoryId: settlement.category.id,
             )
           : ((payment.hasAddition && !isZero(fee)
                 ? payment.addition!.copyWith(
-                    note: CommitmentPayment.additionNote(commitment),
-                    amount: CommitmentPayment.additionAmount(
-                      commitment,
+                    note: SettlementPayment.additionNote(settlement),
+                    amount: SettlementPayment.additionAmount(
+                      settlement,
                       fee,
                     ),
                     issuedAt: issuedAt,
                     vaultId: vault.id,
-                    categoryId: commitment.category.id,
+                    categoryId: settlement.category.id,
                   )
                 : null)));
 
-      final paymentAmount = amount * (commitment.isIncome ? 1 : -1);
+      final paymentAmount = amount * (settlement.isIncome ? 1 : -1);
       payment = payment
           .copyWith(amount: paymentAmount, fee: fee, issuedAt: issuedAt)
           .withAddition(addition)
           .withEntry(entry)
-          .withCommitment(commitment);
+          .withSettlement(settlement);
 
       return await apply(payment);
     });
   }
 
-  get(String commitmentId, String entryId) {
-    return commitmentPaymentRepository
+  get(String settlementId, String entryId) {
+    return settlementPaymentRepository
         .withVault()
         .withCategory()
         .withEntries()
-        .get(commitmentId, entryId);
+        .get(settlementId, entryId);
   }
 
   search({Filter? filter}) {
-    return commitmentPaymentRepository
+    return settlementPaymentRepository
         .withVault()
         .withEntries()
         .withCategory()
         .search(filter: filter);
   }
 
-  delete(String commitmentId, String entryId) {
+  delete(String settlementId, String entryId) {
     return work(() async {
-      final payment = await commitmentPaymentRepository
-          .withCommitment()
+      final payment = await settlementPaymentRepository
+          .withSettlement()
           .withVault()
           .withEntries()
-          .get(commitmentId, entryId);
+          .get(settlementId, entryId);
 
       final nVault = payment.vault.revokeEntries(payment.entries);
-      final nCommitment = payment.commitment.revokePayment(payment);
+      final nSettlement = payment.settlement.revokePayment(payment);
 
       await vaultRepository.save(nVault);
-      await commitmentRepository.save(nCommitment);
+      await settlementRepository.save(nSettlement);
 
-      await commitmentPaymentRepository.delete(
-        payment.commitment.id,
+      await settlementPaymentRepository.delete(
+        payment.settlement.id,
         payment.entry.id,
       );
       await entryRepository.deleteByIds(payment.entryIds);
     });
   }
 
-  Future<CommitmentPayment> apply(CommitmentPayment payment) async {
-    final [commitmentLabel, paymentLabel, feeLabel] =
+  Future<SettlementPayment> apply(SettlementPayment payment) async {
+    final [settlementLabel, paymentLabel, feeLabel] =
         await getReadOnlyLabels();
 
     await entryRepository.bulkSave(
-      payment.entries.map((e) => e.controlledBy(payment.commitment)),
+      payment.entries.map((e) => e.controlledBy(payment.settlement)),
     );
 
     for (var entry in payment.entries) {
       await entryRepository.saveLabels(entry.id, [
-        commitmentLabel.id,
+        settlementLabel.id,
         paymentLabel.id,
         if (payment.addition != null &&
             entry.id == payment.addition!.id)
           feeLabel.id,
-        ...payment.commitment.labels.map((label) => label.id),
+        ...payment.settlement.labels.map((label) => label.id),
       ]);
     }
 
     await vaultRepository.save(
       payment.vault.applyEntries(payment.entries),
     );
-    await commitmentRepository.save(
-      payment.commitment.applyPayment(payment),
+    await settlementRepository.save(
+      payment.settlement.applyPayment(payment),
     );
-    await commitmentPaymentRepository.save(payment);
+    await settlementPaymentRepository.save(payment);
 
     return payment;
   }
 
   Future<List<Label>> getReadOnlyLabels() async {
     final labels = await labelRepository.getByNames([
-      ReadOnlyLabel.commitment.label,
+      ReadOnlyLabel.settlement.label,
       ReadOnlyLabel.payment.label,
       ReadOnlyLabel.fee.label,
     ]);
 
     return <Label>[
       labels.firstWhere(
-        (label) => label.name == ReadOnlyLabel.commitment.label,
+        (label) => label.name == ReadOnlyLabel.settlement.label,
       ),
       labels.firstWhere(
         (label) => label.name == ReadOnlyLabel.payment.label,

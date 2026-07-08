@@ -132,7 +132,7 @@ class _PoolEditorState extends State<PoolEditor> {
         ),
       AmountFormField(
         readOnly: widget.readOnly,
-        initialValue: _d["goal"] ?? pool?.goal,
+        initialValue: _d["goal"] ?? pool?.amount,
         onSaved: (value) => _d["goal"] = value,
         decoration: InputStyles.field(
           hintText: "Enter goal...",

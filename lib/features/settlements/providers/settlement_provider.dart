@@ -1,20 +1,20 @@
-import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/services/commitment_service.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
+import 'package:bandha/features/settlements/services/settlement_service.dart';
 import 'package:bandha/common/types/specification.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:flutter/material.dart';
 
-class CommitmentProvider extends ChangeNotifier {
-  final CommitmentService commitmentService;
+class SettlementProvider extends ChangeNotifier {
+  final SettlementService settlementService;
 
-  CommitmentProvider(this.commitmentService);
+  SettlementProvider(this.settlementService);
 
-  Future<List<Commitment>> search(Filter? spec) async {
-    return commitmentService.search(spec);
+  Future<List<Settlement>> search(Filter? spec) async {
+    return settlementService.search(spec);
   }
 
   Future<void> sync(String id) async {
-    await commitmentService.sync(id);
+    await settlementService.sync(id);
     notifyListeners();
   }
 
@@ -24,13 +24,13 @@ class CommitmentProvider extends ChangeNotifier {
     required DateTime issuedAt,
     DateTime? settledAt,
     required EntryType type,
-    required CommitmentStatus status,
+    required SettlementStatus status,
     required String categoryId,
     required String partyId,
     required String vaultId,
     List<String>? labelIds,
   }) async {
-    await commitmentService.create(
+    await settlementService.create(
       amount: amount,
       type: type,
       status: status,
@@ -53,13 +53,13 @@ class CommitmentProvider extends ChangeNotifier {
     required DateTime issuedAt,
     DateTime? settledAt,
     required EntryType type,
-    required CommitmentStatus status,
+    required SettlementStatus status,
     required String categoryId,
     required String partyId,
     required String vaultId,
     List<String>? labelIds,
   }) async {
-    await commitmentService.update(
+    await settlementService.update(
       id,
       amount: amount,
       type: type,
@@ -76,16 +76,16 @@ class CommitmentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Commitment?> get(String id) async {
-    return commitmentService.get(id);
+  Future<Settlement?> get(String id) async {
+    return settlementService.get(id);
   }
 
   Future<void> delete(String id) async {
-    await commitmentService.delete(id);
+    await settlementService.delete(id);
     notifyListeners();
   }
 
   debugReminder(String id) {
-    return commitmentService.debugReminder(id);
+    return settlementService.debugReminder(id);
   }
 }

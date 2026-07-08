@@ -1,21 +1,21 @@
-import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class CommitmentMenu extends StatelessWidget {
+class SettlementMenu extends StatelessWidget {
   final String id;
 
-  const CommitmentMenu({super.key, required this.id});
+  const SettlementMenu({super.key, required this.id});
 
   Map<String, GestureTapCallback> menuBuilder(
     BuildContext context,
-    Commitment commitment,
+    Settlement settlement,
   ) {
     final navigator = Navigator.of(context);
-    final commitmentProvider = context.read<CommitmentProvider>();
+    final settlementProvider = context.read<SettlementProvider>();
 
     final menu = {
       "Share": () {
@@ -24,24 +24,24 @@ class CommitmentMenu extends StatelessWidget {
             uri: Uri(
               scheme: "app",
               host: "bandha.id",
-              pathSegments: ["commitments", commitment.id, "detail"],
+              pathSegments: ["settlements", settlement.id, "detail"],
             ),
           ),
         );
       },
       "Edit": () {
         navigator.pop();
-        navigator.pushNamed("/commitments/$id/edit");
+        navigator.pushNamed("/settlements/$id/edit");
       },
       "Balance": () async {
-        await commitmentProvider.sync(id);
+        await settlementProvider.sync(id);
         navigator.pop();
       },
     };
 
     if (kDebugMode) {
       menu["Debug Reminder"] = () async {
-        commitmentProvider.debugReminder(id);
+        settlementProvider.debugReminder(id);
       };
     }
 
@@ -54,11 +54,11 @@ class CommitmentMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final commitmentProvider = context.read<CommitmentProvider>();
+    final settlementProvider = context.read<SettlementProvider>();
 
     return Scaffold(
       body: FutureBuilder(
-        future: commitmentProvider.get(id),
+        future: settlementProvider.get(id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -72,8 +72,8 @@ class CommitmentMenu extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final commitment = snapshot.data!;
-          final menu = menuBuilder(context, commitment);
+          final settlement = snapshot.data!;
+          final menu = menuBuilder(context, settlement);
 
           return Center(
             child: ListView.builder(

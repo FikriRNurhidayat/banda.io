@@ -118,10 +118,10 @@ class Repository {
     }).toList();
   }
 
-  getCommitmentByIds(List<String> ids) async {
+  getSettlementByIds(List<String> ids) async {
     final client = await getClient();
     return client.select(
-      "SELECT * FROM commitments WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      "SELECT * FROM settlements WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }

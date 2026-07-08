@@ -1,17 +1,16 @@
 import 'package:bandha/common/helpers/future_helper.dart';
-import 'package:bandha/features/commitments/entities/commitment.dart';
-import 'package:bandha/features/commitments/providers/commitment_filter_provider.dart';
-import 'package:bandha/features/commitments/providers/commitment_provider.dart';
-import 'package:bandha/features/commitments/views/commitment_filter.dart';
-import 'package:bandha/features/commitments/widgets/commitment_tile.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
+import 'package:bandha/features/settlements/providers/settlement_filter_provider.dart';
+import 'package:bandha/features/settlements/providers/settlement_provider.dart';
+import 'package:bandha/features/settlements/widgets/settlement_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Commitments extends StatefulWidget {
-  const Commitments({super.key});
+class Settlements extends StatefulWidget {
+  const Settlements({super.key});
 
   List<Widget> actionsBuilder(BuildContext context) {
-    final filterProvider = context.watch<CommitmentFilterProvider>();
+    final filterProvider = context.watch<SettlementFilterProvider>();
     final filter = filterProvider.get();
 
     return [
@@ -26,7 +25,7 @@ class Commitments extends StatefulWidget {
         onPressed: () {
           Navigator.pushNamed(
             context,
-            "/commiments/filter",
+            "/settlements/filter",
             arguments: filterProvider.get(),
           );
         },
@@ -36,7 +35,7 @@ class Commitments extends StatefulWidget {
         onPressed: () {
           Navigator.pushNamed(
             context,
-            "/commiments/insights",
+            "/settlements/insights",
             arguments: filterProvider.get(),
           );
         },
@@ -46,44 +45,44 @@ class Commitments extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => _CommitmentsState();
+  State<StatefulWidget> createState() => _SettlementsState();
 
   Widget fabBuilder(BuildContext context) {
     return FloatingActionButton(
       child: Icon(Icons.add),
       onPressed: () {
-        Navigator.pushNamed(context, "/commitments/new");
+        Navigator.pushNamed(context, "/settlements/new");
       },
     );
   }
 }
 
-class _CommitmentsState extends State<Commitments> {
+class _SettlementsState extends State<Settlements> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final commitmentProvider = context.watch<CommitmentProvider>();
-    final filterProvider = context.watch<CommitmentFilterProvider>();
+    final settlementProvider = context.watch<SettlementProvider>();
+    final filterProvider = context.watch<SettlementFilterProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Commitments", style: theme.textTheme.titleMedium),
+        title: Text("Settlements", style: theme.textTheme.titleMedium),
         actions: widget.actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
         automaticallyImplyLeading: false,
       ),
       floatingActionButton: widget.fabBuilder(context),
       body: FutureBuilder(
-        future: commitmentProvider.search(filterProvider.get()),
+        future: settlementProvider.search(filterProvider.get()),
         builder: futureBuilder((context, snapshot) {
-          final commitments = snapshot.data as List<Commitment>;
+          final settlements = snapshot.data as List<Settlement>;
 
           return SafeArea(
             child: ListView.builder(
-              itemCount: commitments.length,
+              itemCount: settlements.length,
               itemBuilder: (BuildContext context, int index) {
-                final Commitment commitment = commitments[index];
-                return CommitmentTile(commitment);
+                final Settlement settlement = settlements[index];
+                return SettlementTile(settlement);
               },
             ),
           );

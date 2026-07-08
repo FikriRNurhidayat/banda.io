@@ -80,10 +80,10 @@ class TransferService extends Service {
         note: note,
         debitAmount: debitAmount,
         creditAmount: creditAmount,
-        fee: fee,
+        feeAmount: fee,
         debitId: debit.id,
         debitVaultId: debitVault.id,
-        exchangeId: exchange?.id,
+        feeId: exchange?.id,
         creditId: credit.id,
         creditVaultId: creditVault.id,
         issuedAt: issuedAt,
@@ -98,7 +98,7 @@ class TransferService extends Service {
           )
           .withCreditVault(creditVault)
           .withDebitVault(debitVault)
-          .withExchange(
+          .withFee(
             exchange?.controlledBy(transfer).withLabels([feeLabel]),
           );
 
@@ -144,11 +144,12 @@ class TransferService extends Service {
           )
           .withLabels([creditLabel]);
 
-      final exchangeId = transfer.exchangeId;
-      final exchangeRemoved = !isZero(transfer.fee) && isZero(fee);
+      final exchangeId = transfer.feeId;
+      final exchangeRemoved =
+          !isZero(transfer.feeAmount) && isZero(fee);
       final Entry? exchange = !isZero(fee)
-          ? (transfer.hasExchange
-                    ? transfer.exchange!.copyWith(
+          ? (transfer.hasFee
+                    ? transfer.fee!.copyWith(
                         note: note,
                         amount: fee! * -1,
                         status: EntryStatus.done,
@@ -186,15 +187,15 @@ class TransferService extends Service {
             note: note,
             debitAmount: debitAmount,
             creditAmount: creditAmount,
-            fee: fee,
+            feeAmount: fee,
             debitId: debit.id,
             debitVaultId: debitVault.id,
             creditId: credit.id,
             creditVaultId: creditVault.id,
             issuedAt: issuedAt,
           )
-          .setExchangeId(exchange?.id)
-          .withExchange(exchange)
+          .setFeeId(exchange?.id)
+          .withFee(exchange)
           .withDebit(debit)
           .withCredit(credit)
           .withDebitVault(debitVault)

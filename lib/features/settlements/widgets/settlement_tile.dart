@@ -1,4 +1,4 @@
-import 'package:bandha/features/commitments/entities/commitment.dart';
+import 'package:bandha/features/settlements/entities/settlement.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/features/vaults/widgets/vault_text.dart';
@@ -6,12 +6,12 @@ import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 
-class CommitmentTile extends StatelessWidget {
-  final Commitment commitment;
+class SettlementTile extends StatelessWidget {
+  final Settlement settlement;
   final bool readOnly;
 
-  const CommitmentTile(
-    this.commitment, {
+  const SettlementTile(
+    this.settlement, {
     super.key,
     this.readOnly = false,
   });
@@ -20,8 +20,8 @@ class CommitmentTile extends StatelessWidget {
     Navigator.pushNamed(
       context,
       readOnly
-          ? "/commitments/${commitment.id}/detail"
-          : "/commitments/${commitment.id}/payments",
+          ? "/settlements/${settlement.id}/detail"
+          : "/settlements/${settlement.id}/payments",
     );
   }
 
@@ -30,29 +30,29 @@ class CommitmentTile extends StatelessWidget {
     DismissDirection direction,
   ) async {
     if (direction == DismissDirection.startToEnd) {
-      return confirmCommitmentDeletion(context, commitment);
+      return confirmSettlementDeletion(context, settlement);
     }
 
-    Navigator.pushNamed(context, "/commitments/${commitment.id}/edit");
+    Navigator.pushNamed(context, "/settlements/${settlement.id}/edit");
     return Future.value(false);
   }
 
   Widget statusBuilder(BuildContext context) {
     final theme = Theme.of(context);
-    switch (commitment.status) {
-      case CommitmentStatus.active:
+    switch (settlement.status) {
+      case SettlementStatus.active:
         return Icon(
           Icons.hourglass_empty,
           color: theme.colorScheme.primary,
           size: 8,
         );
-      case CommitmentStatus.overdue:
+      case SettlementStatus.overdue:
         return Icon(
           Icons.hourglass_full,
           color: theme.colorScheme.primary,
           size: 8,
         );
-      case CommitmentStatus.settled:
+      case SettlementStatus.settled:
         return Icon(
           Icons.check,
           color: theme.colorScheme.primary,
@@ -75,23 +75,23 @@ class CommitmentTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                commitment.category.name,
+                settlement.category.name,
                 style: theme.textTheme.titleSmall,
               ),
               statusBuilder(context),
-              if (commitment.hasLabels)
+              if (settlement.hasLabels)
                 labelsBuilder(
                   context,
-                  commitment.labels,
+                  settlement.labels,
                   style: theme.textTheme.bodySmall!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
             ],
           ),
-          DateTimeText(commitment.issuedAt),
-          VaultText(commitment.vault),
-          Text(commitment.party.name, style: theme.textTheme.bodySmall),
+          DateTimeText(settlement.issuedAt),
+          VaultText(settlement.vault),
+          Text(settlement.party.name, style: theme.textTheme.bodySmall),
         ],
       ),
     );
@@ -111,13 +111,13 @@ class CommitmentTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             MoneyText(
-              commitment.paid,
+              settlement.paid,
               useSymbol: false,
               style: theme.textTheme.bodySmall,
             ),
             Text("/"),
             MoneyText(
-              commitment.amount,
+              settlement.amount,
               useSymbol: false,
               style: theme.textTheme.bodySmall,
             ),
@@ -125,7 +125,7 @@ class CommitmentTile extends StatelessWidget {
         ),
         Badge(
           padding: EdgeInsets.all(0),
-          label: Text(commitment.status.label),
+          label: Text(settlement.status.label),
           textColor: theme.colorScheme.onSurface,
           backgroundColor: Colors.transparent,
         ),
@@ -142,7 +142,7 @@ class CommitmentTile extends StatelessWidget {
         SizedBox(
           height: 8,
           child: LinearProgressIndicator(
-            value: commitment.completion,
+            value: settlement.completion,
             backgroundColor: theme.colorScheme.surfaceContainer,
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
@@ -153,7 +153,7 @@ class CommitmentTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              "${(commitment.completion * 100).floor()}%",
+              "${(settlement.completion * 100).floor()}%",
               style: theme.textTheme.labelSmall,
             ),
           ],
@@ -162,7 +162,7 @@ class CommitmentTile extends StatelessWidget {
     );
   }
 
-  commitmentBuilder(BuildContext context) {
+  settlementBuilder(BuildContext context) {
     return tileBuilder(
       context,
       onTap: () {
@@ -188,8 +188,8 @@ class CommitmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return dismissibleBuilder(
       context,
-      key: commitment.id,
-      child: commitmentBuilder(context),
+      key: settlement.id,
+      child: settlementBuilder(context),
       dismissable: !readOnly,
       confirmDismiss: (direction) {
         return handleDismiss(context, direction);

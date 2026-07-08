@@ -58,10 +58,10 @@ class EntryTile extends StatelessWidget {
           "/schedules/${entry.controller!.id}/history",
         );
         break;
-      case ControllerType.commitment:
+      case ControllerType.settlement:
         Navigator.pushNamed(
           context,
-          "/commitments/${entry.controller!.id}/payments",
+          "/settlements/${entry.controller!.id}/payments",
         );
         break;
       default:

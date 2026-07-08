@@ -37,7 +37,7 @@ class PoolRepository extends Repository {
       [
         pool.id,
         pool.note,
-        pool.goal,
+        pool.amount,
         pool.balance,
         pool.status.label,
         pool.categoryId,

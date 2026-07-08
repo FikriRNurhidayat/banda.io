@@ -119,11 +119,11 @@ class Entry extends Entity {
     );
   }
 
-  get isCommitment {
+  get isSettlement {
     return labels.any(
       (label) =>
           label.readOnly &&
-          label.name == ReadOnlyLabel.commitment.label,
+          label.name == ReadOnlyLabel.settlement.label,
     );
   }
 

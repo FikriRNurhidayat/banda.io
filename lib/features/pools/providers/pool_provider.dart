@@ -82,7 +82,7 @@ class PoolProvider extends ChangeNotifier {
   }) async {
     await poolService.create(
       note: note,
-      goal: goal,
+      amount: goal,
       categoryId: categoryId,
       vaultId: vaultId,
       labelIds: labelIds,
@@ -111,7 +111,7 @@ class PoolProvider extends ChangeNotifier {
     await poolService.update(
       id,
       note: note,
-      goal: goal,
+      amount: goal,
       categoryId: categoryId,
       labelIds: labelIds,
     );
