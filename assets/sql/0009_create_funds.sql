@@ -1,19 +1,20 @@
 CREATE TABLE IF NOT EXISTS funds (
     id TEXT PRIMARY KEY,
     note TEXT,
-    goal REAL NOT NULL,
+    amount REAL NOT NULL,
     balance REAL NOT NULL,
     status TEXT NOT NULL,
-    account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
+    journal_id TEXT NOT NULL REFERENCES journals (id) ON DELETE CASCADE,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    released_at TEXT,
-    deleted_at TEXT
+    released_at TEXT
 );
 
-CREATE TABLE IF NOT EXISTS fund_transactions (
-    entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS fund_entries (
     fund_id TEXT NOT NULL REFERENCES funds (id) ON DELETE CASCADE,
+    entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
+    note TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (entry_id, fund_id)

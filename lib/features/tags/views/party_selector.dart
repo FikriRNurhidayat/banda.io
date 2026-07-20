@@ -1,6 +1,6 @@
-import 'package:banda/features/tags/entities/party.dart';
-import 'package:banda/features/tags/layouts/tagable_selector.dart';
-import 'package:banda/features/tags/providers/party_provider.dart';
+import 'package:bandha/features/tags/entities/party.dart';
+import 'package:bandha/features/tags/layouts/tagable_selector.dart';
+import 'package:bandha/features/tags/providers/party_provider.dart';
 import 'package:flutter/material.dart';
 
 class PartySelector extends StatelessWidget {

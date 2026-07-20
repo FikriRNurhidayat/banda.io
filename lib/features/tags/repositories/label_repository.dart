@@ -1,5 +1,5 @@
-import 'package:banda/features/tags/entities/label.dart';
-import "package:banda/common/repositories/repository.dart";
+import 'package:bandha/features/tags/entities/label.dart';
+import "package:bandha/common/repositories/repository.dart";
 import 'package:sqlite3/sqlite3.dart';
 
 class LabelRepository extends Repository {
@@ -16,7 +16,13 @@ class LabelRepository extends Repository {
         [id, name, false, now.toIso8601String(), now.toIso8601String()],
       );
 
-      return Label(id: id, name: name, createdAt: now, updatedAt: now);
+      return Label(
+        id: id,
+        name: name,
+        readOnly: false,
+        createdAt: now,
+        updatedAt: now,
+      );
     } catch (error) {
       rethrow;
     }
@@ -35,6 +41,15 @@ class LabelRepository extends Repository {
     );
 
     return get(id);
+  }
+
+  Future<List<Label>> getByNames(List<String> names) async {
+    final client = await getClient();
+    final List<Map> rows = client.select(
+      "SELECT * FROM labels WHERE name IN (${names.map((_) => "?").join(", ")})",
+      names,
+    );
+    return Label.rows(rows);
   }
 
   Future<Label> getByName(String name) async {
@@ -59,7 +74,11 @@ class LabelRepository extends Repository {
     return Label.row(rows.first);
   }
 
-  getByIds(List<String> ids) async {
+  Future<List<Label>> getByIds(List<String>? ids) async {
+    if (ids == null || ids.isEmpty) {
+      return <Label>[];
+    }
+
     final client = await getClient();
     final List<Map> rows = client.select(
       "SELECT * FROM labels WHERE id IN (${ids.map((_) => "?").join(", ")})",
@@ -71,9 +90,9 @@ class LabelRepository extends Repository {
   Future<List<Label>> search() async {
     final client = await getClient();
     final ResultSet rows = client.select(
-      "SELECT * FROM labels WHERE readonly = 0 ORDER BY name ASC",
+      "SELECT * FROM labels ORDER BY name ASC",
     );
-    return rows.map((row) => Label.row(row)).toList();
+    return Label.rows(rows).toList();
   }
 
   Future<void> delete(String id) async {

@@ -1,16 +1,16 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/tags/providers/category_provider.dart';
-import 'package:banda/features/entries/providers/entry_filter_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/common/widgets/date_time_range_form_field.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/common/widgets/date_time_range_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -38,8 +38,8 @@ class _EntryFilterState extends State<EntryFilter> {
         _formData["category_in"] = widget.specification!["category_in"];
       }
 
-      if (widget.specification!.containsKey("account_in")) {
-        _formData["account_in"] = widget.specification!["account_in"];
+      if (widget.specification!.containsKey("journal_in")) {
+        _formData["journal_in"] = widget.specification!["journal_in"];
       }
 
       if (widget.specification!.containsKey("label_in")) {
@@ -55,7 +55,8 @@ class _EntryFilterState extends State<EntryFilter> {
       }
 
       if (widget.specification!.containsKey("issued_between")) {
-        _formData["issued_between"] = widget.specification!["issued_between"];
+        _formData["issued_between"] =
+            widget.specification!["issued_between"];
       }
     }
   }
@@ -90,8 +91,8 @@ class _EntryFilterState extends State<EntryFilter> {
         specification["category_in"] = _formData["category_in"];
       }
 
-      if (isNotEmpty("account_in")) {
-        specification["account_in"] = _formData["account_in"];
+      if (isNotEmpty("journal_in")) {
+        specification["journal_in"] = _formData["journal_in"];
       }
 
       if (isNotNull("issued_between")) {
@@ -105,26 +106,26 @@ class _EntryFilterState extends State<EntryFilter> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final categoryProvider = context.watch<CategoryProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
+        title: Text(
           "Filter entries",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+          style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+            child: IconButton(
+              onPressed: _submit,
+              icon: Icon(Icons.check),
+            ),
           ),
         ],
       ),
@@ -135,7 +136,7 @@ class _EntryFilterState extends State<EntryFilter> {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              accountProvider.search(),
+              journalProvider.search(),
               labelProvider.search(),
             ]),
             builder: (context, snapshot) {
@@ -148,7 +149,7 @@ class _EntryFilterState extends State<EntryFilter> {
               }
 
               final categories = snapshot.data![0] as List<Category>;
-              final accounts = snapshot.data![1] as List<Account>;
+              final journals = snapshot.data![1] as List<Journal>;
               final labels = snapshot.data![2] as List<Label>;
 
               return Form(
@@ -158,7 +159,8 @@ class _EntryFilterState extends State<EntryFilter> {
                   children: [
                     TextFormField(
                       initialValue: _formData["note_regex"],
-                      onSaved: (value) => _formData["note_regex"] = value,
+                      onSaved: (value) =>
+                          _formData["note_regex"] = value,
                       decoration: InputStyles.field(
                         labelText: "Note",
                         hintText: "Search note...",
@@ -166,7 +168,8 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     DateTimeRangeFormField(
                       initialValue: _formData["issued_between"],
-                      onSaved: (value) => _formData["issued_between"] = value,
+                      onSaved: (value) =>
+                          _formData["issued_between"] = value,
                       decoration: InputStyles.field(
                         labelText: "Issued between",
                         hintText: "Select date range...",
@@ -174,10 +177,16 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     MultiSelectFormField<EntryStatus>(
                       initialValue: _formData["status_in"] ?? [],
-                      onSaved: (value) => _formData["status_in"] = value,
+                      onSaved: (value) =>
+                          _formData["status_in"] = value,
                       options: EntryStatus.values
                           .where((i) => i != EntryStatus.unknown)
-                          .map((i) => MultiSelectItem(value: i, label: i.label))
+                          .map(
+                            (i) => MultiSelectItem(
+                              value: i,
+                              label: i.label,
+                            ),
+                          )
                           .toList(),
                       decoration: InputStyles.field(
                         labelText: "Status",
@@ -186,10 +195,14 @@ class _EntryFilterState extends State<EntryFilter> {
                     ),
                     MultiSelectFormField<String>(
                       initialValue: _formData["category_in"] ?? [],
-                      onSaved: (value) => _formData["category_in"] = value,
+                      onSaved: (value) =>
+                          _formData["category_in"] = value,
                       options: categories
                           .map(
-                            (i) => MultiSelectItem(value: i.id, label: i.name),
+                            (i) => MultiSelectItem(
+                              value: i.id,
+                              label: i.name,
+                            ),
                           )
                           .toList(),
                       decoration: InputStyles.field(
@@ -197,11 +210,12 @@ class _EntryFilterState extends State<EntryFilter> {
                         hintText: "Select categories...",
                       ),
                     ),
-                    if (accounts.isNotEmpty)
+                    if (journals.isNotEmpty)
                       MultiSelectFormField<String>(
-                        initialValue: _formData["account_in"] ?? [],
-                        onSaved: (value) => _formData["account_in"] = value,
-                        options: accounts
+                        initialValue: _formData["journal_in"] ?? [],
+                        onSaved: (value) =>
+                            _formData["journal_in"] = value,
+                        options: journals
                             .map(
                               (i) => MultiSelectItem(
                                 value: i.id,
@@ -210,18 +224,21 @@ class _EntryFilterState extends State<EntryFilter> {
                             )
                             .toList(),
                         decoration: InputStyles.field(
-                          labelText: "Accounts",
-                          hintText: "Select accounts...",
+                          labelText: "Journals",
+                          hintText: "Select journals...",
                         ),
                       ),
                     if (labels.isNotEmpty)
                       MultiSelectFormField<String>(
                         initialValue: _formData["label_in"] ?? [],
-                        onSaved: (value) => _formData["label_in"] = value,
+                        onSaved: (value) =>
+                            _formData["label_in"] = value,
                         options: labels
                             .map(
-                              (i) =>
-                                  MultiSelectItem(value: i.id, label: i.name),
+                              (i) => MultiSelectItem(
+                                value: i.id,
+                                label: i.name,
+                              ),
                             )
                             .toList(),
                         decoration: InputStyles.field(

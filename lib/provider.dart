@@ -1,44 +1,47 @@
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/bills/repositories/bill_repository.dart';
-import 'package:banda/features/bills/services/bill_service.dart';
-import 'package:banda/features/loans/providers/loan_payment_provider.dart';
-import 'package:banda/features/loans/providers/loan_tab_provider.dart';
-import 'package:banda/features/loans/services/loan_payment_service.dart';
-import 'package:banda/features/loans/services/loan_service.dart';
-import 'package:banda/features/main/providers/tool_provider.dart';
-import 'package:banda/features/main/services/tool_service.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/transfers/repositories/transfer_repository.dart';
-import 'package:banda/features/transfers/services/transfer_service.dart';
-import 'package:banda/features/loans/repositories/loan_payment_repository.dart';
-import 'package:banda/infra/db.dart';
+import 'package:bandha/features/schedules/providers/schedule_filter_provider.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/schedules/repositories/schedule_repository.dart';
+import 'package:bandha/features/schedules/services/schedule_service.dart';
+import 'package:bandha/features/obligations/providers/obligation_payment_provider.dart';
+import 'package:bandha/features/obligations/providers/obligation_tab_provider.dart';
+import 'package:bandha/features/obligations/services/obligation_payment_service.dart';
+import 'package:bandha/features/obligations/services/obligation_service.dart';
+import 'package:bandha/features/main/providers/tool_provider.dart';
+import 'package:bandha/features/main/services/tool_service.dart';
+import 'package:bandha/features/transfers/providers/transfer_filter_provider.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
+import 'package:bandha/features/transfers/services/transfer_service.dart';
+import 'package:bandha/features/obligations/repositories/obligation_payment_repository.dart';
+import 'package:bandha/features/journals/providers/journal_filter_provider.dart';
+import 'package:bandha/infra/db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import "package:banda/features/tags/repositories/category_repository.dart";
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/accounts/services/account_service.dart';
-import 'package:banda/features/entries/providers/entry_filter_provider.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/entries/services/entry_service.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/features/funds/repositories/fund_repository.dart';
-import 'package:banda/features/funds/services/fund_service.dart';
-import 'package:banda/features/loans/providers/loan_filter_provider.dart';
-import 'package:banda/features/loans/providers/loan_provider.dart';
-import 'package:banda/features/loans/repositories/loan_repository.dart';
-import 'package:banda/features/tags/providers/category_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/features/tags/providers/party_provider.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/features/tags/repositories/party_repository.dart';
-import 'package:banda/features/main/handlers/notification_handler.dart';
-import 'package:banda/features/notifications/managers/notification_manager.dart';
-import 'package:banda/notification.dart';
-import 'package:banda/features/funds/providers/fund_filter_provider.dart';
-import 'package:banda/features/notifications/repositories/notification_repository.dart';
+import "package:bandha/features/tags/repositories/category_repository.dart";
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
+import 'package:bandha/features/journals/services/journal_service.dart';
+import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/entries/services/entry_service.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/repositories/fund_repository.dart';
+import 'package:bandha/features/funds/services/fund_service.dart';
+import 'package:bandha/features/obligations/providers/obligation_filter_provider.dart';
+import 'package:bandha/features/obligations/providers/obligation_provider.dart';
+import 'package:bandha/features/obligations/repositories/obligation_repository.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/features/tags/providers/party_provider.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/tags/repositories/party_repository.dart';
+import 'package:bandha/features/main/handlers/notification_handler.dart';
+import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/notification.dart';
+import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/features/notifications/repositories/notification_repository.dart';
 
 makeProvider({
   required Widget child,
@@ -49,14 +52,16 @@ makeProvider({
   final notificationRepository = NotificationRepository(dbManager);
   final categoryRepository = CategoryRepository(dbManager);
   final entryRepository = EntryRepository(dbManager);
-  final accountRepository = AccountRepository(dbManager);
+  final journalRepository = JournalRepository(dbManager);
   final transferRepository = TransferRepository(dbManager);
-  final loanRepository = LoanRepository(dbManager);
-  final loanPaymentRepository = LoanPaymentRepository(dbManager);
+  final obligationRepository = ObligationRepository(dbManager);
+  final obligationPaymentRepository = ObligationPaymentRepository(
+    dbManager,
+  );
   final labelRepository = LabelRepository(dbManager);
   final partyRepository = PartyRepository(dbManager);
   final fundRepository = FundRepository(dbManager);
-  final billRepository = BillRepository(dbManager);
+  final scheduleRepository = ScheduleRepository(dbManager);
 
   final notificationManager = NotificationManager(
     notificationRepository: notificationRepository,
@@ -64,56 +69,58 @@ makeProvider({
 
   final entryService = EntryService(
     entryRepository: entryRepository,
-    accountRepository: accountRepository,
+    journalRepository: journalRepository,
     labelRepository: labelRepository,
     categoryRepository: categoryRepository,
     notificationManager: notificationManager,
   );
-  final accountService = AccountService(
-    accountRepository: accountRepository,
+  final journalService = JournalService(
+    journalRepository: journalRepository,
     entryRepository: entryRepository,
     categoryRepository: categoryRepository,
   );
   final transferService = TransferService(
-    accountRepository: accountRepository,
+    journalRepository: journalRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
     transferRepository: transferRepository,
   );
-  final loanService = LoanService(
-    accountRepository: accountRepository,
+  final obligationService = ObligationService(
+    journalRepository: journalRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
-    loanRepository: loanRepository,
-    paymentRepository: loanPaymentRepository,
+    obligationRepository: obligationRepository,
+    paymentRepository: obligationPaymentRepository,
     partyRepository: partyRepository,
     notificationManager: notificationManager,
+    labelRepository: labelRepository,
   );
   final fundService = FundService(
-    accountRepository: accountRepository,
+    journalRepository: journalRepository,
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     fundRepository: fundRepository,
     labelRepository: labelRepository,
   );
 
-  final billService = BillService(
-    accountRepository: accountRepository,
-    billRepository: billRepository,
+  final scheduleService = ScheduleService(
     categoryRepository: categoryRepository,
     entryRepository: entryRepository,
     labelRepository: labelRepository,
+    scheduleRepository: scheduleRepository,
+    journalRepository: journalRepository,
   );
 
-  final loanPaymentService = LoanPaymentService(
-    accountRepository: accountRepository,
-    entryRepository: entryRepository,
+  final obligationPaymentService = ObligationPaymentService(
     categoryRepository: categoryRepository,
-    loanRepository: loanRepository,
-    loanPaymentRepository: loanPaymentRepository,
-    partyRepository: partyRepository,
+    obligationPaymentRepository: obligationPaymentRepository,
+    obligationRepository: obligationRepository,
+    entryRepository: entryRepository,
+    labelRepository: labelRepository,
     notificationManager: notificationManager,
+    partyRepository: partyRepository,
+    journalRepository: journalRepository,
   );
 
   final toolService = ToolService(dbManager);
@@ -128,19 +135,22 @@ makeProvider({
     ChangeNotifierProvider(
       create: (_) => CategoryProvider(categoryRepository),
     ),
-    ChangeNotifierProvider(
-      create: (_) => AccountProvider(accountService),
-    ),
+    ChangeNotifierProvider(create: (_) => JournalProvider(journalService)),
     ChangeNotifierProvider(create: (_) => EntryProvider(entryService)),
     ChangeNotifierProvider(
       create: (_) => TransferProvider(transferService),
     ),
     ChangeNotifierProvider(create: (_) => FundProvider(fundService)),
-    ChangeNotifierProvider(create: (_) => LoanProvider(loanService)),
     ChangeNotifierProvider(
-      create: (_) => LoanPaymentProvider(loanPaymentService),
+      create: (_) => ObligationProvider(obligationService),
     ),
-    ChangeNotifierProvider(create: (_) => BillProvider(billService)),
+    ChangeNotifierProvider(
+      create: (_) =>
+          ObligationPaymentProvider(obligationPaymentService),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => ScheduleProvider(scheduleService),
+    ),
     ChangeNotifierProvider(
       create: (_) => LabelProvider(labelRepository),
     ),
@@ -148,9 +158,12 @@ makeProvider({
       create: (_) => PartyProvider(partyRepository),
     ),
     ChangeNotifierProvider(create: (_) => EntryFilterProvider()),
-    ChangeNotifierProvider(create: (_) => LoanFilterProvider()),
-    ChangeNotifierProvider(create: (_) => LoanTabProvider()),
+    ChangeNotifierProvider(create: (_) => ObligationFilterProvider()),
+    ChangeNotifierProvider(create: (_) => ObligationTabProvider()),
     ChangeNotifierProvider(create: (_) => FundFilterProvider()),
+    ChangeNotifierProvider(create: (_) => ScheduleFilterProvider()),
+    ChangeNotifierProvider(create: (_) => TransferFilterProvider()),
+    ChangeNotifierProvider(create: (_) => JournalFilterProvider()),
   ];
 
   return MultiProvider(providers: providers, child: child);

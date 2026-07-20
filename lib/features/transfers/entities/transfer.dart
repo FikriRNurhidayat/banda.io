@@ -1,75 +1,78 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/common/types/controller.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/common/types/controller.dart';
 
 class Transfer extends Controlable {
   @override
   final String id;
   final String? note;
-  final double amount;
-  final double? fee;
+  final double debitAmount;
+  final double creditAmount;
+  final double? feeAmount;
   final String debitId;
-  final String debitAccountId;
-  final String? exchangeId;
+  final String debitJournalId;
+  final String? feeId;
   final String creditId;
-  final String creditAccountId;
+  final String creditJournalId;
   final DateTime issuedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   late final Entry debit;
-  late final Account debitAccount;
-  late final Entry? exchange;
-  late final Account creditAccount;
+  late final Journal debitJournal;
+  late final Entry? fee;
+  late final Journal creditJournal;
   late final Entry credit;
 
   Transfer({
     required this.id,
     this.note,
-    required this.amount,
-    this.fee,
+    required this.debitAmount,
+    required this.creditAmount,
+    this.feeAmount,
     required this.debitId,
-    required this.debitAccountId,
-    this.exchangeId,
+    required this.debitJournalId,
+    this.feeId,
     required this.creditId,
-    required this.creditAccountId,
+    required this.creditJournalId,
     required this.issuedAt,
     required this.createdAt,
     required this.updatedAt,
   });
 
   Iterable<Entry> get credits {
-    return [credit, exchange].whereType<Entry>();
+    return [credit, fee].whereType<Entry>();
   }
 
   Iterable<Entry> get entries {
-    return [debit, credit, exchange].whereType<Entry>();
+    return [debit, credit, fee].whereType<Entry>();
   }
 
   Iterable<String> get entryIds {
     return entries.map((entry) => entry.id);
   }
 
-  Iterable<Account> get accounts {
-    return [debitAccount, creditAccount].whereType<Account>();
+  Iterable<Journal> get journals {
+    return [debitJournal, creditJournal].whereType<Journal>();
   }
 
-  Iterable<String> get accountIds {
-    return accounts.map((account) => account.id);
+  Iterable<String> get journalIds {
+    return journals.map((journal) => journal.id);
   }
 
   toMap() {
     return {
       "id": id,
       "note": note,
-      "amount": amount,
-      "fee": fee,
+      "creditAmount": creditAmount,
+      "debitAmount": debitAmount,
+      "feeAmount": feeAmount,
       "debitId": debitId,
-      "debitAccountId": debitAccountId,
+      "debitJournalId": debitJournalId,
       "creditId": creditId,
-      "creditAccountId": creditAccountId,
+      "creditJournalId": creditJournalId,
       "issuedAt": issuedAt,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
@@ -85,13 +88,14 @@ class Transfer extends Controlable {
     return Transfer(
       id: row["id"],
       note: row["note"],
-      amount: row["amount"],
-      fee: row["fee"],
+      debitAmount: row["debit_amount"],
+      creditAmount: row["credit_amount"],
+      feeAmount: row["fee_amount"],
       debitId: row["debit_id"],
-      debitAccountId: row["debit_account_id"],
-      exchangeId: row["exchange_id"],
+      debitJournalId: row["debit_journal_id"],
+      feeId: row["fee_id"],
       creditId: row["credit_id"],
-      creditAccountId: row["credit_account_id"],
+      creditJournalId: row["credit_journal_id"],
       issuedAt: DateTime.parse(row["issued_at"]),
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
@@ -100,42 +104,45 @@ class Transfer extends Controlable {
 
   factory Transfer.create({
     String? note,
-    required double amount,
-    double? fee,
+    required double debitAmount,
+    required double creditAmount,
+    double? feeAmount,
     required String debitId,
-    required String debitAccountId,
-    String? exchangeId,
+    required String debitJournalId,
+    String? feeId,
     required String creditId,
-    required String creditAccountId,
+    required String creditJournalId,
     required DateTime issuedAt,
   }) {
     return Transfer(
       id: Entity.getId(),
       note: note,
-      amount: amount,
-      fee: fee,
+      debitAmount: debitAmount,
+      creditAmount: creditAmount,
+      feeAmount: feeAmount,
       debitId: debitId,
-      debitAccountId: debitAccountId,
-      exchangeId: exchangeId,
+      debitJournalId: debitJournalId,
+      feeId: feeId,
       creditId: creditId,
-      creditAccountId: creditAccountId,
+      creditJournalId: creditJournalId,
       issuedAt: issuedAt,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
   }
 
-  Transfer setExchangeId(String? exchangeId) {
+  Transfer setFeeId(String? feeId) {
     return Transfer(
       id: id,
       note: note,
-      amount: amount,
-      fee: fee,
+      debitAmount: debitAmount,
+      creditAmount: creditAmount,
+      feeAmount: feeAmount,
       debitId: debitId,
-      debitAccountId: debitAccountId,
-      exchangeId: exchangeId,
+      debitJournalId: debitJournalId,
+      feeId: feeId,
       creditId: creditId,
-      creditAccountId: creditAccountId,
+      creditJournalId: creditJournalId,
       issuedAt: issuedAt,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -147,8 +154,8 @@ class Transfer extends Controlable {
     return this;
   }
 
-  Transfer withExchange(Entry? exchange) {
-    this.exchange = exchange;
+  Transfer withFee(Entry? fee) {
+    this.fee = fee;
     return this;
   }
 
@@ -157,47 +164,49 @@ class Transfer extends Controlable {
     return this;
   }
 
-  Transfer withDebitAccount(Account? debitAccount) {
-    if (debitAccount != null) this.debitAccount = debitAccount;
+  Transfer withDebitJournal(Journal? debitJournal) {
+    if (debitJournal != null) this.debitJournal = debitJournal;
     return this;
   }
 
-  Transfer withCreditAccount(Account? creditAccount) {
-    if (creditAccount != null) {
-      this.creditAccount = creditAccount;
+  Transfer withCreditJournal(Journal? creditJournal) {
+    if (creditJournal != null) {
+      this.creditJournal = creditJournal;
     }
     return this;
   }
 
   Transfer copyWith({
     String? note,
-    double? amount,
-    double? fee,
+    double? debitAmount,
+    double? creditAmount,
+    double? feeAmount,
     String? debitId,
-    String? debitAccountId,
-    String? exchangeId,
+    String? debitJournalId,
+    String? feeId,
     String? creditId,
-    String? creditAccountId,
+    String? creditJournalId,
     DateTime? issuedAt,
   }) {
     return Transfer(
       id: id,
       note: note ?? this.note,
-      amount: amount ?? this.amount,
-      fee: fee ?? this.fee,
+      debitAmount: debitAmount ?? this.debitAmount,
+      creditAmount: creditAmount ?? this.creditAmount,
+      feeAmount: feeAmount ?? this.feeAmount,
       debitId: debitId ?? this.debitId,
-      debitAccountId: debitAccountId ?? this.debitAccountId,
-      exchangeId: exchangeId ?? this.exchangeId,
+      debitJournalId: debitJournalId ?? this.debitJournalId,
+      feeId: feeId ?? this.feeId,
       creditId: creditId ?? this.creditId,
-      creditAccountId: creditAccountId ?? this.creditAccountId,
+      creditJournalId: creditJournalId ?? this.creditJournalId,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );
   }
 
-  get hasExchange {
-    return exchangeId != null;
+  get hasFee {
+    return feeId != null;
   }
 
   @override

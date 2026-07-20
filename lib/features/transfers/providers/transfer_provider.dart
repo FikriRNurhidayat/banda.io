@@ -1,5 +1,5 @@
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/services/transfer_service.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/services/transfer_service.dart';
 import 'package:flutter/material.dart';
 
 class TransferProvider extends ChangeNotifier {
@@ -16,39 +16,47 @@ class TransferProvider extends ChangeNotifier {
   }
 
   Future<void> create({
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required DateTime issuedAt,
-    required String debitAccountId,
-    required String creditAccountId,
+    required String debitJournalId,
+    required String creditJournalId,
+    String? note,
     double? fee,
   }) {
     return transferService
         .create(
-          amount: amount,
+          debitAmount: debitAmount,
+          creditAmount: creditAmount,
           issuedAt: issuedAt,
           fee: fee,
-          debitAccountId: debitAccountId,
-          creditAccountId: creditAccountId,
+          debitJournalId: debitJournalId,
+          creditJournalId: creditJournalId,
+          note: note,
         )
         .then((_) => notifyListeners());
   }
 
   Future<void> update({
     required String id,
-    required double amount,
+    required double debitAmount,
+    required double creditAmount,
     required DateTime issuedAt,
-    required String debitAccountId,
-    required String creditAccountId,
+    required String debitJournalId,
+    required String creditJournalId,
+    String? note,
     double? fee,
   }) {
     return transferService
         .update(
           id: id,
-          amount: amount,
+          debitAmount: debitAmount,
+          creditAmount: creditAmount,
           fee: fee,
           issuedAt: issuedAt,
-          debitAccountId: debitAccountId,
-          creditAccountId: creditAccountId,
+          debitJournalId: debitJournalId,
+          creditJournalId: creditJournalId,
+          note: note,
         )
         .then((_) => notifyListeners());
   }

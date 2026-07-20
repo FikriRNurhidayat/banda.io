@@ -1,16 +1,18 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/widgets/amount_form_field.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
-import 'package:banda/common/widgets/select_form_field.dart';
-import 'package:flutter/foundation.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,7 +46,8 @@ class _FundEditorState extends State<FundEditor> {
         if (widget.id == null) {
           await fundProvider.create(
             goal: _d["goal"],
-            accountId: _d["accountId"],
+            journalId: _d["journalId"],
+            categoryId: _d["categoryId"],
             labelIds: _d["labelIds"],
             note: _d["note"],
           );
@@ -54,6 +57,7 @@ class _FundEditorState extends State<FundEditor> {
           await fundProvider.update(
             widget.id!,
             goal: _d["goal"],
+            categoryId: _d["categoryId"],
             labelIds: _d["labelIds"],
             note: _d["note"],
           );
@@ -80,15 +84,11 @@ class _FundEditorState extends State<FundEditor> {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
+      automaticallyImplyLeading: false,
       title: Text(
         !widget.readOnly ? "Enter fund details" : "Fund details",
-        style: theme.textTheme.titleLarge,
+        style: theme.textTheme.titleMedium,
       ),
-      centerTitle: true,
       actions: [
         if (!widget.readOnly)
           IconButton(
@@ -113,23 +113,26 @@ class _FundEditorState extends State<FundEditor> {
     BuildContext context, {
     required Fund? fund,
     required List<Label> labels,
-    required List<Account> accounts,
+    required List<Journal> journals,
+    required List<Category> categories,
   }) {
     final theme = Theme.of(context);
 
     return [
-      TextFormField(
-        readOnly: widget.readOnly,
-        decoration: InputStyles.field(
-          labelText: "Note",
-          hintText: "Enter note...",
+      if (!widget.readOnly ||
+          (fund?.note != null && fund!.note!.isNotEmpty))
+        TextFormField(
+          readOnly: widget.readOnly,
+          decoration: InputStyles.field(
+            labelText: "Note",
+            hintText: "Enter note...",
+          ),
+          initialValue: _d["note"] ?? fund?.note,
+          onSaved: (value) => _d["note"] = value,
         ),
-        initialValue: _d["note"] ?? fund?.note,
-        onSaved: (value) => _d["note"] = value,
-      ),
       AmountFormField(
         readOnly: widget.readOnly,
-        initialValue: _d["goal"] ?? fund?.goal,
+        initialValue: _d["goal"] ?? fund?.amount,
         onSaved: (value) => _d["goal"] = value,
         decoration: InputStyles.field(
           hintText: "Enter goal...",
@@ -150,37 +153,68 @@ class _FundEditorState extends State<FundEditor> {
               value == null ? "Balance is required" : null,
         ),
       SelectFormField<String>(
-        readOnly: widget.readOnly,
-        initialValue: _d["accountId"] ?? fund?.accountId,
-        onSaved: (value) => _d["accountId"] = value,
+        readOnly: widget.readOnly || fund?.journalId != null,
+        initialValue: _d["journalId"] ?? fund?.journalId,
+        onSaved: (value) => _d["journalId"] = value,
         validator: (value) =>
-            value == null ? "Account is required" : null,
+            value == null ? "Journal is required" : null,
         actions: [
           if (!widget.readOnly)
             ActionChip(
               avatar: Icon(Icons.add, color: theme.colorScheme.outline),
               label: Text(
-                "New account",
+                "New journal",
                 style: TextStyle(
                   fontWeight: FontWeight.w100,
                   color: theme.colorScheme.outline,
                 ),
               ),
               onPressed: () {
-                redirect(context, "/accounts/new");
+                redirect(context, "/journals/new");
               },
             ),
         ],
-        options: accounts.map((account) {
+        options: journals.map((journal) {
           return SelectItem(
-            value: account.id,
-            label: account.displayName(),
+            value: journal.id,
+            label: journal.displayName(),
           );
         }).toList(),
         decoration: InputStyles.field(
-          labelText: "Account",
-          hintText: "Select account...",
+          labelText: "Journal",
+          hintText: "Select journal...",
         ),
+      ),
+      SelectFormField<String>(
+        readOnly: widget.readOnly,
+        initialValue: _d["categoryId"] ?? fund?.categoryId,
+        onSaved: (value) => _d["categoryId"] = value,
+        decoration: InputStyles.field(
+          labelText: "Category",
+          hintText: "Select category...",
+        ),
+        actions: [
+          if (!widget.readOnly)
+            ActionChip(
+              avatar: Icon(Icons.add, color: theme.colorScheme.outline),
+              label: Text(
+                "New category",
+                style: TextStyle(
+                  fontWeight: FontWeight.w100,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              onPressed: () {
+                redirect(context, "/categories/edit");
+              },
+            ),
+        ],
+        options: categories
+            .where((c) => widget.readOnly || !c.readOnly)
+            .map((c) {
+              return SelectItem(value: c.id, label: c.name);
+            })
+            .toList(),
       ),
       MultiSelectFormField<String>(
         readOnly: widget.readOnly,
@@ -202,9 +236,15 @@ class _FundEditorState extends State<FundEditor> {
               },
             ),
         ],
-        options: labels.map((labe) {
-          return MultiSelectItem(value: labe.id, label: labe.name);
-        }).toList(),
+        options: labels
+            .where((label) => widget.readOnly || !label.readOnly)
+            .map((label) {
+              return MultiSelectItem(
+                value: label.id,
+                label: label.name,
+              );
+            })
+            .toList(),
         decoration: InputStyles.field(
           labelText: "Labels",
           hintText: "Select labels...",
@@ -216,15 +256,17 @@ class _FundEditorState extends State<FundEditor> {
   @override
   Widget build(BuildContext context) {
     final fundProvider = context.read<FundProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
 
     return Scaffold(
       appBar: appBarBuilder(context),
       body: FutureBuilder(
         future: Future.wait([
-          accountProvider.search(),
+          journalProvider.search(),
           labelProvider.search(),
+          categoryProvider.search(),
           if (widget.id != null) fundProvider.get(widget.id!),
         ]),
         builder: (context, snapshot) {
@@ -236,17 +278,19 @@ class _FundEditorState extends State<FundEditor> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final accounts = snapshot.data![0] as List<Account>;
+          final journals = snapshot.data![0] as List<Journal>;
           final labels = snapshot.data![1] as List<Label>;
+          final categories = snapshot.data![2] as List<Category>;
           final fund = widget.id != null
-              ? (snapshot.data![2] as Fund)
+              ? (snapshot.data![3] as Fund)
               : null;
 
           final fields = fieldsBuilder(
             context,
             fund: fund,
             labels: labels,
-            accounts: accounts,
+            journals: journals,
+            categories: categories,
           );
 
           return Container(

@@ -1,4 +1,4 @@
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
 class FilterProvider extends ChangeNotifier {

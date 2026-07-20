@@ -16,12 +16,8 @@ class Information extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Info",
-          style: theme.textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Info", style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: ListView.builder(
         itemCount: info.length,
@@ -30,7 +26,11 @@ class Information extends StatelessWidget {
 
           return ListTile(
             title: Text(i["title"]!, style: theme.textTheme.titleSmall),
-            subtitle: Text(i["subtitle"]!, style: theme.textTheme.bodySmall),
+            subtitle: Text(
+              i["subtitle"]!,
+              style: theme.textTheme.bodySmall,
+            ),
+            dense: true,
           );
         },
       ),

@@ -1,6 +1,6 @@
 enum TransactionType {
   deposit('Deposit'),
-  withdrawal('Withdrawal');
+  withdraw('Withdraw');
 
   final String label;
   const TransactionType(this.label);
@@ -9,7 +9,11 @@ enum TransactionType {
     return this == TransactionType.deposit;
   }
 
-  get isWithdrawal {
-    return this == TransactionType.withdrawal;
+  get isWithdraw {
+    return this == TransactionType.withdraw;
+  }
+
+  get isDisbursement {
+    return false;
   }
 }

@@ -1,4 +1,4 @@
-import 'package:banda/common/helpers/date_helper.dart';
+import 'package:bandha/common/helpers/date_helper.dart';
 import 'package:flutter/material.dart';
 
 class DateTimeRangeFormField extends FormField<DateTimeRange> {
@@ -24,11 +24,14 @@ class DateTimeRangeFormField extends FormField<DateTimeRange> {
        );
 
   @override
-  FormFieldState<DateTimeRange> createState() => _DateTimeRangeFormFieldState();
+  FormFieldState<DateTimeRange> createState() =>
+      _DateTimeRangeFormFieldState();
 }
 
-class _DateTimeRangeFormFieldState extends FormFieldState<DateTimeRange> {
-  final TextEditingController dateTimeController = TextEditingController();
+class _DateTimeRangeFormFieldState
+    extends FormFieldState<DateTimeRange> {
+  final TextEditingController dateTimeController =
+      TextEditingController();
 
   @override
   void initState() {

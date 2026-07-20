@@ -1,19 +1,20 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/tags/providers/category_provider.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/widgets/amount_form_field.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
-import 'package:banda/common/widgets/select_form_field.dart';
-import 'package:banda/common/widgets/when_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/tags/providers/category_provider.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
+import 'package:bandha/common/widgets/when_form_field.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -52,7 +53,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            accountId: _d["accountId"],
+            journalId: _d["journalId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -66,7 +67,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            accountId: _d["accountId"],
+            journalId: _d["journalId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -94,21 +95,17 @@ class _EditorState extends State<EntryEditor> {
     final theme = Theme.of(context);
     final entryProvider = context.read<EntryProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-    final accountProvider = context.watch<AccountProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           widget.readOnly ? "Entry details" : "Enter entry details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             Padding(
@@ -140,29 +137,16 @@ class _EditorState extends State<EntryEditor> {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              accountProvider.search(),
+              journalProvider.search(),
               labelProvider.search(),
               if (widget.id != null) entryProvider.get(widget.id!),
             ]),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (snapshot.hasError) {
-                return const Center(child: Text("..."));
-              }
-
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final categories = snapshot.data![0] as List<Category>;
-              final accounts = snapshot.data![1] as List<Account>;
-              final labels = snapshot.data![2] as List<Label>;
-              final entry = widget.id != null
-                  ? snapshot.data![3] as Entry
-                  : null;
+            builder: futureBuilder((context, snapshot) {
+              final data = snapshot.data as List<dynamic>;
+              final categories = data[0] as List<Category>;
+              final journals = data[1] as List<Journal>;
+              final labels = data[2] as List<Label>;
+              final entry = widget.id != null ? data[3] as Entry : null;
 
               return Form(
                 key: _form,
@@ -277,7 +261,7 @@ class _EditorState extends State<EntryEditor> {
                           ),
                       ],
                       options: categories
-                          .where((c) => widget.readOnly || !c.readonly)
+                          .where((c) => widget.readOnly || !c.readOnly)
                           .map((c) {
                             return SelectItem(
                               value: c.id,
@@ -289,8 +273,8 @@ class _EditorState extends State<EntryEditor> {
                     SelectFormField(
                       readOnly: widget.readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Account",
-                        hintText: "Select account...",
+                        labelText: "Journal",
+                        hintText: "Select journal...",
                       ),
                       actions: [
                         if (!widget.readOnly)
@@ -300,25 +284,25 @@ class _EditorState extends State<EntryEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect("/accounts/new");
+                              redirect("/journals/new");
                             },
                           ),
                       ],
-                      options: accounts.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["accountId"] ?? entry?.accountId,
-                      onSaved: (value) => _d["accountId"] = value,
+                      initialValue: _d["journalId"] ?? entry?.journalId,
+                      onSaved: (value) => _d["journalId"] = value,
                     ),
                     if (!widget.readOnly || !isEmpty(entry?.labels))
                       MultiSelectFormField<String>(
@@ -349,17 +333,26 @@ class _EditorState extends State<EntryEditor> {
                         initialValue:
                             _d["labelIds"] ?? entry?.labelIds ?? [],
                         onSaved: (value) => _d["labelIds"] = value,
-                        options: labels.map((l) {
-                          return MultiSelectItem(
-                            value: l.id,
-                            label: l.name,
-                          );
-                        }).toList(),
+                        options: labels
+                            .where((label) {
+                              if (widget.readOnly) {
+                                return true;
+                              }
+
+                              return !label.readOnly;
+                            })
+                            .map((l) {
+                              return MultiSelectItem(
+                                value: l.id,
+                                label: l.name,
+                              );
+                            })
+                            .toList(),
                       ),
                   ],
                 ),
               );
-            },
+            }),
           ),
         ),
       ),

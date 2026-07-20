@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:banda/features/notifications/entities/notification.dart';
-import 'package:banda/features/main/handlers/notification_handler.dart';
-import 'package:banda/features/notifications/repositories/notification_repository.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/notification_action.dart';
+import 'package:bandha/features/notifications/entities/notification.dart';
+import 'package:bandha/features/main/handlers/notification_handler.dart';
+import 'package:bandha/features/notifications/repositories/notification_repository.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/notification_action.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

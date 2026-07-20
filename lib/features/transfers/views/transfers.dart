@@ -1,14 +1,48 @@
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/transfers/widgets/transfer_tile.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_filter_provider.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/transfers/widgets/transfer_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Transfers extends StatefulWidget {
+class Transfers extends StatelessWidget {
   const Transfers({super.key});
 
-  @override
-  State<StatefulWidget> createState() => _TransfersState();
+  List<Widget> actionsBuilder(BuildContext context) {
+    final filterProvider = context.watch<TransferFilterProvider>();
+    final filter = filterProvider.get();
+
+    return [
+      if (filter != null)
+        IconButton(
+          onPressed: () {
+            filterProvider.reset();
+          },
+          icon: Icon(Icons.close),
+        ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/transfers/filter",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/transfers/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
+      ),
+    ];
+  }
 
   Widget fabBuilder(BuildContext context) {
     return FloatingActionButton(
@@ -18,9 +52,7 @@ class Transfers extends StatefulWidget {
       },
     );
   }
-}
 
-class _TransfersState extends State<Transfers> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -28,37 +60,19 @@ class _TransfersState extends State<Transfers> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Transfers",
-          style: theme.textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Transfers", style: theme.textTheme.titleMedium),
+        actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
+        automaticallyImplyLeading: false,
       ),
-      floatingActionButton: widget.fabBuilder(context),
+      floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: transferProvider.search(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text("..."));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
+        builder: futureBuilder((context, snapshot) {
+          final transfers = snapshot.data as List<Transfer>;
 
           return ListView.separated(
-            itemCount: snapshot.data?.length ?? 0,
+            itemCount: transfers.length,
             separatorBuilder: (_, __) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -66,11 +80,11 @@ class _TransfersState extends State<Transfers> {
               );
             },
             itemBuilder: (BuildContext context, int index) {
-              final Transfer transfer = snapshot.data![index];
+              final Transfer transfer = transfers[index];
               return TransferTile(transfer);
             },
           );
-        },
+        }),
       ),
     );
   }

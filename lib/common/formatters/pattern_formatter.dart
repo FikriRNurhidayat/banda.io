@@ -36,7 +36,11 @@ abstract class PatternFormatter extends TextInputFormatter {
     int inputCount = 0;
     int insertCount = 0;
 
-    for (int i = 0; i < newText.length && inputCount < selectionIndex; i++) {
+    for (
+      int i = 0;
+      i < newText.length && inputCount < selectionIndex;
+      i++
+    ) {
       final character = newText[i];
       if (checkUserInput(character)) {
         inputCount++;

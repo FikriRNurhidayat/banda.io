@@ -1,4 +1,4 @@
-import 'package:banda/features/main/services/tool_service.dart';
+import 'package:bandha/features/main/services/tool_service.dart';
 import 'package:flutter/material.dart';
 
 class ToolProvider extends ChangeNotifier {

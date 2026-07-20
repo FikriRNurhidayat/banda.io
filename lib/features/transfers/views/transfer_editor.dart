@@ -1,14 +1,14 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/widgets/amount_form_field.dart';
-import 'package:banda/common/widgets/select_form_field.dart';
-import 'package:banda/common/widgets/when_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
+import 'package:bandha/common/widgets/when_form_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,22 +38,26 @@ class _TransferEditorState extends State<TransferEditor> {
 
         if (isNull(widget.id)) {
           await transferProvider.create(
-            amount: _d["amount"],
+            note: _d["note"],
+            debitAmount: _d["debit_amount"],
+            creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitAccountId: _d["debitAccountId"],
-            creditAccountId: _d["creditAccountId"],
+            debitJournalId: _d["debitJournalId"],
+            creditJournalId: _d["creditJournalId"],
           );
         }
 
         if (!isNull(widget.id)) {
           await transferProvider.update(
             id: widget.id!,
-            amount: _d["amount"],
+            note: _d["note"],
+            debitAmount: _d["debit_amount"],
+            creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitAccountId: _d["debitAccountId"],
-            creditAccountId: _d["creditAccountId"],
+            debitJournalId: _d["debitJournalId"],
+            creditJournalId: _d["creditJournalId"],
           );
         }
 
@@ -82,23 +86,19 @@ class _TransferEditorState extends State<TransferEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accountProvider = context.watch<AccountProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final transferProvider = context.read<TransferProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
         title: Text(
           !widget.readOnly
               ? "Enter transfer details"
               : "Transfer details",
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.titleMedium,
         ),
+        automaticallyImplyLeading: false,
         actions: [
           if (!widget.readOnly)
             IconButton(
@@ -116,7 +116,7 @@ class _TransferEditorState extends State<TransferEditor> {
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
             future: Future.wait([
-              accountProvider.search(),
+              journalProvider.search(),
               if (widget.id != null) transferProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
@@ -128,7 +128,7 @@ class _TransferEditorState extends State<TransferEditor> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data![0] as List<Account>;
+              final journals = snapshot.data![0] as List<Journal>;
               final transfer = widget.id != null
                   ? snapshot.data![1] as Transfer
                   : null;
@@ -138,26 +138,54 @@ class _TransferEditorState extends State<TransferEditor> {
                 child: Column(
                   spacing: 16,
                   children: [
+                    if (!widget.readOnly ||
+                        (transfer?.note != null &&
+                            transfer!.note!.isNotEmpty))
+                      TextFormField(
+                        readOnly: widget.readOnly,
+                        decoration: InputStyles.field(
+                          labelText: "Note",
+                          hintText: "Enter note...",
+                        ),
+                        initialValue: _d["note"] ?? transfer?.note,
+                        onSaved: (value) => _d["note"] = value ?? '',
+                      ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["amount"] ?? transfer?.amount,
-                      onSaved: (value) => _d["amount"] = value,
+                      initialValue:
+                          _d["debit_amount"] ?? transfer?.debitAmount,
+                      onSaved: (value) => _d["debit_amount"] = value,
                       decoration: InputStyles.field(
-                        hintText: "Enter amount...",
-                        labelText: "Amount",
+                        hintText: "Enter debit amount...",
+                        labelText: "Debit amount",
                       ),
-                      validator: (value) =>
-                          value == null ? "Amount is required" : null,
+                      validator: (value) => value == null
+                          ? "Debit amount is required"
+                          : null,
                     ),
                     AmountFormField(
                       readOnly: widget.readOnly,
-                      initialValue: _d["fee"] ?? transfer?.fee,
-                      onSaved: (value) => _d["fee"] = value,
+                      initialValue:
+                          _d["credit_amount"] ?? transfer?.creditAmount,
+                      onSaved: (value) => _d["credit_amount"] = value,
                       decoration: InputStyles.field(
-                        hintText: "Enter fee...",
-                        labelText: "Fee",
+                        hintText: "Enter credit amount...",
+                        labelText: "Credit amount",
                       ),
+                      validator: (value) => value == null
+                          ? "Debit amount is required"
+                          : null,
                     ),
+                    if (!widget.readOnly || transfer?.feeAmount != null)
+                      AmountFormField(
+                        readOnly: widget.readOnly,
+                        initialValue: _d["fee"] ?? transfer?.feeAmount,
+                        onSaved: (value) => _d["fee"] = value,
+                        decoration: InputStyles.field(
+                          hintText: "Enter fee...",
+                          labelText: "Fee",
+                        ),
+                      ),
                     WhenFormField(
                       readOnly: widget.readOnly,
                       options: WhenOption.min,
@@ -193,28 +221,28 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/accounts/new");
+                              redirect(context, "/journals/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["creditAccountId"] ??
-                          transfer?.creditAccountId,
+                          _d["creditJournalId"] ??
+                          transfer?.creditJournalId,
                       onSaved: (value) =>
-                          _d["creditAccountId"] = value ?? '',
+                          _d["creditJournalId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "From",
-                        hintText: "Select source account...",
+                        hintText: "Select source journal...",
                       ),
-                      options: accounts.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),
@@ -231,28 +259,27 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New account",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/accounts/new");
+                              redirect(context, "/journals/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["debitAccountId"] ??
-                          transfer?.debitAccountId,
+                          _d["debitJournalId"] ?? transfer?.debitJournalId,
                       onSaved: (value) =>
-                          _d["debitAccountId"] = value ?? '',
+                          _d["debitJournalId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "To",
-                        hintText: "Select target account...",
+                        hintText: "Select target journal...",
                       ),
-                      options: accounts.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),

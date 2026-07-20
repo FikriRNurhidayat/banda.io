@@ -1,31 +1,36 @@
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/transaction_type.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/transaction_type.dart';
 
 class Fund extends Controlable {
   @override
   final String id;
   final String? note;
-  final double goal;
+  final double amount;
   final double balance;
   final FundStatus status;
-  final String accountId;
+  final String categoryId;
+  final String journalId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? releasedAt;
 
   late List<Entry> entries;
   late List<Label> labels;
-  late Account account;
+  late Category category;
+  late Journal journal;
+
+  static entryLabelName(Fund fund, TransactionType type) {
+    return type.label;
+  }
 
   static entryNote(Fund fund, TransactionType type) {
-    return type.isDeposit
-        ? "Deposit to ${fund.note}"
-        : "Withdraw from ${fund.note}";
+    return type.label;
   }
 
   static entryAmount(TransactionType type, double amount) {
@@ -35,10 +40,11 @@ class Fund extends Controlable {
   Fund({
     required this.id,
     this.note,
-    required this.goal,
+    required this.amount,
     required this.balance,
     required this.status,
-    required this.accountId,
+    required this.journalId,
+    required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
     required this.releasedAt,
@@ -48,34 +54,37 @@ class Fund extends Controlable {
     return {
       id: id,
       note: note,
-      goal: goal,
+      amount: amount,
       balance: balance,
       status: status,
-      accountId: accountId,
+      categoryId: categoryId,
+      journalId: journalId,
       createdAt: createdAt,
       updatedAt: updatedAt,
       releasedAt: releasedAt,
     };
   }
 
-  get labelIds {
+  List<String> get labelIds {
     return labels.map((label) => label.id).toList();
   }
 
   factory Fund.create({
     String? note,
-    required double goal,
+    required double amount,
     required double balance,
     required FundStatus status,
-    required String accountId,
+    required String categoryId,
+    required String journalId,
   }) {
     return Fund(
       id: Entity.getId(),
       note: note,
-      goal: goal,
+      amount: amount,
       balance: balance,
       status: status,
-      accountId: accountId,
+      journalId: journalId,
+      categoryId: categoryId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       releasedAt: null,
@@ -87,15 +96,16 @@ class Fund extends Controlable {
   }
 
   get canGrow {
-    return status != FundStatus.released && balance < goal;
+    return status != FundStatus.released && balance < amount;
   }
 
   copyWith({
     String? note,
-    double? goal,
+    double? amount,
     double? balance,
     FundStatus? status,
-    String? accountId,
+    String? categoryId,
+    String? journalId,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? releasedAt,
@@ -103,18 +113,23 @@ class Fund extends Controlable {
     return Fund(
       id: id,
       note: note ?? this.note,
-      goal: goal ?? this.goal,
+      amount: amount ?? this.amount,
       balance: balance ?? this.balance,
       status: status ?? this.status,
-      accountId: accountId ?? this.accountId,
+      categoryId: categoryId ?? this.categoryId,
+      journalId: journalId ?? this.journalId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       releasedAt: releasedAt ?? this.releasedAt,
     );
   }
 
-  double getProgress() {
-    return (balance.toDouble() / goal.toDouble());
+  double get progress {
+    return (balance.toDouble() / amount.toDouble());
+  }
+
+  double get completion {
+    return (balance.toDouble() / amount.toDouble()).abs();
   }
 
   Fund applyDelta(EntryType type, double delta) {
@@ -131,6 +146,11 @@ class Fund extends Controlable {
     return copyWith(balance: balance + entry.amount);
   }
 
+  Fund withCategory(Category? value) {
+    if (value != null) category = value;
+    return this;
+  }
+
   Fund withLabels(List<Label>? value) {
     if (value != null) labels = value;
     return this;
@@ -141,8 +161,8 @@ class Fund extends Controlable {
     return this;
   }
 
-  Fund withAccount(Account? value) {
-    if (value != null) account = value;
+  Fund withJournal(Journal? value) {
+    if (value != null) journal = value;
     return this;
   }
 
@@ -150,10 +170,13 @@ class Fund extends Controlable {
     return Fund(
       id: row["id"],
       note: row["note"],
-      goal: row["goal"],
+      amount: row["amount"],
       balance: row["balance"],
-      status: FundStatus.values.firstWhere((e) => e.label == row["status"]),
-      accountId: row["account_id"],
+      status: FundStatus.values.firstWhere(
+        (e) => e.label == row["status"],
+      ),
+      categoryId: row["category_id"],
+      journalId: row["journal_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
       releasedAt: DateTime.tryParse(row["released_at"] ?? ""),

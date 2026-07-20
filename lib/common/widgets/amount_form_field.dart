@@ -1,4 +1,4 @@
-import 'package:banda/common/formatters/numeric_formatter.dart';
+import 'package:bandha/common/formatters/numeric_formatter.dart';
 import 'package:flutter/material.dart';
 
 class AmountFormField extends FormField<double> {
@@ -26,9 +26,14 @@ class AmountFormField extends FormField<double> {
              ),
              decoration:
                  decoration ??
-                 InputDecoration(labelText: label, errorText: state.errorText),
+                 InputDecoration(
+                   labelText: label,
+                   errorText: state.errorText,
+                 ),
              onChanged: (val) {
-               double? number = double.tryParse(val.replaceAll(',', ''))?.abs();
+               double? number = double.tryParse(
+                 val.replaceAll(',', ''),
+               )?.abs();
                state.didChange(number);
              },
            );

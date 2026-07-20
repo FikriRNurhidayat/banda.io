@@ -1,8 +1,8 @@
-import 'package:banda/common/repositories/repository.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/common/helpers/type_helper.dart';
+import 'package:bandha/common/repositories/repository.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class TransferRepository extends Repository {
@@ -11,8 +11,8 @@ class TransferRepository extends Repository {
   TransferRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  TransferRepository withAccounts() {
-    withArgs.add("accounts");
+  TransferRepository withJournals() {
+    withArgs.add("journals");
     return TransferRepository(db, withArgs: withArgs);
   }
 
@@ -24,17 +24,18 @@ class TransferRepository extends Repository {
   save(Transfer transfer) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO transfers (id, note, amount, fee, debit_id, debit_account_id, exchange_id, credit_id, credit_account_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, debit_id = excluded.debit_id, debit_account_id = excluded.debit_account_id, exchange_id = excluded.exchange_id, credit_id = excluded.credit_id, credit_account_id = excluded.credit_account_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO transfers (id, note, debit_amount, credit_amount, fee_amount, debit_id, debit_journal_id, fee_id, credit_id, credit_journal_id, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, debit_amount = excluded.debit_amount, credit_amount = excluded.credit_amount, fee_amount = excluded.fee_amount, debit_id = excluded.debit_id, debit_journal_id = excluded.debit_journal_id, fee_id = excluded.fee_id, credit_id = excluded.credit_id, credit_journal_id = excluded.credit_journal_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         transfer.id,
         transfer.note,
-        transfer.amount,
-        transfer.fee,
+        transfer.debitAmount,
+        transfer.creditAmount,
+        transfer.feeAmount,
         transfer.debitId,
-        transfer.debitAccountId,
-        transfer.exchangeId,
+        transfer.debitJournalId,
+        transfer.feeId,
         transfer.creditId,
-        transfer.creditAccountId,
+        transfer.creditJournalId,
         transfer.issuedAt.toIso8601String(),
         transfer.createdAt.toIso8601String(),
         transfer.updatedAt.toIso8601String(),
@@ -63,25 +64,25 @@ class TransferRepository extends Repository {
   }
 
   Future<List<Transfer>> entities(List<Map> rows) async {
-    if (withArgs.contains("accounts")) {
-      final accountIds = rows
+    if (withArgs.contains("journals")) {
+      final journalIds = rows
           .expand(
             (t) => [
-              t["debit_account_id"] as String,
-              t["credit_account_id"] as String,
+              t["debit_journal_id"] as String,
+              t["credit_journal_id"] as String,
             ],
           )
           .toList();
-      final accountRows = await getAccountByIds(accountIds);
+      final journalRows = await getJournalByIds(journalIds);
 
       rows = rows.map((t) {
         return {
           ...t,
-          "debit_account": accountRows.firstWhere(
-            (e) => e["id"] == t["debit_account_id"],
+          "debit_journal": journalRows.firstWhere(
+            (e) => e["id"] == t["debit_journal_id"],
           ),
-          "credit_account": accountRows.firstWhere(
-            (e) => e["id"] == t["credit_account_id"],
+          "credit_journal": journalRows.firstWhere(
+            (e) => e["id"] == t["credit_journal_id"],
           ),
         };
       }).toList();
@@ -90,7 +91,7 @@ class TransferRepository extends Repository {
     if (withArgs.contains("entries")) {
       final entryIds = rows
           .expand(
-            (t) => [t["debit_id"], t["exchange_id"], t["credit_id"]],
+            (t) => [t["debit_id"], t["fee_id"], t["credit_id"]],
           )
           .whereType<String>()
           .toList();
@@ -105,8 +106,8 @@ class TransferRepository extends Repository {
           "credit": entryRows.firstWhere(
             (e) => e["id"] == t["credit_id"],
           ),
-          "exchange": !isNull(t["exchange_id"])
-              ? entryRows.firstWhere((e) => e["id"] == t["exchange_id"])
+          "exchange": !isNull(t["fee_id"])
+              ? entryRows.firstWhere((e) => e["id"] == t["fee_id"])
               : null,
         };
       }).toList();
@@ -115,10 +116,10 @@ class TransferRepository extends Repository {
     return rows.map((r) {
       return Transfer.fromRow(r)
           .withDebit(Entry.row(r["debit"]))
-          .withDebitAccount(Account.row(r["debit_account"]))
-          .withExchange(Entry.tryRow(r["exchange"]))
+          .withDebitJournal(Journal.row(r["debit_journal"]))
+          .withFee(Entry.tryRow(r["exchange"]))
           .withCredit(Entry.row(r["credit"]))
-          .withCreditAccount(Account.row(r["credit_account"]));
+          .withCreditJournal(Journal.row(r["credit_journal"]));
     }).toList();
   }
 }

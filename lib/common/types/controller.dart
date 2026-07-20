@@ -1,4 +1,4 @@
-import 'package:banda/common/types/controller_type.dart';
+import 'package:bandha/common/types/controller_type.dart';
 
 class Controller {
   final String id;
@@ -17,12 +17,12 @@ class Controller {
     return Controller(ControllerType.fund, id);
   }
 
-  factory Controller.loanPayment(String id) {
-    return Controller(ControllerType.loanPayment, id);
+  factory Controller.obligationPayment(String id) {
+    return Controller(ControllerType.obligationPayment, id);
   }
 
-  factory Controller.loan(String id) {
-    return Controller(ControllerType.loan, id);
+  factory Controller.obligation(String id) {
+    return Controller(ControllerType.obligation, id);
   }
 
   factory Controller.budget(String id) {
@@ -33,8 +33,8 @@ class Controller {
     return Controller(ControllerType.transfer, id);
   }
 
-  factory Controller.bill(String id) {
-    return Controller(ControllerType.bill, id);
+  factory Controller.schedule(String id) {
+    return Controller(ControllerType.schedule, id);
   }
 
   factory Controller.entry(String id) {

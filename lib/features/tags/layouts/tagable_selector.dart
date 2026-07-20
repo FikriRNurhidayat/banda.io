@@ -1,5 +1,5 @@
-import 'package:banda/features/tags/entities/tagable.dart';
-import 'package:banda/features/tags/providers/tagable_provider.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
+import 'package:bandha/features/tags/providers/tagable_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,10 @@ class TagableSelector<I extends Tagable, P extends TagableProvider<I>>
   State<StatefulWidget> createState() => _TagableSelectorState<I, P>();
 }
 
-class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
+class _TagableSelectorState<
+  I extends Tagable,
+  P extends TagableProvider<I>
+>
     extends State<TagableSelector> {
   String? editId;
 
@@ -109,18 +112,12 @@ class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
   @override
   Widget build(BuildContext context) {
     final itemableProvider = context.watch<P>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-        ),
-        centerTitle: true,
+        title: Text(widget.title, style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<I>>(
         future: itemableProvider.search(),
@@ -146,10 +143,13 @@ class _TagableSelectorState<I extends Tagable, P extends TagableProvider<I>>
                   ),
                 ),
                 trailing: _createFocus.hasFocus
-                    ? GestureDetector(onTap: _create, child: Icon(Icons.check))
+                    ? GestureDetector(
+                        onTap: _create,
+                        child: Icon(Icons.check),
+                      )
                     : null,
               ),
-              ...items.where((i) => !i.readonly!).map((item) {
+              ...items.where((i) => !i.readOnly!).map((item) {
                 final isEditing = item.id == editId;
 
                 return ListTile(

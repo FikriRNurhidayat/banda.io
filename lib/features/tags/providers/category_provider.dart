@@ -1,6 +1,6 @@
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/tags/providers/tagable_provider.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/tags/providers/tagable_provider.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
 
 class CategoryProvider extends TagableProvider<Category> {
   final CategoryRepository _repository;
@@ -19,7 +19,10 @@ class CategoryProvider extends TagableProvider<Category> {
   }
 
   @override
-  Future<void> update({required String id, required String name}) async {
+  Future<void> update({
+    required String id,
+    required String name,
+  }) async {
     await _repository.update(id: id, name: name);
     notifyListeners();
   }

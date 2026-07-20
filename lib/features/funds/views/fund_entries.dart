@@ -1,8 +1,8 @@
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/features/funds/widgets/fund_tile.dart';
-import 'package:banda/features/funds/widgets/entry_tile.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/widgets/fund_tile.dart';
+import 'package:bandha/features/funds/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,12 +22,7 @@ class FundEntries extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text("Fund", style: theme.textTheme.titleLarge),
-      centerTitle: true,
+      title: Text("Fund", style: theme.textTheme.titleMedium),
       actions: [
         IconButton(
           onPressed: () {
@@ -37,6 +32,7 @@ class FundEntries extends StatelessWidget {
         ),
       ],
       actionsPadding: EdgeInsets.all(8.0),
+      automaticallyImplyLeading: false,
     );
   }
 
@@ -60,7 +56,9 @@ class FundEntries extends StatelessWidget {
       future: fundProvider.get(fundId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasError) {
@@ -90,9 +88,12 @@ class FundEntries extends StatelessWidget {
                 FundTile(fund, readOnly: true),
                 Divider(height: 1),
                 FutureBuilder(
-                  future: fundProvider.searchTransactions(fundId: fund.id),
+                  future: fundProvider.searchTransactions(
+                    fundId: fund.id,
+                  ),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     }
 
@@ -105,7 +106,8 @@ class FundEntries extends StatelessWidget {
                         child: Center(
                           child: Icon(
                             Icons.dashboard_customize_outlined,
-                            size: theme.textTheme.displayLarge!.fontSize,
+                            size:
+                                theme.textTheme.displayLarge!.fontSize,
                           ),
                         ),
                       );

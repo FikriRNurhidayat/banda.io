@@ -1,4 +1,4 @@
-import 'package:banda/features/tags/entities/tagable.dart';
+import 'package:bandha/features/tags/entities/tagable.dart';
 
 class Party extends Tagable {
   @override
@@ -8,7 +8,7 @@ class Party extends Tagable {
   final DateTime createdAt;
   final DateTime updatedAt;
   @override
-  final readonly = false;
+  final readOnly = false;
 
   Party({
     required this.id,
@@ -17,7 +17,6 @@ class Party extends Tagable {
     required this.updatedAt,
   });
 
-  
   static Party? tryRow(Map<dynamic, dynamic>? row) {
     if (row == null) return null;
     return Party.row(row);

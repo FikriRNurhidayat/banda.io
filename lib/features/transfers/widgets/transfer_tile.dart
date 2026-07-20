@@ -1,8 +1,7 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/money_helper.dart';
-import 'package:banda/common/helpers/type_helper.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/money_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -30,7 +29,7 @@ class TransferTile extends StatelessWidget {
     );
   }
 
-  accountBuilder(BuildContext context, String labelText, Account account) {
+  journalBuilder(BuildContext context, String labelText, Journal journal) {
     final theme = Theme.of(context);
     return <Widget>[
       Text(
@@ -39,12 +38,12 @@ class TransferTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       Text(
-        account.name,
+        journal.name,
         style: theme.textTheme.bodySmall,
         overflow: TextOverflow.ellipsis,
       ),
       Text(
-        account.holderName,
+        journal.holderName,
         style: theme.textTheme.labelSmall,
         overflow: TextOverflow.ellipsis,
       ),
@@ -61,19 +60,17 @@ class TransferTile extends StatelessWidget {
         spacing: 8,
         children: [
           Text(
-            MoneyHelper.normalize(transfer.amount),
+            MoneyHelper.normalize(transfer.creditAmount),
+            style: theme.textTheme.bodySmall,
+          ),
+          Icon(
+            Icons.sync_alt_outlined,
+            size: theme.textTheme.bodySmall?.fontSize,
+          ),
+          Text(
+            MoneyHelper.normalize(transfer.debitAmount),
             style: theme.textTheme.bodyMedium,
           ),
-          if (!isZero(transfer.fee)) ...[
-            Icon(
-              Icons.sync_alt_outlined,
-              size: theme.textTheme.bodySmall?.fontSize,
-            ),
-            Text(
-              MoneyHelper.normalize(transfer.fee!),
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
         ],
       ),
     );
@@ -98,10 +95,10 @@ class TransferTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: accountBuilder(
+                  children: journalBuilder(
                     context,
                     "Credit",
-                    transfer.creditAccount,
+                    transfer.creditJournal,
                   ),
                 ),
               ),
@@ -112,10 +109,10 @@ class TransferTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: accountBuilder(
+                  children: journalBuilder(
                     context,
                     "Debit",
-                    transfer.debitAccount,
+                    transfer.debitJournal,
                   ),
                 ),
               ),
@@ -132,7 +129,9 @@ class TransferTile extends StatelessWidget {
 
     return Dismissible(
       key: Key(transfer.id),
-      direction: readOnly ? DismissDirection.none : DismissDirection.horizontal,
+      direction: readOnly
+          ? DismissDirection.none
+          : DismissDirection.horizontal,
       background: Container(
         color: theme.colorScheme.surfaceContainer,
         alignment: Alignment.center,

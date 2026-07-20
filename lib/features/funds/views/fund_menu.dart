@@ -1,6 +1,6 @@
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/error_helper.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/error_helper.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -10,11 +10,18 @@ class FundMenu extends StatelessWidget {
 
   const FundMenu({super.key, required this.id});
 
-  Map<String, GestureTapCallback> menuBuilder(BuildContext context, Fund fund) {
+  Map<String, GestureTapCallback> menuBuilder(
+    BuildContext context,
+    Fund fund,
+  ) {
     final navigator = Navigator.of(context);
     final fundProvider = context.read<FundProvider>();
 
     final Map<String, VoidCallback> menu = {
+      "Edit": () {
+        navigator.pop();
+        navigator.pushNamed("/funds/$id/edit");
+      },
       "Share": () {
         SharePlus.instance.share(
           ShareParams(
@@ -30,7 +37,10 @@ class FundMenu extends StatelessWidget {
         await fundProvider
             .sync(id)
             .catchError(
-              showError(context: context, content: "Balance fund failed"),
+              showError(
+                context: context,
+                content: "Balance fund failed",
+              ),
             );
         navigator.pop();
       },
@@ -41,7 +51,10 @@ class FundMenu extends StatelessWidget {
         await fundProvider
             .release(id)
             .catchError(
-              showError(context: context, content: "Release fund failed"),
+              showError(
+                context: context,
+                content: "Release fund failed",
+              ),
             );
         navigator.pop();
       };
@@ -52,7 +65,10 @@ class FundMenu extends StatelessWidget {
         await fundProvider
             .retract(id)
             .catchError(
-              showError(context: context, content: "Retract fund failed"),
+              showError(
+                context: context,
+                content: "Retract fund failed",
+              ),
             );
         navigator.pop();
       };
@@ -96,7 +112,10 @@ class FundMenu extends StatelessWidget {
               itemBuilder: (context, index) {
                 final callback = menu.entries.elementAt(index);
                 return ListTile(
-                  title: Text(callback.key, textAlign: TextAlign.center),
+                  title: Text(
+                    callback.key,
+                    textAlign: TextAlign.center,
+                  ),
                   onTap: callback.value,
                 );
               },

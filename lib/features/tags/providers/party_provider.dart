@@ -1,6 +1,6 @@
-import 'package:banda/features/tags/entities/party.dart';
-import 'package:banda/features/tags/providers/tagable_provider.dart';
-import 'package:banda/features/tags/repositories/party_repository.dart';
+import 'package:bandha/features/tags/entities/party.dart';
+import 'package:bandha/features/tags/providers/tagable_provider.dart';
+import 'package:bandha/features/tags/repositories/party_repository.dart';
 
 class PartyProvider extends TagableProvider<Party> {
   final PartyRepository _repository;
@@ -19,7 +19,10 @@ class PartyProvider extends TagableProvider<Party> {
   }
 
   @override
-  Future<void> update({required String id, required String name}) async {
+  Future<void> update({
+    required String id,
+    required String name,
+  }) async {
     await _repository.update(id: id, name: name);
     notifyListeners();
   }

@@ -4,9 +4,7 @@ class MoneyHelper {
   }
 
   static String string(double value) {
-    return value
-        .toStringAsFixed(3)
-        .replaceFirst(RegExp(r'\.?0+$'), ''); // trims .000 / .100 etc.
+    return value.toStringAsFixed(3).replaceFirst(RegExp(r'\.?0+$'), '');
   }
 
   static String normalize(double amount) {

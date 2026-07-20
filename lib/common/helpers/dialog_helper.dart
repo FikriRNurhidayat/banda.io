@@ -1,19 +1,19 @@
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/common/widgets/flash.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/bills/entities/bill.dart';
-import 'package:banda/features/bills/providers/bill_provider.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/loans/entities/loan.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/loans/providers/loan_payment_provider.dart';
-import 'package:banda/features/transfers/entities/transfer.dart';
-import 'package:banda/features/transfers/providers/transfer_provider.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/loans/providers/loan_provider.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/common/widgets/verdict.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/widgets/flash.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/schedules/entities/schedule.dart';
+import 'package:bandha/features/schedules/providers/schedule_provider.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/obligations/entities/obligation.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/obligations/providers/obligation_payment_provider.dart';
+import 'package:bandha/features/transfers/entities/transfer.dart';
+import 'package:bandha/features/transfers/providers/transfer_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/obligations/providers/obligation_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/common/widgets/verdict.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -130,20 +130,20 @@ Future<bool?> confirmFundDeletion(
   );
 }
 
-Future<bool?> confirmBillDeletion(
+Future<bool?> confirmScheduleDeletion(
   BuildContext context,
-  Bill bill,
+  Schedule schedule,
 ) async {
   return ask(
     context,
-    title: "Delete bill",
+    title: "Delete schedule",
     content:
-        "You're about to delete this bill, this action cannot be reversed. Are you sure?",
+        "You're about to delete this schedule, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final billProvider = context.read<BillProvider>();
+      final scheduleProvider = context.read<ScheduleProvider>();
 
-      await billProvider.delete(bill.id).catchError((
+      await scheduleProvider.delete(schedule.id).catchError((
         error,
         stackTrace,
       ) {
@@ -152,27 +152,27 @@ Future<bool?> confirmBillDeletion(
           print(stackTrace);
         }
 
-        alert(messenger, "Delete bill failed");
+        alert(messenger, "Delete schedule failed");
         throw error;
       });
     },
   );
 }
 
-Future<bool?> confirmLoanDeletion(
+Future<bool?> confirmObligationDeletion(
   BuildContext context,
-  Loan loan,
+  Obligation obligation,
 ) async {
   return ask(
     context,
-    title: "Delete loan",
+    title: "Delete obligation",
     content:
-        "You're about to delete this loan, this action cannot be reversed. Are you sure?",
+        "You're about to delete this obligation, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final loanProvider = context.read<LoanProvider>();
+      final obligationProvider = context.read<ObligationProvider>();
 
-      await loanProvider.delete(loan.id).catchError((
+      await obligationProvider.delete(obligation.id).catchError((
         error,
         stackTrace,
       ) {
@@ -181,7 +181,7 @@ Future<bool?> confirmLoanDeletion(
           print(stackTrace);
         }
 
-        alert(messenger, "Delete loan failed");
+        alert(messenger, "Delete obligation failed");
         throw error;
       });
     },
@@ -217,21 +217,21 @@ Future<bool?> confirmTransferDeletion(
   );
 }
 
-Future<bool?> confirmAccountDeletion(
+Future<bool?> confirmJournalDeletion(
   BuildContext context,
-  Account account,
+  Journal journal,
 ) async {
   return ask(
     context,
-    title: "Delete account",
+    title: "Delete journal",
     content:
-        "You're about to delete this account, this action cannot be reversed. Are you sure?",
+        "You're about to delete this.journal, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final accountProvider = context.read<AccountProvider>();
+      final journalProvider = context.read<JournalProvider>();
 
-      await accountProvider.delete(account.id).catchError((error) {
-        alert(messenger, "Delete account failed");
+      await journalProvider.delete(journal.id).catchError((error) {
+        alert(messenger, "Delete journal failed");
         throw error;
       });
     },
@@ -267,9 +267,9 @@ Future<bool?> confirmEntryDeletion(
   );
 }
 
-Future<bool?> confirmLoanPaymentDeletion(
+Future<bool?> confirmObligationPaymentDeletion(
   BuildContext context,
-  Loan loan,
+  Obligation obligation,
   Entry entry,
 ) async {
   return ask(
@@ -279,20 +279,20 @@ Future<bool?> confirmLoanPaymentDeletion(
         "You're about to delete this payment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final loanPaymentProvider = context.read<LoanPaymentProvider>();
+      final obligationPaymentProvider = context
+          .read<ObligationPaymentProvider>();
 
-      await loanPaymentProvider.delete(loan.id, entry.id).catchError((
-        error,
-        stackTrace,
-      ) {
-        if (kDebugMode) {
-          print(error);
-          print(stackTrace);
-        }
+      await obligationPaymentProvider
+          .delete(obligation.id, entry.id)
+          .catchError((error, stackTrace) {
+            if (kDebugMode) {
+              print(error);
+              print(stackTrace);
+            }
 
-        alert(messenger, "Delete payment failed");
-        throw error;
-      });
+            alert(messenger, "Delete payment failed");
+            throw error;
+          });
     },
   );
 }

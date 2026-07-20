@@ -1,4 +1,4 @@
-import 'package:banda/common/helpers/date_helper.dart';
+import 'package:bandha/common/helpers/date_helper.dart';
 import 'package:flutter/material.dart';
 
 enum WhenOption {
@@ -122,7 +122,9 @@ class WhenFormField extends FormField<When> {
                          selected: option == state.value?.option,
                          onSelected: !readOnly
                              ? (selected) {
-                                 if (selected) field.didChange(When(option));
+                                 if (selected) {
+                                   field.didChange(When(option));
+                                 }
                                }
                              : null,
                        );

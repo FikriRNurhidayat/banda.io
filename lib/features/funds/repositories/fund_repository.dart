@@ -1,9 +1,11 @@
-import 'package:banda/common/repositories/repository.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/repositories/repository.dart';
+import 'package:bandha/common/types/transaction_type.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class FundRepository extends Repository {
@@ -12,8 +14,13 @@ class FundRepository extends Repository {
   FundRepository(super.db, {WithArgs? withArgs})
     : withArgs = withArgs ?? {};
 
-  FundRepository withAccount() {
-    withArgs.add("account");
+  FundRepository withJournal() {
+    withArgs.add("journal");
+    return FundRepository(db, withArgs: withArgs);
+  }
+
+  FundRepository withCategory() {
+    withArgs.add("category");
     return FundRepository(db, withArgs: withArgs);
   }
 
@@ -26,14 +33,15 @@ class FundRepository extends Repository {
     final client = await getClient();
 
     client.execute(
-      "INSERT INTO funds (id, note, goal, balance, status, account_id, created_at, updated_at, released_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, goal = excluded.goal, balance = excluded.balance, account_id = excluded.account_id, updated_at = excluded.updated_at, status = excluded.status, released_at = excluded.released_at",
+      "INSERT INTO funds (id, note, amount, balance, status, category_id, journal_id, created_at, updated_at, released_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, balance = excluded.balance, category_id = excluded.category_id, journal_id = excluded.journal_id, updated_at = excluded.updated_at, status = excluded.status, released_at = excluded.released_at",
       [
         fund.id,
         fund.note,
-        fund.goal,
+        fund.amount,
         fund.balance,
         fund.status.label,
-        fund.accountId,
+        fund.categoryId,
+        fund.journalId,
         fund.createdAt.toIso8601String(),
         fund.updatedAt.toIso8601String(),
         fund.releasedAt?.toIso8601String(),
@@ -59,7 +67,7 @@ class FundRepository extends Repository {
     return Repository.work<void>(() async {
       final client = await getClient();
       final ResultSet rows = client.select(
-        "SELECT SUM(entries.amount) AS balance FROM fund_transactions JOIN entries ON entries.id = fund_transactions.entry_id WHERE fund_transactions.fund_id = ? AND entries.status = ?",
+        "SELECT SUM(entries.amount) AS balance FROM fund_entries JOIN entries ON entries.id = fund_entries.entry_id WHERE fund_entries.fund_id = ? AND entries.status = ?",
         [id, EntryStatus.done.label],
       );
 
@@ -72,20 +80,20 @@ class FundRepository extends Repository {
     });
   }
 
-  saveTransaction(Fund fund, Entry entry) async {
+  saveTransaction(Fund fund, TransactionType type, Entry entry) async {
     final client = await getClient();
     final now = DateTime.now().toIso8601String();
 
     client.execute(
-      "INSERT INTO fund_transactions (fund_id, entry_id, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET updated_at = excluded.updated_at",
-      [fund.id, entry.id, now, now],
+      "INSERT INTO fund_entries (fund_id, entry_id, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, updated_at = excluded.updated_at",
+      [fund.id, entry.id, type.label, now, now],
     );
   }
 
   removeTransaction(Fund fund, Entry entry) async {
     final client = await getClient();
     client.execute(
-      "DELETE FROM fund_transactions WHERE fund_id = ? AND entry_id = ?",
+      "DELETE FROM fund_entries WHERE fund_id = ? AND entry_id = ?",
       [fund.id, entry.id],
     );
 
@@ -95,14 +103,14 @@ class FundRepository extends Repository {
   removeTransactions(Fund fund) async {
     final client = await getClient();
     client.execute(
-      "DELETE FROM entries WHERE id IN (SELECT fund_transactions.entry_id FROM fund_transactions WHERE fund_transactions.fund_id = ?)",
+      "DELETE FROM entries WHERE id IN (SELECT fund_entries.entry_id FROM fund_entries WHERE fund_entries.fund_id = ?)",
       [fund.id],
     );
   }
 
   delete(String id) async {
     final client = await getClient();
-    client.execute("DELETE FROM fund WHERE id = ?", [id]);
+    client.execute("DELETE FROM funds WHERE id = ?", [id]);
   }
 
   saveLabels(String fundId, List<String> labelIds) {
@@ -127,8 +135,12 @@ class FundRepository extends Repository {
   }
 
   Future<List<Fund>> entities(List<Map> rows) async {
-    if (withArgs.contains("account")) {
-      rows = await populateAccount(rows);
+    if (withArgs.contains("journal")) {
+      rows = await populateJournal(rows);
+    }
+
+    if (withArgs.contains("category")) {
+      rows = await populateCategory(rows);
     }
 
     if (withArgs.contains("labels")) {
@@ -138,8 +150,9 @@ class FundRepository extends Repository {
     return rows
         .map(
           (row) => Fund.row(row)
+              .withCategory(Category.tryRow(row["category"]))
               .withLabels(Label.tryRows(row["labels"]))
-              .withAccount(Account.tryRow(row["account"])),
+              .withJournal(Journal.tryRow(row["journal"])),
         )
         .toList();
   }

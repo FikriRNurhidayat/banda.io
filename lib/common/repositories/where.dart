@@ -3,7 +3,9 @@ class Where {
   List<dynamic> values = [];
 
   String get sql {
-    return expressions.map((expression) => "($expression)").join(" AND ");
+    return expressions
+        .map((expression) => "($expression)")
+        .join(" AND ");
   }
 
   add(String expression, List<dynamic> value) {

@@ -1,9 +1,9 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/date_helper.dart';
-import 'package:banda/features/accounts/providers/account_provider.dart';
-import 'package:banda/features/funds/providers/fund_filter_provider.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/date_helper.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +22,7 @@ class _FundFilterState extends State<FundFilter> {
   final _formKey = GlobalKey<FormState>();
   final _createdBetweenController = TextEditingController();
 
-  List<String>? _accountIdIn;
+  List<String>? _journalIdIn;
   DateTimeRange? _createdBetween;
 
   @override
@@ -30,8 +30,8 @@ class _FundFilterState extends State<FundFilter> {
     super.initState();
 
     if (widget.specs != null) {
-      if (widget.specs!.containsKey("account_in")) {
-        _accountIdIn = widget.specs!["account_in"];
+      if (widget.specs!.containsKey("journal_in")) {
+        _journalIdIn = widget.specs!["journal_in"];
       }
 
       if (widget.specs!.containsKey("created_between")) {
@@ -56,8 +56,8 @@ class _FundFilterState extends State<FundFilter> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_accountIdIn != null && _accountIdIn!.isNotEmpty) {
-        query["account_in"] = _accountIdIn;
+      if (_journalIdIn != null && _journalIdIn!.isNotEmpty) {
+        query["journal_in"] = _journalIdIn;
       }
 
       if (_createdBetween != null) {
@@ -96,24 +96,21 @@ class _FundFilterState extends State<FundFilter> {
 
   @override
   Widget build(BuildContext context) {
-    final accountProvider = context.watch<AccountProvider>();
+    final theme = Theme.of(context);
+    final journalProvider = context.watch<JournalProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Filter fund",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-        ),
-        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: Text("Filter funds", style: theme.textTheme.titleMedium),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+            child: IconButton(
+              onPressed: _submit,
+              icon: Icon(Icons.check),
+            ),
           ),
         ],
       ),
@@ -122,7 +119,7 @@ class _FundFilterState extends State<FundFilter> {
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
-            future: accountProvider.search(),
+            future: journalProvider.search(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -132,7 +129,7 @@ class _FundFilterState extends State<FundFilter> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final accounts = snapshot.data!;
+              final journals = snapshot.data!;
 
               return Form(
                 key: _formKey,
@@ -148,14 +145,14 @@ class _FundFilterState extends State<FundFilter> {
                         hintText: "Select date range...",
                       ),
                     ),
-                    if (accounts.isNotEmpty)
+                    if (journals.isNotEmpty)
                       MultiSelectFormField<String>(
                         decoration: InputStyles.field(
-                          labelText: "Accounts",
-                          hintText: "Select accounts...",
+                          labelText: "Journals",
+                          hintText: "Select journals...",
                         ),
-                        initialValue: _accountIdIn ?? [],
-                        options: accounts
+                        initialValue: _journalIdIn ?? [],
+                        options: journals
                             .map(
                               (i) => MultiSelectItem(
                                 value: i.id,
@@ -163,7 +160,7 @@ class _FundFilterState extends State<FundFilter> {
                               ),
                             )
                             .toList(),
-                        onSaved: (value) => _accountIdIn = value,
+                        onSaved: (value) => _journalIdIn = value,
                       ),
                   ],
                 ),

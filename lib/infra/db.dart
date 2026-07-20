@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:banda/infra/db_migration_files.dart';
+import 'package:bandha/infra/db_migration_files.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';

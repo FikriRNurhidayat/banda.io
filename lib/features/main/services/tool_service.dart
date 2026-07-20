@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:banda/common/services/service.dart';
-import 'package:banda/infra/db.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/infra/db.dart';
 
 class ToolService extends Service {
   final DatabaseManager dbManager;

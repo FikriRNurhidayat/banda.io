@@ -1,7 +1,8 @@
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/entries/services/entry_service.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/types/metric.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/entries/services/entry_service.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 
 class EntryProvider extends ChangeNotifier {
@@ -9,8 +10,12 @@ class EntryProvider extends ChangeNotifier {
 
   EntryProvider(this.entryService);
 
+  Future<List<Metric>> insights({Filter? specification}) {
+    return entryService.insights(filter: specification);
+  }
+
   Future<List<Entry>> search({Filter? specification}) {
-    return entryService.search(specification: specification);
+    return entryService.search(filter: specification);
   }
 
   Future<List<Entry>> getByController(
@@ -21,7 +26,7 @@ class EntryProvider extends ChangeNotifier {
     final controller = controlable.toController();
     entrySpecification["controller_id_is"] = controller.id;
     entrySpecification["controller_type_is"] = controller.type.label;
-    return entryService.search(specification: entrySpecification);
+    return entryService.search(filter: entrySpecification);
   }
 
   Future<Entry?> get(String id) async {
@@ -34,7 +39,7 @@ class EntryProvider extends ChangeNotifier {
     required EntryType type,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     List<String>? labelIds,
   }) async {
@@ -44,7 +49,7 @@ class EntryProvider extends ChangeNotifier {
       type: type,
       status: status,
       timestamp: issuedAt,
-      accountId: accountId,
+      journalId: journalId,
       categoryId: categoryId,
       labelIds: labelIds,
     );
@@ -58,7 +63,7 @@ class EntryProvider extends ChangeNotifier {
     required EntryType type,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     List<String>? labelIds,
   }) async {
@@ -69,7 +74,7 @@ class EntryProvider extends ChangeNotifier {
       type: type,
       status: status,
       timestamp: issuedAt,
-      accountId: accountId,
+      journalId: journalId,
       categoryId: categoryId,
       labelIds: labelIds,
     );

@@ -1,11 +1,12 @@
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/common/entities/entity.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/controller_type.dart';
-import 'package:banda/common/types/transaction_type.dart';
+import 'package:bandha/features/tags/types/read_only_label.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/common/entities/entity.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/controller_type.dart';
+import 'package:bandha/common/types/transaction_type.dart';
 
 class Entry extends Entity {
   final String id;
@@ -14,7 +15,7 @@ class Entry extends Entity {
   final EntryStatus status;
   final DateTime issuedAt;
   final bool readonly;
-  final String accountId;
+  final String journalId;
   final String categoryId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,12 +23,12 @@ class Entry extends Entity {
 
   List<Label> labels = [];
   late Category category;
-  late Account account;
+  late Journal journal;
   Map<String, dynamic>? annotations = {};
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is Account && id == other.id);
+      identical(this, other) || (other is Entry && id == other.id);
 
   @override
   int get hashCode => id.hashCode;
@@ -39,7 +40,7 @@ class Entry extends Entity {
     required this.status,
     required this.issuedAt,
     required this.readonly,
-    required this.accountId,
+    required this.journalId,
     required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
@@ -59,7 +60,7 @@ class Entry extends Entity {
 
   get transactionType {
     if (isIncome()) {
-      return TransactionType.withdrawal;
+      return TransactionType.withdraw;
     }
 
     return TransactionType.deposit;
@@ -89,6 +90,87 @@ class Entry extends Entity {
     return labels.map((l) => l.id).toList();
   }
 
+  get isDisbursement {
+    return labels.any(
+      (label) =>
+          label.readOnly &&
+          label.name == ReadOnlyLabel.disbursement.label,
+    );
+  }
+
+  get isFee {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.fee.label,
+    );
+  }
+
+  get isWithdraw {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.withdraw.label,
+    );
+  }
+
+  get isDeposit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.deposit.label,
+    );
+  }
+
+  get isObligation {
+    return labels.any(
+      (label) =>
+          label.readOnly &&
+          label.name == ReadOnlyLabel.obligation.label,
+    );
+  }
+
+  get isDebit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.debit.label,
+    );
+  }
+
+  get isCredit {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.credit.label,
+    );
+  }
+
+  get isReleased {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.released.label,
+    );
+  }
+
+  get isRetracted {
+    return labels.any(
+      (label) =>
+          label.readOnly && label.name == ReadOnlyLabel.retracted.label,
+    );
+  }
+
+  get hasReadOnlyLabels {
+    return labels.any((label) => label.readOnly);
+  }
+
+  get readOnlyLabels {
+    return labels.where((label) => label.readOnly);
+  }
+
+  get hasWritableLabels {
+    return labels.any((label) => !label.readOnly);
+  }
+
+  get writableLabels {
+    return labels.where((label) => !label.readOnly);
+  }
+
   Entry withAnnotations(Map<String, dynamic>? annotations) {
     if (annotations != null) this.annotations = annotations;
     return this;
@@ -99,8 +181,8 @@ class Entry extends Entity {
     return this;
   }
 
-  Entry withAccount(Account? account) {
-    if (account != null) this.account = account;
+  Entry withJournal(Journal? journal) {
+    if (journal != null) this.journal = journal;
     return this;
   }
 
@@ -120,7 +202,7 @@ class Entry extends Entity {
     EntryStatus? status,
     DateTime? issuedAt,
     bool? readonly,
-    String? accountId,
+    String? journalId,
     String? categoryId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -132,7 +214,7 @@ class Entry extends Entity {
       amount: amount ?? this.amount,
       status: status ?? this.status,
       readonly: readonly ?? this.readonly,
-      accountId: accountId ?? this.accountId,
+      journalId: journalId ?? this.journalId,
       categoryId: categoryId ?? this.categoryId,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt ?? this.createdAt,
@@ -150,7 +232,7 @@ class Entry extends Entity {
       "status": status,
       "issuedAt": issuedAt,
       "readonly": readonly,
-      "accountId": accountId,
+      "journalId": journalId,
       "categoryId": categoryId,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
@@ -163,7 +245,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -173,7 +255,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: false,
-      accountId: accountId,
+      journalId: journalId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -184,7 +266,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -194,7 +276,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: true,
-      accountId: accountId,
+      journalId: journalId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -206,7 +288,7 @@ class Entry extends Entity {
     required EntryStatus status,
     required DateTime issuedAt,
     required bool readonly,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -216,7 +298,7 @@ class Entry extends Entity {
       amount: amount,
       status: status,
       readonly: readonly,
-      accountId: accountId,
+      journalId: journalId,
       categoryId: categoryId,
       issuedAt: issuedAt,
       createdAt: DateTime.now(),
@@ -248,7 +330,7 @@ class Entry extends Entity {
       ),
       issuedAt: DateTime.parse(row["issued_at"]),
       readonly: row["readonly"] == 1,
-      accountId: row["account_id"],
+      journalId: row["journal_id"],
       categoryId: row["category_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
@@ -263,6 +345,14 @@ enum EntryType {
 
   final String label;
   const EntryType(this.label);
+
+  get isIncome {
+    return this == EntryType.income;
+  }
+
+  get isExpense {
+    return this == EntryType.expense;
+  }
 }
 
 enum EntryStatus {

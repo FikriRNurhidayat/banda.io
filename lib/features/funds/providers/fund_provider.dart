@@ -1,8 +1,8 @@
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/funds/services/fund_service.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/common/types/transaction_type.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/funds/services/fund_service.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/common/types/transaction_type.dart';
 import 'package:flutter/material.dart';
 
 class FundProvider extends ChangeNotifier {
@@ -18,7 +18,10 @@ class FundProvider extends ChangeNotifier {
     required String fundId,
     required String entryId,
   }) async {
-    await fundService.deleteTransaction(fundId: fundId, entryId: entryId);
+    await fundService.deleteTransaction(
+      fundId: fundId,
+      entryId: entryId,
+    );
     notifyListeners();
   }
 
@@ -36,6 +39,7 @@ class FundProvider extends ChangeNotifier {
       amount: amount,
       type: type,
       issuedAt: issuedAt,
+      labelIds: labelIds,
     );
 
     notifyListeners();
@@ -53,6 +57,7 @@ class FundProvider extends ChangeNotifier {
       amount: amount,
       type: type,
       issuedAt: issuedAt,
+      labelIds: labelIds,
     );
 
     notifyListeners();
@@ -71,13 +76,15 @@ class FundProvider extends ChangeNotifier {
   Future<void> create({
     String? note,
     required double goal,
-    required String accountId,
+    required String categoryId,
+    required String journalId,
     List<String>? labelIds,
   }) async {
     await fundService.create(
       note: note,
-      goal: goal,
-      accountId: accountId,
+      amount: goal,
+      categoryId: categoryId,
+      journalId: journalId,
       labelIds: labelIds,
     );
 
@@ -98,9 +105,16 @@ class FundProvider extends ChangeNotifier {
     String id, {
     String? note,
     required double goal,
+    String? categoryId,
     List<String>? labelIds,
   }) async {
-    await fundService.update(id, note: note, goal: goal, labelIds: labelIds);
+    await fundService.update(
+      id,
+      note: note,
+      amount: goal,
+      categoryId: categoryId,
+      labelIds: labelIds,
+    );
 
     notifyListeners();
   }

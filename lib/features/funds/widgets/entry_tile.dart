@@ -1,10 +1,9 @@
-import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/common/types/transaction_type.dart';
-import 'package:banda/common/widgets/money_text.dart';
+import 'package:bandha/common/widgets/date_time_text.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -15,15 +14,6 @@ class EntryTile extends StatelessWidget {
 
   EntryTile(this.fund, this.entry, {super.key});
 
-  typeBuilder(BuildContext context, Entry entry) {
-    final theme = Theme.of(context);
-    return Text(
-      (entry.amount >= 0 ? TransactionType.withdrawal : TransactionType.deposit)
-          .label,
-      style: theme.textTheme.titleSmall,
-    );
-  }
-
   headerBuilder(BuildContext context, Entry entry) {
     final theme = Theme.of(context);
 
@@ -33,7 +23,23 @@ class EntryTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        typeBuilder(context, entry),
+        labelsBuilder(
+          context,
+          entry.labels.where((label) => label.readOnly).toList(),
+          style: theme.textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        labelsBuilder(
+          context,
+          entry.labels
+              .where(
+                (label) =>
+                    !label.readOnly &&
+                    !fund.labelIds.contains(label.id),
+              )
+              .toList(),
+        ),
         if (fund.status.isReleased)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       ],
@@ -51,7 +57,6 @@ class EntryTile extends StatelessWidget {
       children: [
         headerBuilder(context, entry),
         DateTimeText(entry.issuedAt),
-        labelsBuilder(context, entry.labels),
       ],
     );
   }
@@ -65,7 +70,10 @@ class EntryTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [infoBuilder(context, entry), amountBuilder(context, entry)],
+        children: [
+          infoBuilder(context, entry),
+          amountBuilder(context, entry),
+        ],
       ),
     );
   }

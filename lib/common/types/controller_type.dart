@@ -3,9 +3,9 @@ enum ControllerType {
   budget('Budget'),
   fund('Fund'),
   transfer('Transfer'),
-  loan('Loan'),
-  loanPayment('Loan Payment'),
-  bill('Bill'),
+  obligation('Obligation'),
+  obligationPayment('Obligation Payment'),
+  schedule('Schedule'),
   purchase('Purchase'),
   unknown('Unknown');
 

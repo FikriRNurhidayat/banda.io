@@ -1,4 +1,4 @@
-import 'package:banda/common/types/widget_list_builder.dart';
+import 'package:bandha/common/types/widget_list_builder.dart';
 import 'package:flutter/material.dart';
 
 class MultiSelectItem<T> {
@@ -38,7 +38,9 @@ class MultiSelectFormField<T> extends FormField<List<T>> {
                          selected: option.enabled ? selected : true,
                          onSelected: option.enabled
                              ? (bool value) {
-                                 final newValue = List<T>.from(state.value!);
+                                 final newValue = List<T>.from(
+                                   state.value!,
+                                 );
                                  if (value) {
                                    newValue.add(option.value);
                                  } else {
@@ -51,16 +53,20 @@ class MultiSelectFormField<T> extends FormField<List<T>> {
                        as Widget;
                  }).toList()
                : options
-                     .where((option) => state.value!.contains(option.value))
+                     .where(
+                       (option) => state.value!.contains(option.value),
+                     )
                      .map((option) {
                        return Chip(
                              label: Text(
                                option.label,
                                style: TextStyle(
-                                 color: theme.colorScheme.onInverseSurface,
+                                 color:
+                                     theme.colorScheme.onInverseSurface,
                                ),
                              ),
-                             backgroundColor: theme.colorScheme.inverseSurface,
+                             backgroundColor:
+                                 theme.colorScheme.inverseSurface,
                            )
                            as Widget;
                      })

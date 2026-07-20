@@ -1,13 +1,15 @@
-import 'package:banda/common/entities/controlable.dart';
-import 'package:banda/features/accounts/entities/account.dart';
-import 'package:banda/features/tags/entities/category.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/common/repositories/repository.dart';
-import 'package:banda/common/types/pair.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/entities/controlable.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
+import 'package:bandha/features/tags/entities/category.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/common/repositories/repository.dart';
+import 'package:bandha/common/types/pair.dart';
+import 'package:bandha/common/types/specification.dart';
 import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart';
+
+typedef IterateCallback = Future<void> Function(Entry entry);
 
 class EntryRepository extends Repository {
   WithArgs withArgs;
@@ -23,18 +25,83 @@ class EntryRepository extends Repository {
     return EntryRepository(db, withArgs: {...withArgs, "labels"});
   }
 
-  EntryRepository withAccount() {
-    return EntryRepository(db, withArgs: {...withArgs, "account"});
+  EntryRepository withJournal() {
+    return EntryRepository(db, withArgs: {...withArgs, "journal"});
   }
 
   EntryRepository withCategory() {
     return EntryRepository(db, withArgs: {...withArgs, "category"});
   }
 
+  Future<double> min(Filter? filter) async {
+    var baseQuery = "SELECT MIN(entries.amount) as min FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["min"] ?? 0;
+  }
+
+  Future<double> max(Filter? filter) async {
+    var baseQuery = "SELECT MAX(entries.amount) as max FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["max"] ?? 0;
+  }
+
+  Future<double> average(Filter? filter) async {
+    var baseQuery = "SELECT AVG(entries.amount) as avg FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["avg"] ?? 0;
+  }
+
+  Future<double> sum(Filter? filter) async {
+    var baseQuery = "SELECT SUM(entries.amount) as sum FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["sum"] ?? 0;
+  }
+
+  Future<int> count(Filter? filter) async {
+    var baseQuery = "SELECT count(entries.id) as count FROM entries";
+
+    final query = defineQuery(baseQuery, filter);
+    final sqlString = query.first;
+    final sqlArgs = query.second;
+
+    final client = await getClient();
+    final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+    return entryRows.first["count"] ?? 0;
+  }
+
   bulkSave(Iterable<Entry> entries) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO entries (id, note, amount, readonly, status, category_id, account_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES ${entries.map((_) => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, account_id = excluded.account_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
+      "INSERT INTO entries (id, note, amount, readonly, status, category_id, journal_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES ${entries.map((_) => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, journal_id = excluded.journal_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
       entries
           .map(
             (entry) => [
@@ -44,7 +111,7 @@ class EntryRepository extends Repository {
               entry.readonly ? 1 : 0,
               entry.status.label,
               entry.categoryId,
-              entry.accountId,
+              entry.journalId,
               entry.controller?.id,
               entry.controller?.type.label,
               entry.issuedAt.toIso8601String(),
@@ -62,6 +129,35 @@ class EntryRepository extends Repository {
 
     if (_include("labels")) {
       await _saveLabels(entries);
+    }
+  }
+
+  iterate(Filter? filter, IterateCallback callback) async {
+    String? lastId;
+
+    while (true) {
+      var baseQuery = "SELECT entries.* FROM entries";
+
+      final query = defineQuery(baseQuery, {
+        "id_gt": lastId,
+        ...?filter,
+      });
+
+      final sqlString =
+          "${query.first} ORDER BY entries.id ASC LIMIT 1";
+      final sqlArgs = query.second;
+
+      final client = await getClient();
+      final ResultSet entryRows = client.select(sqlString, sqlArgs);
+
+      if (entryRows.isEmpty) break;
+
+      final entries = await entities(entryRows);
+
+      for (var entry in entries) {
+        lastId = entry.id;
+        await callback(entry);
+      }
     }
   }
 
@@ -92,6 +188,15 @@ class EntryRepository extends Repository {
     client.execute(
       "INSERT INTO entry_annotations (entry_id, name, value) VALUES ${annotations.entries.map((_) => "(?, ?, ?)").join(", ")} ON CONFLICT (entry_id, name) DO UPDATE SET value = excluded.value",
       arguments,
+    );
+  }
+
+  applyLabels(String entryId, Iterable<(bool, String)> diffIds) {
+    return applyEntityLabels(
+      entityId: entryId,
+      diffIds: diffIds,
+      junctionTable: "entry_labels",
+      junctionKey: "entry_id",
     );
   }
 
@@ -197,8 +302,8 @@ class EntryRepository extends Repository {
       entryRows = await populateLabels(entryRows);
     }
 
-    if (withArgs.contains("account")) {
-      entryRows = await populateAccount(entryRows);
+    if (withArgs.contains("journal")) {
+      entryRows = await populateJournal(entryRows);
     }
 
     if (withArgs.contains("category")) {
@@ -208,7 +313,7 @@ class EntryRepository extends Repository {
     return entryRows.map((e) {
       return Entry.row(e)
           .withLabels(Label.tryRows(e["labels"]))
-          .withAccount(Account.tryRow(e["account"]))
+          .withJournal(Journal.tryRow(e["journal"]))
           .withCategory(Category.tryRow(e["category"]))
           .withAnnotations(e["annotations"]);
     }).toList();
@@ -252,7 +357,7 @@ class EntryRepository extends Repository {
       final value = spec["fund_in"] as List<String>;
       if (value.isNotEmpty) {
         join["query"].add(
-          "INNER JOIN fund_transactions ON fund_transactions.entry_id = entries.id",
+          "INNER JOIN fund_entries ON fund_entries.entry_id = entries.id",
         );
       }
     }
@@ -270,6 +375,22 @@ class EntryRepository extends Repository {
       "query": <String>[],
       "sql": null,
     };
+
+    if (filter.containsKey("id_is")) {
+      final value = filter["id_is"];
+      if (value != null && value.isNotEmpty) {
+        where["query"].add("entries.id = ?");
+        where["args"].add(filter["id_is"]);
+      }
+    }
+
+    if (filter.containsKey("id_gt")) {
+      final value = filter["id_gt"];
+      if (value != null && value.isNotEmpty) {
+        where["query"].add("entries.id > ?");
+        where["args"].add(filter["id_gt"]);
+      }
+    }
 
     if (filter.containsKey("note_regex")) {
       final value = filter["note_regex"];
@@ -312,11 +433,11 @@ class EntryRepository extends Repository {
       ]);
     }
 
-    if (filter.containsKey("account_in")) {
-      final value = filter["account_in"] as List<String>;
+    if (filter.containsKey("journal_in")) {
+      final value = filter["journal_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(entries.account_id IN (${value.map((_) => '?').join(', ')}))",
+          "(entries.journal_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -365,7 +486,7 @@ class EntryRepository extends Repository {
       final value = filter["fund_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(fund_transactions.fund_id IN (${value.map((_) => '?').join(', ')}))",
+          "(fund_entries.fund_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }

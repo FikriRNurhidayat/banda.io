@@ -1,9 +1,8 @@
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/money_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/features/accounts/widgets/account_text.dart';
-import 'package:banda/common/widgets/money_text.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/money_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/features/journals/widgets/journal_text.dart';
 import 'package:flutter/material.dart';
 
 class FundTile extends StatelessWidget {
@@ -15,7 +14,9 @@ class FundTile extends StatelessWidget {
   handleTap(BuildContext context) {
     Navigator.pushNamed(
       context,
-      readOnly ? "/funds/${fund.id}/detail" : "/funds/${fund.id}/transactions",
+      readOnly
+          ? "/funds/${fund.id}/detail"
+          : "/funds/${fund.id}/transactions",
     );
   }
 
@@ -37,7 +38,8 @@ class FundTile extends StatelessWidget {
     return [
       if (fund.status == FundStatus.released)
         Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
-      if (fund.status != FundStatus.released && fund.balance == fund.goal)
+      if (fund.status != FundStatus.released &&
+          fund.balance == fund.amount)
         Icon(Icons.done_all, size: 8, color: theme.colorScheme.primary),
     ];
   }
@@ -49,7 +51,7 @@ class FundTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AccountText(fund.account),
+        JournalText(fund.journal),
         Row(
           spacing: 8,
           children: [
@@ -76,7 +78,7 @@ class FundTile extends StatelessWidget {
         SizedBox(
           height: 8,
           child: LinearProgressIndicator(
-            value: fund.getProgress(),
+            value: fund.progress,
             backgroundColor: theme.colorScheme.surfaceContainer,
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
@@ -86,14 +88,13 @@ class FundTile extends StatelessWidget {
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            MoneyText(
-              fund.balance,
-              useSymbol: false,
-              style: theme.textTheme.labelSmall,
+            Text(
+              fund.category.name,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
             ),
-            MoneyText(
-              fund.goal,
-              useSymbol: false,
+            Text(
+              "${(fund.completion * 100).floor()}%",
               style: theme.textTheme.labelSmall,
             ),
           ],
@@ -119,7 +120,7 @@ class FundTile extends StatelessWidget {
             ),
             Text("/", style: theme.textTheme.bodySmall),
             Text(
-              MoneyHelper.normalize(fund.goal),
+              MoneyHelper.normalize(fund.amount),
               style: theme.textTheme.bodySmall,
             ),
           ],

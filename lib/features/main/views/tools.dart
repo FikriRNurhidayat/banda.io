@@ -1,6 +1,6 @@
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/features/main/providers/tool_provider.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/features/main/providers/tool_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -123,12 +123,8 @@ class _ToolsState extends State<Tools> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Tools",
-          style: theme.textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Tools", style: theme.textTheme.titleMedium),
+        automaticallyImplyLeading: false,
       ),
       body: ListView.builder(
         itemCount: menus.length,

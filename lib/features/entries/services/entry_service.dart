@@ -1,24 +1,26 @@
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/notifications/managers/notification_manager.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/common/types/controller.dart';
-import 'package:banda/common/types/notification_action.dart';
-import 'package:banda/common/types/specification.dart';
+import 'package:bandha/common/helpers/money_helper.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/common/types/metric.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/notifications/managers/notification_manager.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/common/types/controller.dart';
+import 'package:bandha/common/types/notification_action.dart';
+import 'package:bandha/common/types/specification.dart';
 
 class EntryService extends Service {
   final EntryRepository entryRepository;
-  final AccountRepository accountRepository;
+  final JournalRepository journalRepository;
   final LabelRepository labelRepository;
   final CategoryRepository categoryRepository;
   final NotificationManager notificationManager;
 
   EntryService({
     required this.entryRepository,
-    required this.accountRepository,
+    required this.journalRepository,
     required this.labelRepository,
     required this.categoryRepository,
     required this.notificationManager,
@@ -26,10 +28,9 @@ class EntryService extends Service {
 
   Future<void> snooze(String id) async {
     return work(() async {
-      final entry = await entryRepository
-          .withAccount()
-          .withLabels()
-          .get(id);
+      final entry = await entryRepository.withJournal().withLabels().get(
+        id,
+      );
       await entryRepository.save(
         entry.copyWith(issuedAt: entry.issuedAt.add(Duration(days: 1))),
       );
@@ -38,10 +39,9 @@ class EntryService extends Service {
 
   Future<void> markAsDone(String id) async {
     return work(() async {
-      final entry = await entryRepository
-          .withAccount()
-          .withLabels()
-          .get(id);
+      final entry = await entryRepository.withJournal().withLabels().get(
+        id,
+      );
       await entryRepository.save(
         entry.copyWith(status: EntryStatus.done),
       );
@@ -50,13 +50,12 @@ class EntryService extends Service {
 
   delete(String id) {
     return work(() async {
-      final entry = await entryRepository
-          .withAccount()
-          .withLabels()
-          .get(id);
-      final account = entry.account.revokeEntry(entry);
+      final entry = await entryRepository.withJournal().withLabels().get(
+        id,
+      );
+      final journal = entry.journal.revokeEntry(entry);
       await entryRepository.delete(id);
-      await accountRepository.save(account);
+      await journalRepository.save(journal);
       await notificationManager.cancelReminder(
         Controller.entry(entry.id),
       );
@@ -64,19 +63,58 @@ class EntryService extends Service {
   }
 
   get(String id) {
-    return entryRepository
-        .withLabels()
-        .withAccount()
-        .withCategory()
-        .get(id);
+    return entryRepository.withLabels().withJournal().withCategory().get(
+      id,
+    );
   }
 
-  search({Filter? specification}) {
+  Future<List<Metric>> insights({Filter? filter}) async {
+    final count = await entryRepository.count(filter);
+    final sum = await entryRepository.sum(filter);
+    final max = await entryRepository.max(filter);
+    final min = await entryRepository.min(filter);
+    final average = await entryRepository.average(filter);
+
+    return [
+      Metric(
+        name: 'COUNT',
+        label: 'Total entries',
+        value: count.toDouble(),
+        displayValue: count.toString(),
+      ),
+      Metric(
+        name: 'SUM',
+        label: 'Total amount',
+        value: sum,
+        displayValue: MoneyHelper.format(sum),
+      ),
+      Metric(
+        name: 'MAX',
+        label: 'Maximum amount',
+        value: max,
+        displayValue: MoneyHelper.format(max),
+      ),
+      Metric(
+        name: 'MIN',
+        label: 'Minimum amount',
+        value: min,
+        displayValue: MoneyHelper.format(min),
+      ),
+      Metric(
+        name: 'AVG',
+        label: 'Average amount',
+        value: average,
+        displayValue: MoneyHelper.format(average),
+      ),
+    ];
+  }
+
+  search({Filter? filter}) {
     return entryRepository
         .withLabels()
-        .withAccount()
+        .withJournal()
         .withCategory()
-        .search(specification);
+        .search(filter);
   }
 
   Future<Entry> create({
@@ -84,17 +122,15 @@ class EntryService extends Service {
     required double amount,
     required EntryType type,
     required EntryStatus status,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     required DateTime timestamp,
     List<String>? labelIds,
   }) {
     return work<Entry>(() async {
-      final account = await accountRepository.get(accountId);
+      final journal = await journalRepository.get(journalId);
       final category = await categoryRepository.get(categoryId);
-      final labels = (labelIds != null && labelIds.isNotEmpty)
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final labels = await labelRepository.getByIds(labelIds);
 
       final entry = Entry.writeable(
         note: note,
@@ -102,11 +138,11 @@ class EntryService extends Service {
         status: status,
         issuedAt: timestamp,
         categoryId: categoryId,
-        accountId: accountId,
-      ).withLabels(labels).withAccount(account).withCategory(category);
+        journalId: journalId,
+      ).withLabels(labels).withJournal(journal).withCategory(category);
 
       await entryRepository.withLabels().withAnnotations().save(entry);
-      await accountRepository.save(account.applyEntry(entry));
+      await journalRepository.save(journal.applyEntry(entry));
 
       if (entry.status.isPending()) {
         await notificationManager.setReminder(
@@ -129,7 +165,7 @@ class EntryService extends Service {
     required double amount,
     required EntryType type,
     required EntryStatus status,
-    required String accountId,
+    required String journalId,
     required String categoryId,
     required DateTime timestamp,
     List<String>? labelIds,
@@ -137,21 +173,19 @@ class EntryService extends Service {
     return work(() async {
       final entry = await entryRepository
           .withCategory()
-          .withAccount()
+          .withJournal()
           .withLabels()
           .get(id);
 
-      await accountRepository.save(entry.account.revokeEntry(entry));
+      await journalRepository.save(entry.journal.revokeEntry(entry));
 
       if (entry.status.isPending()) {
         notificationManager.cancelReminder(Controller.entry(entry.id));
       }
 
-      final newAccount = await accountRepository.get(accountId);
+      final newJournal = await journalRepository.get(journalId);
       final newCategory = await categoryRepository.get(categoryId);
-      final newLabels = (labelIds != null && labelIds.isNotEmpty)
-          ? await labelRepository.getByIds(labelIds)
-          : [];
+      final newLabels = await labelRepository.getByIds(labelIds);
       final newEntry = entry
           .copyWith(
             note: note,
@@ -159,16 +193,16 @@ class EntryService extends Service {
             status: status,
             issuedAt: timestamp,
             categoryId: categoryId,
-            accountId: accountId,
+            journalId: journalId,
           )
           .withLabels(newLabels)
-          .withAccount(newAccount)
+          .withJournal(newJournal)
           .withCategory(newCategory);
 
       await entryRepository.withLabels().withAnnotations().save(
         newEntry,
       );
-      await accountRepository.save(newAccount.applyEntry(newEntry));
+      await journalRepository.save(newJournal.applyEntry(newEntry));
 
       if (newEntry.status.isPending()) {
         notificationManager.setReminder(

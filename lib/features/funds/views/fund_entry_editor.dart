@@ -1,18 +1,18 @@
-import 'package:banda/common/decorations/input_styles.dart';
-import 'package:banda/common/helpers/alert_helper.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/entries/providers/entry_provider.dart';
-import 'package:banda/features/tags/providers/label_provider.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/common/types/form_data.dart';
-import 'package:banda/common/types/transaction_type.dart';
-import 'package:banda/common/widgets/amount_form_field.dart';
-import 'package:banda/common/widgets/multi_select_form_field.dart';
-import 'package:banda/common/widgets/select_form_field.dart';
-import 'package:banda/common/widgets/when_form_field.dart';
+import 'package:bandha/common/decorations/input_styles.dart';
+import 'package:bandha/common/helpers/alert_helper.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/entries/providers/entry_provider.dart';
+import 'package:bandha/features/tags/providers/label_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/common/types/form_data.dart';
+import 'package:bandha/common/types/transaction_type.dart';
+import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/multi_select_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
+import 'package:bandha/common/widgets/when_form_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -90,15 +90,11 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
     final theme = Theme.of(context);
 
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text(
         !widget.readOnly ? "Enter entry details" : "Entry details",
-        style: theme.textTheme.titleLarge,
+        style: theme.textTheme.titleMedium,
       ),
-      centerTitle: true,
+      automaticallyImplyLeading: false,
       actions: [
         if (!widget.readOnly)
           Padding(
@@ -196,7 +192,7 @@ class _FundEntryEditorState extends State<FundEntryEditor> {
         ],
         initialValue:
             _d["labelIds"] ?? entry?.labelIds ?? readonlyLabelIds ?? [],
-        options: labels.map((label) {
+        options: labels.where((label) => !label.readOnly).map((label) {
           return MultiSelectItem(
             value: label.id,
             label: label.name,

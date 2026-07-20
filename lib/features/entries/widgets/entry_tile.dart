@@ -1,12 +1,12 @@
-import 'package:banda/common/helpers/type_helper.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/common/helpers/date_helper.dart';
-import 'package:banda/common/helpers/dialog_helper.dart';
-import 'package:banda/common/helpers/tile_helper.dart';
-import 'package:banda/common/types/controller_type.dart';
-import 'package:banda/features/accounts/widgets/account_text.dart';
-import 'package:banda/common/widgets/date_time_text.dart';
-import 'package:banda/common/widgets/money_text.dart';
+import 'package:bandha/common/helpers/type_helper.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/common/helpers/date_helper.dart';
+import 'package:bandha/common/helpers/dialog_helper.dart';
+import 'package:bandha/common/helpers/tile_helper.dart';
+import 'package:bandha/common/types/controller_type.dart';
+import 'package:bandha/features/journals/widgets/journal_text.dart';
+import 'package:bandha/common/widgets/date_time_text.dart';
+import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -23,7 +23,14 @@ class EntryTile extends StatelessWidget {
   }
 
   String getTime() {
-    return DateHelper.formatTime(TimeOfDay.fromDateTime(entry.issuedAt));
+    return DateHelper.formatTime(
+      TimeOfDay.fromDateTime(entry.issuedAt),
+    );
+  }
+
+  handleLongPress(BuildContext context, Entry entry) {
+    Navigator.pushNamed(context, "/entries/${entry.id}/detail");
+    return;
   }
 
   handleTap(BuildContext context, Entry entry) {
@@ -34,7 +41,10 @@ class EntryTile extends StatelessWidget {
 
     switch (entry.controller?.type) {
       case ControllerType.fund:
-        Navigator.pushNamed(context, "/funds/${entry.controller!.id}/entries");
+        Navigator.pushNamed(
+          context,
+          "/funds/${entry.controller!.id}/entries",
+        );
         break;
       case ControllerType.transfer:
         Navigator.pushNamed(
@@ -42,11 +52,17 @@ class EntryTile extends StatelessWidget {
           "/transfers/${entry.controller!.id}/entries",
         );
         break;
-      case ControllerType.bill:
-        Navigator.pushNamed(context, "/bills/${entry.controller!.id}/history");
+      case ControllerType.schedule:
+        Navigator.pushNamed(
+          context,
+          "/schedules/${entry.controller!.id}/history",
+        );
         break;
-      case ControllerType.loan:
-        Navigator.pushNamed(context, "/loans/${entry.controller!.id}/payments");
+      case ControllerType.obligation:
+        Navigator.pushNamed(
+          context,
+          "/obligations/${entry.controller!.id}/payments",
+        );
         break;
       default:
         Navigator.pushNamed(context, "/entries/${entry.id}/detail");
@@ -87,15 +103,19 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        AccountText(entry.account),
         DateTimeText(entry.issuedAt),
-        if (!isNull(entry.note) && entry.note!.isNotEmpty)
+        JournalText(entry.journal),
+        if (!isNull(entry.controller?.id))
           Text(
-            entry.note!,
+            entry.controller!.id.toUpperCase(),
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),
-        labelsBuilder(context, entry.labels),
+        if (entry.hasWritableLabels)
+          labelsBuilder(
+            context,
+            entry.labels.where((label) => !label.readOnly).toList(),
+          ),
       ],
     );
   }
@@ -109,6 +129,11 @@ class EntryTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(entry.category.name, style: theme.textTheme.titleSmall),
+        if (entry.hasReadOnlyLabels)
+          labelsBuilder(
+            context,
+            entry.labels.where((label) => label.readOnly).toList(),
+          ),
         if (entry.readonly)
           Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
         statusBuilder(context),
@@ -119,6 +144,9 @@ class EntryTile extends StatelessWidget {
   entryBuilder(BuildContext context, Entry entry) {
     return tileBuilder(
       context,
+      onLongPress: () {
+        handleLongPress(context, entry);
+      },
       onTap: () {
         handleTap(context, entry);
       },

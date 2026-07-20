@@ -1,28 +1,29 @@
-import 'package:banda/common/services/service.dart';
-import 'package:banda/features/entries/entities/entry.dart';
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/accounts/repositories/account_repository.dart';
-import 'package:banda/features/tags/entities/label.dart';
-import 'package:banda/features/tags/repositories/category_repository.dart';
-import 'package:banda/features/entries/repositories/entry_repository.dart';
-import 'package:banda/features/tags/repositories/label_repository.dart';
-import 'package:banda/features/funds/repositories/fund_repository.dart';
-import 'package:banda/common/types/specification.dart';
-import 'package:banda/common/types/transaction_type.dart';
-import 'package:banda/features/tags/types/read_only_category.dart';
+import 'package:bandha/common/services/service.dart';
+import 'package:bandha/common/types/controller_type.dart';
+import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/tags/types/read_only_label.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
+import 'package:bandha/features/tags/entities/label.dart';
+import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/entries/repositories/entry_repository.dart';
+import 'package:bandha/features/tags/repositories/label_repository.dart';
+import 'package:bandha/features/funds/repositories/fund_repository.dart';
+import 'package:bandha/common/types/specification.dart';
+import 'package:bandha/common/types/transaction_type.dart';
 
 class FundService extends Service {
   final FundRepository fundRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
-  final AccountRepository accountRepository;
+  final JournalRepository journalRepository;
   final LabelRepository labelRepository;
 
   FundService({
     required this.fundRepository,
     required this.categoryRepository,
     required this.entryRepository,
-    required this.accountRepository,
+    required this.journalRepository,
     required this.labelRepository,
   });
 
@@ -33,49 +34,83 @@ class FundService extends Service {
   retract(String id) {
     return work(() async {
       final now = DateTime.now();
-      final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withAccount().get(id);
+      final fund = await fundRepository
+          .withCategory()
+          .withJournal()
+          .withLabels()
+          .get(id);
 
-      await fundRepository.save(fund.copyWith(releasedAt: null, status: FundStatus.active));
+      await fundRepository.save(
+        fund.copyWith(releasedAt: null, status: FundStatus.active),
+      );
 
       final entry = Entry.readOnly(
-        note: "Retracted from ${fund.note}",
         amount: fund.balance * -1,
         status: EntryStatus.done,
         issuedAt: now,
-        accountId: fund.accountId,
-        categoryId: category.id,
+        journalId: fund.journalId,
+        categoryId: fund.category.id,
       );
 
-      await entryRepository.save(entry.controlledBy(fund));
-      await accountRepository.save(fund.account.applyEntry(entry));
+      await entryRepository.save(
+        entry.controlledBy(fund).withLabels([
+          await labelRepository.getByName(
+            ReadOnlyLabel.retracted.label,
+          ),
+          ...fund.labels,
+        ]),
+      );
+      await journalRepository.save(fund.journal.applyEntry(entry));
     });
   }
 
   release(String id) {
     return work(() async {
       final now = DateTime.now();
-      final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withAccount().get(id);
-      await fundRepository.save(fund.copyWith(releasedAt: now, status: FundStatus.released));
+      final fund = await fundRepository
+          .withJournal()
+          .withLabels()
+          .withCategory()
+          .get(id);
+
+      await fundRepository.save(
+        fund.copyWith(releasedAt: now, status: FundStatus.released),
+      );
 
       final entry = Entry.readOnly(
-        note: "Released from ${fund.note}",
         amount: fund.balance,
         status: EntryStatus.done,
         issuedAt: now,
-        accountId: fund.accountId,
-        categoryId: category.id,
+        journalId: fund.journalId,
+        categoryId: fund.category.id,
       );
 
-      await entryRepository.save(entry.controlledBy(fund));
-      await accountRepository.save(fund.account.applyEntry(entry));
+      await entryRepository.save(
+        entry.controlledBy(fund).withLabels([
+          await labelRepository.getByName(ReadOnlyLabel.released.label),
+          ...fund.labels,
+        ]),
+      );
+      await journalRepository.save(fund.journal.applyEntry(entry));
     });
   }
 
-  Future<Fund> create({String? note, required double goal, required String accountId, List<String>? labelIds}) async {
+  Future<Fund> create({
+    String? note,
+    required double amount,
+    required String categoryId,
+    required String journalId,
+    List<String>? labelIds,
+  }) async {
     return await work<Fund>(() async {
-      final fund = Fund.create(note: note, goal: goal, balance: 0, accountId: accountId, status: FundStatus.active);
+      final fund = Fund.create(
+        note: note,
+        amount: amount,
+        balance: 0,
+        categoryId: categoryId,
+        journalId: journalId,
+        status: FundStatus.active,
+      );
 
       await fundRepository.save(fund);
       if (labelIds != null) {
@@ -86,39 +121,84 @@ class FundService extends Service {
     });
   }
 
-  update(String id, {String? note, required double goal, List<String>? labelIds}) async {
+  update(
+    String id, {
+    String? note,
+    required double amount,
+    String? categoryId,
+    List<String>? labelIds,
+  }) async {
     return await work(() async {
-      final fund = await fundRepository.get(id);
-      await fundRepository.save(fund.copyWith(note: note, goal: goal));
+      final eFund = await fundRepository.withLabels().get(id);
+      final nFund = eFund.copyWith(
+        note: note,
+        amount: amount,
+        categoryId: categoryId,
+      );
+
+      await fundRepository.save(nFund);
+
+      final Iterable<(bool, String)> diffIds = ((labelIds != null)
+          ? (eFund.labelIds
+                .where((labelId) => !labelIds.contains(labelId))
+                .map((labelId) => (false, labelId))
+                .followedBy(labelIds.map((labelId) => (true, labelId))))
+          : []);
+
       if (labelIds != null) {
-        await fundRepository.saveLabels(fund.id, labelIds);
+        await fundRepository.saveLabels(eFund.id, labelIds);
       }
+
+      await entryRepository.iterate(
+        {
+          "controller_id_is": eFund.id,
+          "controller_type_is": ControllerType.fund.label,
+        },
+        (entry) async {
+          await entryRepository.save(
+            entry.copyWith(categoryId: nFund.categoryId),
+          );
+
+          if (diffIds.isNotEmpty) {
+            await entryRepository.applyLabels(entry.id, diffIds);
+          }
+        },
+      );
     });
   }
 
   delete(String id) {
     return work(() async {
-      final fund = await fundRepository.withAccount().get(id);
-      final account = fund.account;
+      final fund = await fundRepository.withJournal().get(id);
+      final journal = fund.journal;
       await fundRepository.removeTransactions(fund);
       await fundRepository.delete(fund.id);
-      await accountRepository.sync(account.id);
+      await entryRepository.deleteByController(fund);
+      await journalRepository.sync(journal.id);
     });
   }
 
   search(Filter? specification) {
-    return fundRepository.withLabels().withAccount().search(specification);
+    return fundRepository
+        .withLabels()
+        .withJournal()
+        .withCategory()
+        .search(specification);
   }
 
   get(String id) {
-    return fundRepository.withLabels().withAccount().get(id);
+    return fundRepository.withLabels().withJournal().get(id);
   }
 
   searchTransactions({required String fundId, Filter? specification}) {
-    return entryRepository.withLabels().withAccount().search({
-      "fund_in": [fundId],
-      ...?specification,
-    });
+    return entryRepository
+        .withCategory()
+        .withLabels()
+        .withJournal()
+        .search({
+          "fund_in": [fundId],
+          ...?specification,
+        });
   }
 
   createTransaction(
@@ -129,10 +209,17 @@ class FundService extends Service {
     List<String>? labelIds,
   }) async {
     return await work(() async {
-      final category = await categoryRepository.getByName(ReadOnlyCategory.fund.label);
-      final fund = await fundRepository.withLabels().withAccount().get(fundId);
+      final fund = await fundRepository
+          .withLabels()
+          .withCategory()
+          .withJournal()
+          .get(fundId);
 
-      final labels = <Label>[];
+      final labels = <Label>[
+        await labelRepository.getByName(
+          Fund.entryLabelName(fund, type),
+        ),
+      ];
 
       if (fund.labels.isNotEmpty) {
         labels.addAll(fund.labels);
@@ -142,20 +229,28 @@ class FundService extends Service {
         labels.addAll(await labelRepository.getByIds(labelIds));
       }
 
-      final entry = Entry.readOnly(
-        note: Fund.entryNote(fund, type),
-        amount: Fund.entryAmount(type, amount),
-        status: EntryStatus.done,
-        issuedAt: issuedAt,
-        accountId: fund.accountId,
-        categoryId: category.id,
-      ).controlledBy(fund).withLabels(labels).withAccount(fund.account).withCategory(category);
+      final entry =
+          Entry.readOnly(
+                amount: Fund.entryAmount(type, amount),
+                status: EntryStatus.done,
+                issuedAt: issuedAt,
+                journalId: fund.journalId,
+                categoryId: fund.category.id,
+              )
+              .controlledBy(fund)
+              .withLabels(labels)
+              .withJournal(fund.journal)
+              .withCategory(fund.category);
 
       await entryRepository.save(entry);
       await entryRepository.saveLabels(entry.id, entry.labelIds);
-      await accountRepository.save(fund.account.applyEntry(entry));
-      await fundRepository.save(fund.applyEntry(entry));
-      await fundRepository.saveTransaction(fund, entry);
+      await journalRepository.save(fund.journal.applyEntry(entry));
+
+      if (!type.isDisbursement) {
+        await fundRepository.save(fund.applyEntry(entry));
+      }
+
+      await fundRepository.saveTransaction(fund, type, entry);
     });
   }
 
@@ -168,12 +263,19 @@ class FundService extends Service {
     List<String>? labelIds,
   }) async {
     return await work(() async {
-      final fund = await fundRepository.withAccount().withLabels().get(fundId);
-      final entry = await entryRepository.get(entryId);
-
-      final newAccount = fund.account.revokeEntry(entry);
-      final newFund = fund.revokeEntry(entry);
-      final newLabels = <Label>[];
+      final fund = await fundRepository.withJournal().withLabels().get(
+        fundId,
+      );
+      final entry = await entryRepository.withLabels().get(entryId);
+      final newJournal = fund.journal.revokeEntry(entry);
+      final newFund = !entry.isDisbursement
+          ? fund.revokeEntry(entry)
+          : fund;
+      final newLabels = <Label>[
+        await labelRepository.getByName(
+          Fund.entryLabelName(fund, type),
+        ),
+      ];
 
       if (fund.labels.isNotEmpty) newLabels.addAll(fund.labels);
       if (labelIds != null && labelIds.isNotEmpty) {
@@ -181,24 +283,36 @@ class FundService extends Service {
       }
 
       final newEntry = entry
-          .copyWith(note: Fund.entryNote(newFund, type), amount: Fund.entryAmount(type, amount), issuedAt: issuedAt)
-          .withAccount(newAccount)
+          .copyWith(
+            amount: Fund.entryAmount(type, amount),
+            issuedAt: issuedAt,
+          )
+          .withJournal(newJournal)
           .withLabels(newLabels);
 
       await entryRepository.save(newEntry);
       await entryRepository.saveLabels(newEntry.id, newEntry.labelIds);
-      await accountRepository.save(newAccount.applyEntry(newEntry));
-      await fundRepository.save(newFund.applyEntry(newEntry));
+      await journalRepository.save(newJournal.applyEntry(newEntry));
+      if (type.isDisbursement) {
+        await fundRepository.save(newFund.applyEntry(newEntry));
+      }
+
+      await fundRepository.saveTransaction(newFund, type, newEntry);
     });
   }
 
-  deleteTransaction({required String fundId, required String entryId}) async {
+  deleteTransaction({
+    required String fundId,
+    required String entryId,
+  }) async {
     return await work(() async {
-      final fund = await fundRepository.withAccount().get(fundId);
+      final fund = await fundRepository.withJournal().get(fundId);
       final entry = await entryRepository.get(entryId);
 
-      await accountRepository.save(fund.account.revokeEntry(entry));
-      await fundRepository.save(fund.revokeEntry(entry));
+      await journalRepository.save(fund.journal.revokeEntry(entry));
+      if (!entry.isDisbursement) {
+        await fundRepository.save(fund.revokeEntry(entry));
+      }
       await entryRepository.delete(entry.id);
     });
   }

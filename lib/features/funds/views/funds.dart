@@ -1,9 +1,8 @@
-import 'package:banda/features/funds/entities/fund.dart';
-import 'package:banda/features/funds/views/fund_filter.dart';
-import 'package:banda/features/funds/providers/fund_filter_provider.dart';
-import 'package:banda/features/funds/providers/fund_provider.dart';
-import 'package:banda/features/funds/widgets/fund_tile.dart';
-import 'package:flutter/foundation.dart';
+import 'package:bandha/common/helpers/future_helper.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
+import 'package:bandha/features/funds/widgets/fund_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,13 +23,23 @@ class Funds extends StatelessWidget {
         ),
       IconButton(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => FundFilter(specs: filterProvider.get()),
-            ),
+          Navigator.pushNamed(
+            context,
+            "/funds/filter",
+            arguments: filterProvider.get(),
           );
         },
         icon: Icon(Icons.search),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            "/funds/insights",
+            arguments: filterProvider.get(),
+          );
+        },
+        icon: Icon(Icons.insights),
       ),
     ];
   }
@@ -43,51 +52,27 @@ class Funds extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Funds",
-          style: theme.textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
+        title: Text("Funds", style: theme.textTheme.titleMedium),
         actions: actionsBuilder(context),
         actionsPadding: EdgeInsets.all(8),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: fabBuilder(context),
       body: FutureBuilder(
         future: fundProvider.search(filterProvider.get()),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            if (kDebugMode) {
-              print(snapshot.error);
-              print(snapshot.stackTrace);
-            }
-
-            return Center(child: Text("..."));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Icon(
-                Icons.dashboard_customize_outlined,
-                size: theme.textTheme.displayLarge!.fontSize,
-              ),
-            );
-          }
+        builder: futureBuilder((context, snapshot) {
+          final funds = snapshot.data as List<Fund>;
 
           return SafeArea(
             child: ListView.builder(
-              itemCount: snapshot.data?.length ?? 0,
+              itemCount: funds.length,
               itemBuilder: (BuildContext context, int index) {
-                final Fund fund = snapshot.data![index];
+                final Fund fund = funds[index];
                 return FundTile(fund);
               },
             ),
           );
-        },
+        }),
       ),
     );
   }
