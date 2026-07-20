@@ -4,7 +4,7 @@ import 'package:bandha/common/helpers/date_helper.dart';
 import 'package:bandha/common/helpers/dialog_helper.dart';
 import 'package:bandha/common/helpers/tile_helper.dart';
 import 'package:bandha/common/types/controller_type.dart';
-import 'package:bandha/features/vaults/widgets/vault_text.dart';
+import 'package:bandha/features/journals/widgets/journal_text.dart';
 import 'package:bandha/common/widgets/date_time_text.dart';
 import 'package:bandha/common/widgets/money_text.dart';
 import 'package:flutter/material.dart';
@@ -40,10 +40,10 @@ class EntryTile extends StatelessWidget {
     }
 
     switch (entry.controller?.type) {
-      case ControllerType.pool:
+      case ControllerType.fund:
         Navigator.pushNamed(
           context,
-          "/pools/${entry.controller!.id}/entries",
+          "/funds/${entry.controller!.id}/entries",
         );
         break;
       case ControllerType.transfer:
@@ -58,10 +58,10 @@ class EntryTile extends StatelessWidget {
           "/schedules/${entry.controller!.id}/history",
         );
         break;
-      case ControllerType.settlement:
+      case ControllerType.obligation:
         Navigator.pushNamed(
           context,
-          "/settlements/${entry.controller!.id}/payments",
+          "/obligations/${entry.controller!.id}/payments",
         );
         break;
       default:
@@ -104,7 +104,7 @@ class EntryTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         DateTimeText(entry.issuedAt),
-        VaultText(entry.vault),
+        JournalText(entry.journal),
         if (!isNull(entry.controller?.id))
           Text(
             entry.controller!.id.toUpperCase(),

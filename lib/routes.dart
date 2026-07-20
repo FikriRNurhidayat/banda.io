@@ -1,8 +1,8 @@
 import 'package:bandha/features/entries/views/entries_insights.dart';
-import 'package:bandha/features/vaults/views/vault_editor.dart';
-import 'package:bandha/features/vaults/views/vault_entries.dart';
-import 'package:bandha/features/vaults/views/vault_menu.dart';
-import 'package:bandha/features/vaults/views/vaults.dart';
+import 'package:bandha/features/journals/views/journal_editor.dart';
+import 'package:bandha/features/journals/views/journal_entries.dart';
+import 'package:bandha/features/journals/views/journal_menu.dart';
+import 'package:bandha/features/journals/views/journals.dart';
 import 'package:bandha/features/schedules/views/schedule_editor.dart';
 import 'package:bandha/features/schedules/views/schedule_history.dart';
 import 'package:bandha/features/schedules/views/schedule_menu.dart';
@@ -11,12 +11,12 @@ import 'package:bandha/features/entries/views/entries.dart';
 import 'package:bandha/features/entries/views/entry_editor.dart';
 import 'package:bandha/features/entries/views/entry_filter.dart';
 import 'package:bandha/features/entries/views/entry_menu.dart';
-import 'package:bandha/features/pools/views/pool_editor.dart';
-import 'package:bandha/features/pools/views/pool_entries.dart';
-import 'package:bandha/features/pools/views/pool_entry_editor.dart';
-import 'package:bandha/features/pools/views/pool_filter.dart';
-import 'package:bandha/features/pools/views/pool_menu.dart';
-import 'package:bandha/features/pools/views/pools.dart';
+import 'package:bandha/features/funds/views/fund_editor.dart';
+import 'package:bandha/features/funds/views/fund_entries.dart';
+import 'package:bandha/features/funds/views/fund_entry_editor.dart';
+import 'package:bandha/features/funds/views/fund_filter.dart';
+import 'package:bandha/features/funds/views/fund_menu.dart';
+import 'package:bandha/features/funds/views/funds.dart';
 import 'package:bandha/features/tags/views/party_selector.dart';
 import 'package:bandha/features/transfers/views/transfer_editor.dart';
 import 'package:bandha/features/transfers/views/transfer_entries.dart';
@@ -25,12 +25,12 @@ import 'package:bandha/features/transfers/views/transfers.dart';
 import 'package:bandha/features/tags/views/category_selector.dart';
 import 'package:bandha/features/main/views/information.dart';
 import 'package:bandha/features/tags/views/label_selector.dart';
-import 'package:bandha/features/settlements/views/settlement_editor.dart';
-import 'package:bandha/features/settlements/views/settlement_filter.dart';
-import 'package:bandha/features/settlements/views/settlement_menu.dart';
-import 'package:bandha/features/settlements/views/settlement_entry_editor.dart';
-import 'package:bandha/features/settlements/views/settlement_entries.dart';
-import 'package:bandha/features/settlements/views/settlements.dart';
+import 'package:bandha/features/obligations/views/obligation_editor.dart';
+import 'package:bandha/features/obligations/views/obligation_filter.dart';
+import 'package:bandha/features/obligations/views/obligation_menu.dart';
+import 'package:bandha/features/obligations/views/obligation_entry_editor.dart';
+import 'package:bandha/features/obligations/views/obligation_entries.dart';
+import 'package:bandha/features/obligations/views/obligations.dart';
 import 'package:bandha/features/main/views/main_menu.dart';
 import 'package:bandha/features/main/views/tools.dart';
 import 'package:flutter/material.dart';
@@ -76,47 +76,47 @@ class Routes {
       case '/schedules/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => SettlementFilter(),
+          builder: (context) => ObligationFilter(),
         );
-      case '/settlements':
+      case '/obligations':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Settlements(),
+          builder: (context) => Obligations(),
         );
-      case '/settlements/new':
+      case '/obligations/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => SettlementEditor(),
+          builder: (context) => ObligationEditor(),
         );
-      case '/settlements/filter':
+      case '/obligations/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => SettlementFilter(),
+          builder: (context) => ObligationFilter(),
         );
-      case '/pools':
+      case '/funds':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Pools(),
+          builder: (context) => Funds(),
         );
-      case '/pools/new':
+      case '/funds/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => PoolEditor(),
+          builder: (context) => FundEditor(),
         );
-      case '/pools/filter':
+      case '/funds/filter':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => PoolFilter(),
+          builder: (context) => FundFilter(),
         );
-      case '/vaults':
+      case '/journals':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => Vaults(),
+          builder: (context) => Journals(),
         );
-      case '/vaults/new':
+      case '/journals/new':
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => VaultEditor(),
+          builder: (context) => JournalEditor(),
         );
       case '/transfers':
         return MaterialPageRoute(
@@ -171,25 +171,25 @@ class Routes {
             settings: settings,
             builder: (context) => EntryEditor(id: id),
           );
-        case 'settlements':
+        case 'obligations':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => SettlementEditor(id: id),
+            builder: (context) => ObligationEditor(id: id),
           );
-        case 'vaults':
+        case 'journals':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => VaultEditor(id: id),
+            builder: (context) => JournalEditor(id: id),
           );
         case 'transfers':
           return MaterialPageRoute(
             settings: settings,
             builder: (context) => TransferEditor(id: id),
           );
-        case 'pools':
+        case 'funds':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => PoolEditor(id: id),
+            builder: (context) => FundEditor(id: id),
           );
       }
     }
@@ -204,15 +204,15 @@ class Routes {
             settings: settings,
             builder: (context) => EntryMenu(id: id),
           );
-        case 'vaults':
+        case 'journals':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => VaultMenu(id: id),
+            builder: (context) => JournalMenu(id: id),
           );
-        case 'settlements':
+        case 'obligations':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => SettlementMenu(id: id),
+            builder: (context) => ObligationMenu(id: id),
           );
         case 'schedules':
           return MaterialPageRoute(
@@ -224,10 +224,10 @@ class Routes {
             settings: settings,
             builder: (context) => TransferMenu(id: id),
           );
-        case 'pools':
+        case 'funds':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => PoolMenu(id: id),
+            builder: (context) => FundMenu(id: id),
           );
       }
     }
@@ -237,10 +237,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'settlements':
+        case 'obligations':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => SettlementEntries(id: id),
+            builder: (context) => ObligationEntries(id: id),
           );
       }
     }
@@ -250,10 +250,10 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'pools':
+        case 'funds':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => PoolEntries(poolId: id),
+            builder: (context) => FundEntries(fundId: id),
           );
       }
     }
@@ -276,15 +276,15 @@ class Routes {
       final id = uri.pathSegments[1];
 
       switch (uri.pathSegments.first) {
-        case 'pools':
+        case 'funds':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => PoolEntries(poolId: id),
+            builder: (context) => FundEntries(fundId: id),
           );
-        case 'vaults':
+        case 'journals':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => VaultEntries(id: id),
+            builder: (context) => JournalEntries(id: id),
           );
         case 'transfers':
           return MaterialPageRoute(
@@ -310,16 +310,16 @@ class Routes {
             settings: settings,
             builder: (context) => EntryEditor(id: id, readOnly: true),
           );
-        case 'settlements':
+        case 'obligations':
           return MaterialPageRoute(
             settings: settings,
             builder: (context) =>
-                SettlementEditor(id: id, readOnly: true),
+                ObligationEditor(id: id, readOnly: true),
           );
-        case 'vaults':
+        case 'journals':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => VaultEditor(id: id, readOnly: true),
+            builder: (context) => JournalEditor(id: id, readOnly: true),
           );
         case 'transfers':
           return MaterialPageRoute(
@@ -327,59 +327,59 @@ class Routes {
             builder: (context) =>
                 TransferEditor(id: id, readOnly: true),
           );
-        case 'pools':
+        case 'funds':
           return MaterialPageRoute(
             settings: settings,
-            builder: (context) => PoolEditor(id: id, readOnly: true),
+            builder: (context) => FundEditor(id: id, readOnly: true),
           );
       }
     }
 
     if (uri.pathSegments.length == 4) {
-      if (uri.pathSegments.first == "pools" &&
+      if (uri.pathSegments.first == "funds" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) =>
-              PoolEntryEditor(poolId: uri.pathSegments[1]),
+              FundEntryEditor(fundId: uri.pathSegments[1]),
         );
       }
     }
 
     if (uri.pathSegments.length == 4) {
-      if (uri.pathSegments.first == "settlements" &&
+      if (uri.pathSegments.first == "obligations" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments[3] == "new") {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) =>
-              SettlementEntryEditor(settlementId: uri.pathSegments[1]),
+              ObligationEntryEditor(obligationId: uri.pathSegments[1]),
         );
       }
     }
 
     if (uri.pathSegments.length == 5) {
-      if (uri.pathSegments.first == "settlements" &&
+      if (uri.pathSegments.first == "obligations" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments.last == "edit") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => SettlementEntryEditor(
-            settlementId: uri.pathSegments[1],
+          builder: (context) => ObligationEntryEditor(
+            obligationId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: false,
           ),
         );
       }
 
-      if (uri.pathSegments.first == "settlements" &&
+      if (uri.pathSegments.first == "obligations" &&
           uri.pathSegments[2] == "payments" &&
           uri.pathSegments.last == "detail") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => SettlementEntryEditor(
-            settlementId: uri.pathSegments[1],
+          builder: (context) => ObligationEntryEditor(
+            obligationId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: true,
           ),
@@ -388,25 +388,25 @@ class Routes {
     }
 
     if (uri.pathSegments.length == 5) {
-      if (uri.pathSegments.first == "pools" &&
+      if (uri.pathSegments.first == "funds" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments.last == "edit") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => PoolEntryEditor(
-            poolId: uri.pathSegments[1],
+          builder: (context) => FundEntryEditor(
+            fundId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
           ),
         );
       }
 
-      if (uri.pathSegments.first == "pools" &&
+      if (uri.pathSegments.first == "funds" &&
           uri.pathSegments[2] == "transactions" &&
           uri.pathSegments.last == "detail") {
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => PoolEntryEditor(
-            poolId: uri.pathSegments[1],
+          builder: (context) => FundEntryEditor(
+            fundId: uri.pathSegments[1],
             entryId: uri.pathSegments[3],
             readOnly: true,
           ),

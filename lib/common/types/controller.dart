@@ -13,16 +13,16 @@ class Controller {
     );
   }
 
-  factory Controller.pool(String id) {
-    return Controller(ControllerType.pool, id);
+  factory Controller.fund(String id) {
+    return Controller(ControllerType.fund, id);
   }
 
-  factory Controller.settlementPayment(String id) {
-    return Controller(ControllerType.settlementPayment, id);
+  factory Controller.obligationPayment(String id) {
+    return Controller(ControllerType.obligationPayment, id);
   }
 
-  factory Controller.settlement(String id) {
-    return Controller(ControllerType.settlement, id);
+  factory Controller.obligation(String id) {
+    return Controller(ControllerType.obligation, id);
   }
 
   factory Controller.budget(String id) {

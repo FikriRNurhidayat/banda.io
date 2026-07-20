@@ -1,10 +1,10 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
 import 'package:bandha/common/widgets/select_form_field.dart';
@@ -43,8 +43,8 @@ class _TransferEditorState extends State<TransferEditor> {
             creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitVaultId: _d["debitVaultId"],
-            creditVaultId: _d["creditVaultId"],
+            debitJournalId: _d["debitJournalId"],
+            creditJournalId: _d["creditJournalId"],
           );
         }
 
@@ -56,8 +56,8 @@ class _TransferEditorState extends State<TransferEditor> {
             creditAmount: _d["credit_amount"],
             fee: _d["fee"],
             issuedAt: _d["issuedAt"].dateTime,
-            debitVaultId: _d["debitVaultId"],
-            creditVaultId: _d["creditVaultId"],
+            debitJournalId: _d["debitJournalId"],
+            creditJournalId: _d["creditJournalId"],
           );
         }
 
@@ -86,7 +86,7 @@ class _TransferEditorState extends State<TransferEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final vaultProvider = context.watch<VaultProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final transferProvider = context.read<TransferProvider>();
 
     return Scaffold(
@@ -116,7 +116,7 @@ class _TransferEditorState extends State<TransferEditor> {
           padding: EdgeInsets.all(16.0),
           child: FutureBuilder(
             future: Future.wait([
-              vaultProvider.search(),
+              journalProvider.search(),
               if (widget.id != null) transferProvider.get(widget.id!),
             ]),
             builder: (context, snapshot) {
@@ -128,7 +128,7 @@ class _TransferEditorState extends State<TransferEditor> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final vaults = snapshot.data![0] as List<Vault>;
+              final journals = snapshot.data![0] as List<Journal>;
               final transfer = widget.id != null
                   ? snapshot.data![1] as Transfer
                   : null;
@@ -221,28 +221,28 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New vault",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/vaults/new");
+                              redirect(context, "/journals/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["creditVaultId"] ??
-                          transfer?.creditVaultId,
+                          _d["creditJournalId"] ??
+                          transfer?.creditJournalId,
                       onSaved: (value) =>
-                          _d["creditVaultId"] = value ?? '',
+                          _d["creditJournalId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "From",
-                        hintText: "Select source vault...",
+                        hintText: "Select source journal...",
                       ),
-                      options: vaults.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),
@@ -259,27 +259,27 @@ class _TransferEditorState extends State<TransferEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New vault",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect(context, "/vaults/new");
+                              redirect(context, "/journals/new");
                             },
                           ),
                       ],
                       initialValue:
-                          _d["debitVaultId"] ?? transfer?.debitVaultId,
+                          _d["debitJournalId"] ?? transfer?.debitJournalId,
                       onSaved: (value) =>
-                          _d["debitVaultId"] = value ?? '',
+                          _d["debitJournalId"] = value ?? '',
                       validator: (_) => null,
                       decoration: InputStyles.field(
                         labelText: "To",
-                        hintText: "Select target vault...",
+                        hintText: "Select target journal...",
                       ),
-                      options: vaults.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: i.displayName(),

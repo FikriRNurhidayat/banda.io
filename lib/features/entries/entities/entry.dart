@@ -1,5 +1,5 @@
 import 'package:bandha/features/tags/types/read_only_label.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
@@ -15,7 +15,7 @@ class Entry extends Entity {
   final EntryStatus status;
   final DateTime issuedAt;
   final bool readonly;
-  final String vaultId;
+  final String journalId;
   final String categoryId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -23,12 +23,12 @@ class Entry extends Entity {
 
   List<Label> labels = [];
   late Category category;
-  late Vault vault;
+  late Journal journal;
   Map<String, dynamic>? annotations = {};
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is Vault && id == other.id);
+      identical(this, other) || (other is Entry && id == other.id);
 
   @override
   int get hashCode => id.hashCode;
@@ -40,7 +40,7 @@ class Entry extends Entity {
     required this.status,
     required this.issuedAt,
     required this.readonly,
-    required this.vaultId,
+    required this.journalId,
     required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
@@ -119,11 +119,11 @@ class Entry extends Entity {
     );
   }
 
-  get isSettlement {
+  get isObligation {
     return labels.any(
       (label) =>
           label.readOnly &&
-          label.name == ReadOnlyLabel.settlement.label,
+          label.name == ReadOnlyLabel.obligation.label,
     );
   }
 
@@ -181,8 +181,8 @@ class Entry extends Entity {
     return this;
   }
 
-  Entry withVault(Vault? vault) {
-    if (vault != null) this.vault = vault;
+  Entry withJournal(Journal? journal) {
+    if (journal != null) this.journal = journal;
     return this;
   }
 
@@ -202,7 +202,7 @@ class Entry extends Entity {
     EntryStatus? status,
     DateTime? issuedAt,
     bool? readonly,
-    String? vaultId,
+    String? journalId,
     String? categoryId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -214,7 +214,7 @@ class Entry extends Entity {
       amount: amount ?? this.amount,
       status: status ?? this.status,
       readonly: readonly ?? this.readonly,
-      vaultId: vaultId ?? this.vaultId,
+      journalId: journalId ?? this.journalId,
       categoryId: categoryId ?? this.categoryId,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt ?? this.createdAt,
@@ -232,7 +232,7 @@ class Entry extends Entity {
       "status": status,
       "issuedAt": issuedAt,
       "readonly": readonly,
-      "vaultId": vaultId,
+      "journalId": journalId,
       "categoryId": categoryId,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
@@ -245,7 +245,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -255,7 +255,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: false,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -266,7 +266,7 @@ class Entry extends Entity {
     required double amount,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -276,7 +276,7 @@ class Entry extends Entity {
       status: status,
       issuedAt: issuedAt,
       readonly: true,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       controller: controller,
     );
@@ -288,7 +288,7 @@ class Entry extends Entity {
     required EntryStatus status,
     required DateTime issuedAt,
     required bool readonly,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     Controller? controller,
   }) {
@@ -298,7 +298,7 @@ class Entry extends Entity {
       amount: amount,
       status: status,
       readonly: readonly,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       issuedAt: issuedAt,
       createdAt: DateTime.now(),
@@ -330,7 +330,7 @@ class Entry extends Entity {
       ),
       issuedAt: DateTime.parse(row["issued_at"]),
       readonly: row["readonly"] == 1,
-      vaultId: row["vault_id"],
+      journalId: row["journal_id"],
       categoryId: row["category_id"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),

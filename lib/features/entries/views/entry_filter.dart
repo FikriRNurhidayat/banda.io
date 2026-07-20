@@ -1,9 +1,9 @@
 import 'package:bandha/common/decorations/input_styles.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
-import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/entries/providers/entry_filter_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
@@ -38,8 +38,8 @@ class _EntryFilterState extends State<EntryFilter> {
         _formData["category_in"] = widget.specification!["category_in"];
       }
 
-      if (widget.specification!.containsKey("vault_in")) {
-        _formData["vault_in"] = widget.specification!["vault_in"];
+      if (widget.specification!.containsKey("journal_in")) {
+        _formData["journal_in"] = widget.specification!["journal_in"];
       }
 
       if (widget.specification!.containsKey("label_in")) {
@@ -91,8 +91,8 @@ class _EntryFilterState extends State<EntryFilter> {
         specification["category_in"] = _formData["category_in"];
       }
 
-      if (isNotEmpty("vault_in")) {
-        specification["vault_in"] = _formData["vault_in"];
+      if (isNotEmpty("journal_in")) {
+        specification["journal_in"] = _formData["journal_in"];
       }
 
       if (isNotNull("issued_between")) {
@@ -108,7 +108,7 @@ class _EntryFilterState extends State<EntryFilter> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final categoryProvider = context.watch<CategoryProvider>();
-    final vaultProvider = context.watch<VaultProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
@@ -136,7 +136,7 @@ class _EntryFilterState extends State<EntryFilter> {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              vaultProvider.search(),
+              journalProvider.search(),
               labelProvider.search(),
             ]),
             builder: (context, snapshot) {
@@ -149,7 +149,7 @@ class _EntryFilterState extends State<EntryFilter> {
               }
 
               final categories = snapshot.data![0] as List<Category>;
-              final vaults = snapshot.data![1] as List<Vault>;
+              final journals = snapshot.data![1] as List<Journal>;
               final labels = snapshot.data![2] as List<Label>;
 
               return Form(
@@ -210,12 +210,12 @@ class _EntryFilterState extends State<EntryFilter> {
                         hintText: "Select categories...",
                       ),
                     ),
-                    if (vaults.isNotEmpty)
+                    if (journals.isNotEmpty)
                       MultiSelectFormField<String>(
-                        initialValue: _formData["vault_in"] ?? [],
+                        initialValue: _formData["journal_in"] ?? [],
                         onSaved: (value) =>
-                            _formData["vault_in"] = value,
-                        options: vaults
+                            _formData["journal_in"] = value,
+                        options: journals
                             .map(
                               (i) => MultiSelectItem(
                                 value: i.id,
@@ -224,8 +224,8 @@ class _EntryFilterState extends State<EntryFilter> {
                             )
                             .toList(),
                         decoration: InputStyles.field(
-                          labelText: "Vaults",
-                          hintText: "Select vaults...",
+                          labelText: "Journals",
+                          hintText: "Select journals...",
                         ),
                       ),
                     if (labels.isNotEmpty)

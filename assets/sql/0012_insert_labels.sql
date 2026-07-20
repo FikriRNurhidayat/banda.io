@@ -51,7 +51,7 @@ VALUES
 ),
 (
     'd44d6370-ad29-4a51-8a13-952d21b8960b',
-    'Settlement',
+    'Obligation',
     1,
     strftime('%Y-%m-%dT%H:%M:%S', 'now'),
     strftime('%Y-%m-%dT%H:%M:%S', 'now')

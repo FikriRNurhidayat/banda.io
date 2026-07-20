@@ -77,17 +77,17 @@ class Repository {
     }).toList();
   }
 
-  populateVault(List<Map> rows) async {
-    final List<String> vaultIds = rows
-        .map((row) => row["vault_id"] as String)
+  populateJournal(List<Map> rows) async {
+    final List<String> journalIds = rows
+        .map((row) => row["journal_id"] as String)
         .toList();
-    final vaultRows = await getVaultByIds(vaultIds);
+    final journalRows = await getJournalByIds(journalIds);
 
     return rows.map((mainRow) {
       return {
         ...mainRow,
-        "vault": vaultRows.firstWhere(
-          (vaultRow) => mainRow["vault_id"] == vaultRow["id"],
+        "journal": journalRows.firstWhere(
+          (journalRow) => mainRow["journal_id"] == journalRow["id"],
         ),
       };
     }).toList();
@@ -118,18 +118,18 @@ class Repository {
     }).toList();
   }
 
-  getSettlementByIds(List<String> ids) async {
+  getObligationByIds(List<String> ids) async {
     final client = await getClient();
     return client.select(
-      "SELECT * FROM settlements WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      "SELECT * FROM obligations WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }
 
-  getVaultByIds(List<String> ids) async {
+  getJournalByIds(List<String> ids) async {
     final client = await getClient();
     return client.select(
-      "SELECT * FROM vaults WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      "SELECT * FROM journals WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }

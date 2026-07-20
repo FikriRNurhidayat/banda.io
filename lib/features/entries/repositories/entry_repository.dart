@@ -1,5 +1,5 @@
 import 'package:bandha/common/entities/controlable.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
@@ -25,8 +25,8 @@ class EntryRepository extends Repository {
     return EntryRepository(db, withArgs: {...withArgs, "labels"});
   }
 
-  EntryRepository withVault() {
-    return EntryRepository(db, withArgs: {...withArgs, "vault"});
+  EntryRepository withJournal() {
+    return EntryRepository(db, withArgs: {...withArgs, "journal"});
   }
 
   EntryRepository withCategory() {
@@ -101,7 +101,7 @@ class EntryRepository extends Repository {
   bulkSave(Iterable<Entry> entries) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO entries (id, note, amount, readonly, status, category_id, vault_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES ${entries.map((_) => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, vault_id = excluded.vault_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
+      "INSERT INTO entries (id, note, amount, readonly, status, category_id, journal_id, controller_id, controller_type, issued_at, created_at, updated_at) VALUES ${entries.map((_) => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")} ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, readonly = excluded.readonly, status = excluded.status, issued_at = excluded.issued_at, category_id = excluded.category_id, journal_id = excluded.journal_id, controller_id = excluded.controller_id, controller_type = excluded.controller_type, updated_at = excluded.updated_at",
       entries
           .map(
             (entry) => [
@@ -111,7 +111,7 @@ class EntryRepository extends Repository {
               entry.readonly ? 1 : 0,
               entry.status.label,
               entry.categoryId,
-              entry.vaultId,
+              entry.journalId,
               entry.controller?.id,
               entry.controller?.type.label,
               entry.issuedAt.toIso8601String(),
@@ -302,8 +302,8 @@ class EntryRepository extends Repository {
       entryRows = await populateLabels(entryRows);
     }
 
-    if (withArgs.contains("vault")) {
-      entryRows = await populateVault(entryRows);
+    if (withArgs.contains("journal")) {
+      entryRows = await populateJournal(entryRows);
     }
 
     if (withArgs.contains("category")) {
@@ -313,7 +313,7 @@ class EntryRepository extends Repository {
     return entryRows.map((e) {
       return Entry.row(e)
           .withLabels(Label.tryRows(e["labels"]))
-          .withVault(Vault.tryRow(e["vault"]))
+          .withJournal(Journal.tryRow(e["journal"]))
           .withCategory(Category.tryRow(e["category"]))
           .withAnnotations(e["annotations"]);
     }).toList();
@@ -353,11 +353,11 @@ class EntryRepository extends Repository {
       }
     }
 
-    if (spec.containsKey("pool_in")) {
-      final value = spec["pool_in"] as List<String>;
+    if (spec.containsKey("fund_in")) {
+      final value = spec["fund_in"] as List<String>;
       if (value.isNotEmpty) {
         join["query"].add(
-          "INNER JOIN pool_transactions ON pool_transactions.entry_id = entries.id",
+          "INNER JOIN fund_entries ON fund_entries.entry_id = entries.id",
         );
       }
     }
@@ -433,11 +433,11 @@ class EntryRepository extends Repository {
       ]);
     }
 
-    if (filter.containsKey("vault_in")) {
-      final value = filter["vault_in"] as List<String>;
+    if (filter.containsKey("journal_in")) {
+      final value = filter["journal_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(entries.vault_id IN (${value.map((_) => '?').join(', ')}))",
+          "(entries.journal_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }
@@ -482,11 +482,11 @@ class EntryRepository extends Repository {
       }
     }
 
-    if (filter.containsKey("pool_in")) {
-      final value = filter["pool_in"] as List<String>;
+    if (filter.containsKey("fund_in")) {
+      final value = filter["fund_in"] as List<String>;
       if (value.isNotEmpty) {
         where["query"].add(
-          "(pool_transactions.pool_id IN (${value.map((_) => '?').join(', ')}))",
+          "(fund_entries.fund_id IN (${value.map((_) => '?').join(', ')}))",
         );
         where["args"].addAll(value);
       }

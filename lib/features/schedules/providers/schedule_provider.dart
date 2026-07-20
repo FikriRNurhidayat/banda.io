@@ -21,7 +21,7 @@ class ScheduleProvider extends ChangeNotifier {
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String vaultId,
+    required String journalId,
     required List<String> labelIds,
   }) async {
     await scheduleService.create(
@@ -33,7 +33,7 @@ class ScheduleProvider extends ChangeNotifier {
       status: status,
       dueAt: dueAt,
       categoryId: categoryId,
-      vaultId: vaultId,
+      journalId: journalId,
       labelIds: labelIds,
     );
 
@@ -50,7 +50,7 @@ class ScheduleProvider extends ChangeNotifier {
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String vaultId,
+    required String journalId,
     required List<String> labelIds,
   }) async {
     await scheduleService.update(
@@ -63,7 +63,7 @@ class ScheduleProvider extends ChangeNotifier {
       status: status,
       dueAt: dueAt,
       categoryId: categoryId,
-      vaultId: vaultId,
+      journalId: journalId,
       labelIds: labelIds,
     );
 

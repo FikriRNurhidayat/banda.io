@@ -3,7 +3,7 @@ import 'package:bandha/common/services/service.dart';
 import 'package:bandha/common/types/metric.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/notifications/managers/notification_manager.dart';
-import 'package:bandha/features/vaults/repositories/vault_repository.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/tags/repositories/label_repository.dart';
@@ -13,14 +13,14 @@ import 'package:bandha/common/types/specification.dart';
 
 class EntryService extends Service {
   final EntryRepository entryRepository;
-  final VaultRepository vaultRepository;
+  final JournalRepository journalRepository;
   final LabelRepository labelRepository;
   final CategoryRepository categoryRepository;
   final NotificationManager notificationManager;
 
   EntryService({
     required this.entryRepository,
-    required this.vaultRepository,
+    required this.journalRepository,
     required this.labelRepository,
     required this.categoryRepository,
     required this.notificationManager,
@@ -28,7 +28,7 @@ class EntryService extends Service {
 
   Future<void> snooze(String id) async {
     return work(() async {
-      final entry = await entryRepository.withVault().withLabels().get(
+      final entry = await entryRepository.withJournal().withLabels().get(
         id,
       );
       await entryRepository.save(
@@ -39,7 +39,7 @@ class EntryService extends Service {
 
   Future<void> markAsDone(String id) async {
     return work(() async {
-      final entry = await entryRepository.withVault().withLabels().get(
+      final entry = await entryRepository.withJournal().withLabels().get(
         id,
       );
       await entryRepository.save(
@@ -50,12 +50,12 @@ class EntryService extends Service {
 
   delete(String id) {
     return work(() async {
-      final entry = await entryRepository.withVault().withLabels().get(
+      final entry = await entryRepository.withJournal().withLabels().get(
         id,
       );
-      final vault = entry.vault.revokeEntry(entry);
+      final journal = entry.journal.revokeEntry(entry);
       await entryRepository.delete(id);
-      await vaultRepository.save(vault);
+      await journalRepository.save(journal);
       await notificationManager.cancelReminder(
         Controller.entry(entry.id),
       );
@@ -63,7 +63,7 @@ class EntryService extends Service {
   }
 
   get(String id) {
-    return entryRepository.withLabels().withVault().withCategory().get(
+    return entryRepository.withLabels().withJournal().withCategory().get(
       id,
     );
   }
@@ -112,7 +112,7 @@ class EntryService extends Service {
   search({Filter? filter}) {
     return entryRepository
         .withLabels()
-        .withVault()
+        .withJournal()
         .withCategory()
         .search(filter);
   }
@@ -122,13 +122,13 @@ class EntryService extends Service {
     required double amount,
     required EntryType type,
     required EntryStatus status,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     required DateTime timestamp,
     List<String>? labelIds,
   }) {
     return work<Entry>(() async {
-      final vault = await vaultRepository.get(vaultId);
+      final journal = await journalRepository.get(journalId);
       final category = await categoryRepository.get(categoryId);
       final labels = await labelRepository.getByIds(labelIds);
 
@@ -138,11 +138,11 @@ class EntryService extends Service {
         status: status,
         issuedAt: timestamp,
         categoryId: categoryId,
-        vaultId: vaultId,
-      ).withLabels(labels).withVault(vault).withCategory(category);
+        journalId: journalId,
+      ).withLabels(labels).withJournal(journal).withCategory(category);
 
       await entryRepository.withLabels().withAnnotations().save(entry);
-      await vaultRepository.save(vault.applyEntry(entry));
+      await journalRepository.save(journal.applyEntry(entry));
 
       if (entry.status.isPending()) {
         await notificationManager.setReminder(
@@ -165,7 +165,7 @@ class EntryService extends Service {
     required double amount,
     required EntryType type,
     required EntryStatus status,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     required DateTime timestamp,
     List<String>? labelIds,
@@ -173,17 +173,17 @@ class EntryService extends Service {
     return work(() async {
       final entry = await entryRepository
           .withCategory()
-          .withVault()
+          .withJournal()
           .withLabels()
           .get(id);
 
-      await vaultRepository.save(entry.vault.revokeEntry(entry));
+      await journalRepository.save(entry.journal.revokeEntry(entry));
 
       if (entry.status.isPending()) {
         notificationManager.cancelReminder(Controller.entry(entry.id));
       }
 
-      final newVault = await vaultRepository.get(vaultId);
+      final newJournal = await journalRepository.get(journalId);
       final newCategory = await categoryRepository.get(categoryId);
       final newLabels = await labelRepository.getByIds(labelIds);
       final newEntry = entry
@@ -193,16 +193,16 @@ class EntryService extends Service {
             status: status,
             issuedAt: timestamp,
             categoryId: categoryId,
-            vaultId: vaultId,
+            journalId: journalId,
           )
           .withLabels(newLabels)
-          .withVault(newVault)
+          .withJournal(newJournal)
           .withCategory(newCategory);
 
       await entryRepository.withLabels().withAnnotations().save(
         newEntry,
       );
-      await vaultRepository.save(newVault.applyEntry(newEntry));
+      await journalRepository.save(newJournal.applyEntry(newEntry));
 
       if (newEntry.status.isPending()) {
         notificationManager.setReminder(

@@ -1,18 +1,18 @@
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/flash.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/settlements/entities/settlement.dart';
-import 'package:bandha/features/pools/entities/pool.dart';
-import 'package:bandha/features/settlements/providers/settlement_payment_provider.dart';
+import 'package:bandha/features/obligations/entities/obligation.dart';
+import 'package:bandha/features/funds/entities/fund.dart';
+import 'package:bandha/features/obligations/providers/obligation_payment_provider.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/providers/transfer_provider.dart';
-import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
-import 'package:bandha/features/settlements/providers/settlement_provider.dart';
-import 'package:bandha/features/pools/providers/pool_provider.dart';
+import 'package:bandha/features/obligations/providers/obligation_provider.dart';
+import 'package:bandha/features/funds/providers/fund_provider.dart';
 import 'package:bandha/common/widgets/verdict.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -85,45 +85,45 @@ Future<bool?> ask(
   return false;
 }
 
-Future<bool?> confirmPoolTransactionDeletion(
+Future<bool?> confirmFundTransactionDeletion(
   BuildContext context,
-  Pool pool,
+  Fund fund,
   Entry entry,
 ) async {
   return ask(
     context,
-    title: "Delete pool entry",
+    title: "Delete fund entry",
     content:
-        "You're about to delete this pool entry, this action cannot be reversed. Are you sure?",
+        "You're about to delete this fund entry, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final poolProvider = context.read<PoolProvider>();
+      final fundProvider = context.read<FundProvider>();
 
-      await poolProvider
-          .deleteTransaction(poolId: pool.id, entryId: entry.id)
+      await fundProvider
+          .deleteTransaction(fundId: fund.id, entryId: entry.id)
           .catchError((error) {
-            alert(messenger, "Delete pool entry failed");
+            alert(messenger, "Delete fund entry failed");
             throw error;
           });
     },
   );
 }
 
-Future<bool?> confirmPoolDeletion(
+Future<bool?> confirmFundDeletion(
   BuildContext context,
-  Pool pool,
+  Fund fund,
 ) async {
   return ask(
     context,
-    title: "Delete pool",
+    title: "Delete fund",
     content:
-        "You're about to delete this pool, this action cannot be reversed. Are you sure?",
+        "You're about to delete this fund, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final poolProvider = context.read<PoolProvider>();
+      final fundProvider = context.read<FundProvider>();
 
-      await poolProvider.delete(pool.id).catchError((error) {
-        alert(messenger, "Delete pool failed");
+      await fundProvider.delete(fund.id).catchError((error) {
+        alert(messenger, "Delete fund failed");
         throw error;
       });
     },
@@ -159,20 +159,20 @@ Future<bool?> confirmScheduleDeletion(
   );
 }
 
-Future<bool?> confirmSettlementDeletion(
+Future<bool?> confirmObligationDeletion(
   BuildContext context,
-  Settlement settlement,
+  Obligation obligation,
 ) async {
   return ask(
     context,
-    title: "Delete settlement",
+    title: "Delete obligation",
     content:
-        "You're about to delete this settlement, this action cannot be reversed. Are you sure?",
+        "You're about to delete this obligation, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final settlementProvider = context.read<SettlementProvider>();
+      final obligationProvider = context.read<ObligationProvider>();
 
-      await settlementProvider.delete(settlement.id).catchError((
+      await obligationProvider.delete(obligation.id).catchError((
         error,
         stackTrace,
       ) {
@@ -181,7 +181,7 @@ Future<bool?> confirmSettlementDeletion(
           print(stackTrace);
         }
 
-        alert(messenger, "Delete settlement failed");
+        alert(messenger, "Delete obligation failed");
         throw error;
       });
     },
@@ -217,21 +217,21 @@ Future<bool?> confirmTransferDeletion(
   );
 }
 
-Future<bool?> confirmVaultDeletion(
+Future<bool?> confirmJournalDeletion(
   BuildContext context,
-  Vault vault,
+  Journal journal,
 ) async {
   return ask(
     context,
-    title: "Delete vault",
+    title: "Delete journal",
     content:
-        "You're about to delete this vault, this action cannot be reversed. Are you sure?",
+        "You're about to delete this.journal, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final vaultProvider = context.read<VaultProvider>();
+      final journalProvider = context.read<JournalProvider>();
 
-      await vaultProvider.delete(vault.id).catchError((error) {
-        alert(messenger, "Delete vault failed");
+      await journalProvider.delete(journal.id).catchError((error) {
+        alert(messenger, "Delete journal failed");
         throw error;
       });
     },
@@ -267,9 +267,9 @@ Future<bool?> confirmEntryDeletion(
   );
 }
 
-Future<bool?> confirmSettlementPaymentDeletion(
+Future<bool?> confirmObligationPaymentDeletion(
   BuildContext context,
-  Settlement settlement,
+  Obligation obligation,
   Entry entry,
 ) async {
   return ask(
@@ -279,11 +279,11 @@ Future<bool?> confirmSettlementPaymentDeletion(
         "You're about to delete this payment, this action cannot be reversed. Are you sure?",
     onConfirm: (context) async {
       final messenger = ScaffoldMessenger.of(context);
-      final settlementPaymentProvider = context
-          .read<SettlementPaymentProvider>();
+      final obligationPaymentProvider = context
+          .read<ObligationPaymentProvider>();
 
-      await settlementPaymentProvider
-          .delete(settlement.id, entry.id)
+      await obligationPaymentProvider
+          .delete(obligation.id, entry.id)
           .catchError((error, stackTrace) {
             if (kDebugMode) {
               print(error);

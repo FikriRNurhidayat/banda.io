@@ -1,12 +1,12 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/helpers/future_helper.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
@@ -53,7 +53,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            vaultId: _d["vaultId"],
+            journalId: _d["journalId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -67,7 +67,7 @@ class _EditorState extends State<EntryEditor> {
             type: _d["type"],
             status: _d["status"],
             categoryId: _d["categoryId"],
-            vaultId: _d["vaultId"],
+            journalId: _d["journalId"],
             issuedAt: _d["issuedAt"].dateTime,
             labelIds: _d["labelIds"],
           );
@@ -95,7 +95,7 @@ class _EditorState extends State<EntryEditor> {
     final theme = Theme.of(context);
     final entryProvider = context.read<EntryProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-    final vaultProvider = context.watch<VaultProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
@@ -137,14 +137,14 @@ class _EditorState extends State<EntryEditor> {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              vaultProvider.search(),
+              journalProvider.search(),
               labelProvider.search(),
               if (widget.id != null) entryProvider.get(widget.id!),
             ]),
             builder: futureBuilder((context, snapshot) {
               final data = snapshot.data as List<dynamic>;
               final categories = data[0] as List<Category>;
-              final vaults = data[1] as List<Vault>;
+              final journals = data[1] as List<Journal>;
               final labels = data[2] as List<Label>;
               final entry = widget.id != null ? data[3] as Entry : null;
 
@@ -273,8 +273,8 @@ class _EditorState extends State<EntryEditor> {
                     SelectFormField(
                       readOnly: widget.readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Vault",
-                        hintText: "Select vault...",
+                        labelText: "Journal",
+                        hintText: "Select journal...",
                       ),
                       actions: [
                         if (!widget.readOnly)
@@ -284,25 +284,25 @@ class _EditorState extends State<EntryEditor> {
                               color: theme.colorScheme.outline,
                             ),
                             label: Text(
-                              "New vault",
+                              "New journal",
                               style: TextStyle(
                                 fontWeight: FontWeight.w100,
                                 color: theme.colorScheme.outline,
                               ),
                             ),
                             onPressed: () {
-                              redirect("/vaults/new");
+                              redirect("/journals/new");
                             },
                           ),
                       ],
-                      options: vaults.map((i) {
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["vaultId"] ?? entry?.vaultId,
-                      onSaved: (value) => _d["vaultId"] = value,
+                      initialValue: _d["journalId"] ?? entry?.journalId,
+                      onSaved: (value) => _d["journalId"] = value,
                     ),
                     if (!widget.readOnly || !isEmpty(entry?.labels))
                       MultiSelectFormField<String>(

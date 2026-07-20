@@ -7,17 +7,17 @@ import 'package:bandha/features/schedules/repositories/schedule_repository.dart'
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/tags/repositories/label_repository.dart';
 import 'package:bandha/features/tags/types/read_only_label.dart';
-import 'package:bandha/features/vaults/repositories/vault_repository.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
 
 class ScheduleService extends Service {
-  final VaultRepository vaultRepository;
+  final JournalRepository journalRepository;
   final ScheduleRepository scheduleRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
   final LabelRepository labelRepository;
 
   ScheduleService({
-    required this.vaultRepository,
+    required this.journalRepository,
     required this.scheduleRepository,
     required this.categoryRepository,
     required this.entryRepository,
@@ -33,12 +33,12 @@ class ScheduleService extends Service {
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String vaultId,
+    required String journalId,
     required List<String> labelIds,
   }) {
     return work(() async {
       final category = await categoryRepository.get(categoryId);
-      var vault = await vaultRepository.get(vaultId);
+      var journal = await journalRepository.get(journalId);
       final labels = await labelRepository.getByIds(labelIds);
       final feeLabel = await labelRepository.getByName(
         ReadOnlyLabel.fee.label,
@@ -50,11 +50,11 @@ class ScheduleService extends Service {
                 amount: amount * sign,
                 status: status.entryStatus,
                 issuedAt: dueAt,
-                vaultId: vault.id,
+                journalId: journal.id,
                 categoryId: category.id,
               )
               .withCategory(category)
-              .withVault(vault)
+              .withJournal(journal)
               .withLabels(labels)
               .annotate("iteration", 1);
 
@@ -63,11 +63,11 @@ class ScheduleService extends Service {
                   amount: fee * -1,
                   status: status.entryStatus,
                   issuedAt: dueAt,
-                  vaultId: vault.id,
+                  journalId: journal.id,
                   categoryId: category.id,
                 )
                 .withCategory(category)
-                .withVault(vault)
+                .withJournal(journal)
                 .withLabels([...labels, feeLabel])
                 .annotate("entry_id", entry.id)
                 .annotate("iteration", 1)
@@ -85,7 +85,7 @@ class ScheduleService extends Service {
                 cycle: cycle,
                 status: status,
                 categoryId: category.id,
-                vaultId: vault.id,
+                journalId: journal.id,
                 entryId: entry.id,
                 additionId: addition?.id,
                 dueAt: dueAt,
@@ -93,7 +93,7 @@ class ScheduleService extends Service {
               .withLabels(labels)
               .withEntry(entry)
               .withAddition(addition)
-              .withVault(vault)
+              .withJournal(journal)
               .withCategory(category);
 
       await entryRepository.withLabels().withAnnotations().bulkSave(
@@ -106,8 +106,8 @@ class ScheduleService extends Service {
       );
 
       if (schedule.status.isPaid) {
-        await vaultRepository.save(
-          schedule.vault.applyEntries(schedule.entries),
+        await journalRepository.save(
+          schedule.journal.applyEntries(schedule.entries),
         );
       }
 
@@ -128,13 +128,13 @@ class ScheduleService extends Service {
     required ScheduleStatus status,
     required DateTime dueAt,
     required String categoryId,
-    required String vaultId,
+    required String journalId,
     required List<String> labelIds,
   }) {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withVault()
+          .withJournal()
           .withEntries()
           .withCategory()
           .get(id);
@@ -144,13 +144,13 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        await vaultRepository.save(
-          schedule.vault.revokeEntries(schedule.entries),
+        await journalRepository.save(
+          schedule.journal.revokeEntries(schedule.entries),
         );
       }
 
       final category = await categoryRepository.get(categoryId);
-      var vault = await vaultRepository.get(vaultId);
+      var journal = await journalRepository.get(journalId);
       final labels = await labelRepository.getByIds(labelIds);
       final feeLabel = await labelRepository.getByName(
         ReadOnlyLabel.fee.label,
@@ -163,11 +163,11 @@ class ScheduleService extends Service {
             amount: amount * sign,
             status: status.entryStatus,
             issuedAt: dueAt,
-            vaultId: vault.id,
+            journalId: journal.id,
             categoryId: category.id,
           )
           .withCategory(category)
-          .withVault(vault)
+          .withJournal(journal)
           .withLabels(labels);
 
       final additionId = schedule.additionId;
@@ -178,18 +178,18 @@ class ScheduleService extends Service {
                         amount: fee * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
-                        vaultId: vault.id,
+                        journalId: journal.id,
                         categoryId: category.id,
                       )
                     : Entry.readOnly(
                         amount: fee * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
-                        vaultId: vault.id,
+                        journalId: journal.id,
                         categoryId: category.id,
                       ))
                 .withCategory(category)
-                .withVault(vault)
+                .withJournal(journal)
                 .withLabels([...labels, feeLabel])
                 .annotate("entry_id", entry.id)
           : null;
@@ -204,7 +204,7 @@ class ScheduleService extends Service {
         cycle: cycle,
         status: status,
         categoryId: category.id,
-        vaultId: vault.id,
+        journalId: journal.id,
         entryId: entry.id,
         dueAt: dueAt,
       );
@@ -216,7 +216,7 @@ class ScheduleService extends Service {
           .withLabels(labels)
           .withEntry(entry)
           .withAddition(addition)
-          .withVault(vault)
+          .withJournal(journal)
           .withCategory(category);
 
       for (var entry in schedule.entries) {
@@ -229,8 +229,8 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        await vaultRepository.save(
-          schedule.vault.applyEntries(schedule.entries),
+        await journalRepository.save(
+          schedule.journal.applyEntries(schedule.entries),
         );
       }
 
@@ -249,7 +249,7 @@ class ScheduleService extends Service {
     return await scheduleRepository
         .withCategory()
         .withEntries()
-        .withVault()
+        .withJournal()
         .withLabels()
         .get(id);
   }
@@ -258,7 +258,7 @@ class ScheduleService extends Service {
     return await scheduleRepository
         .withCategory()
         .withLabels()
-        .withVault()
+        .withJournal()
         .search();
   }
 
@@ -272,20 +272,20 @@ class ScheduleService extends Service {
 
       await scheduleRepository.delete(schedule.id);
 
-      final entries = await entryRepository.withVault().controlledBy(
+      final entries = await entryRepository.withJournal().controlledBy(
         schedule,
       );
       final entryIds = entries.map((entry) => entry.id).toList();
-      final vaults = entries
-          .map((entry) => entry.vault)
+      final journals = entries
+          .map((entry) => entry.journal)
           .toSet()
           .map(
-            (vault) => vault.revokeEntries(
-              entries.where((entry) => vault == entry.vault),
+            (journal) => journal.revokeEntries(
+              entries.where((entry) => journal == entry.journal),
             ),
           );
 
-      await vaultRepository.bulkSave(vaults);
+      await journalRepository.bulkSave(journals);
       await entryRepository.deleteByIds(entryIds);
     });
   }
@@ -294,7 +294,7 @@ class ScheduleService extends Service {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withVault()
+          .withJournal()
           .withCategory()
           .withEntries()
           .get(id);
@@ -307,7 +307,7 @@ class ScheduleService extends Service {
         return null;
       }
 
-      var vault = schedule.vault;
+      var journal = schedule.journal;
       final entry = schedule.entry;
       final iteration = schedule.iteration - 1;
 
@@ -317,8 +317,8 @@ class ScheduleService extends Service {
       }
 
       if (schedule.status.isPaid) {
-        vault = vault.revokeEntries(schedule.entries);
-        await vaultRepository.save(vault);
+        journal = journal.revokeEntries(schedule.entries);
+        await journalRepository.save(journal);
       }
 
       final previousEntry = await entryRepository.withAnnotations().get(
@@ -345,7 +345,7 @@ class ScheduleService extends Service {
     return work(() async {
       var schedule = await scheduleRepository
           .withLabels()
-          .withVault()
+          .withJournal()
           .withCategory()
           .withEntries()
           .get(id);
@@ -368,12 +368,12 @@ class ScheduleService extends Service {
                 amount: schedule.amount,
                 status: EntryStatus.pending,
                 issuedAt: schedule.nextTime,
-                vaultId: schedule.vaultId,
+                journalId: schedule.journalId,
                 categoryId: schedule.categoryId,
               )
               .controlledBy(schedule)
               .withLabels(schedule.labels)
-              .withVault(schedule.vault)
+              .withJournal(schedule.journal)
               .withCategory(schedule.category)
               .annotate("previous_id", schedule.entryId)
               .annotate("iteration", iteration);
@@ -388,12 +388,12 @@ class ScheduleService extends Service {
                   amount: schedule.fee!,
                   status: EntryStatus.pending,
                   issuedAt: schedule.nextTime,
-                  vaultId: schedule.vaultId,
+                  journalId: schedule.journalId,
                   categoryId: schedule.categoryId,
                 )
                 .controlledBy(schedule)
                 .withLabels([...schedule.labels, feeLabel])
-                .withVault(schedule.vault)
+                .withJournal(schedule.journal)
                 .withCategory(schedule.category)
                 .annotate("previous_id", schedule.entryId)
                 .annotate("entry_id", schedule.entryId)
@@ -413,7 +413,7 @@ class ScheduleService extends Service {
             dueAt: schedule.nextTime,
           )
           .withCategory(schedule.category)
-          .withVault(schedule.vault)
+          .withJournal(schedule.journal)
           .withLabels(schedule.labels)
           .withEntry(newEntry)
           .withAddition(newAddition);

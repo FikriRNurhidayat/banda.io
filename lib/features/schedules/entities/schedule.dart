@@ -1,7 +1,7 @@
 import 'package:bandha/common/entities/controlable.dart';
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/common/types/controller.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/tags/entities/label.dart';
@@ -16,7 +16,7 @@ class Schedule extends Controlable {
   final int iteration;
   final ScheduleStatus status;
   final String categoryId;
-  final String vaultId;
+  final String journalId;
   final String entryId;
   final String? additionId;
   final DateTime dueAt;
@@ -24,7 +24,7 @@ class Schedule extends Controlable {
   final DateTime updatedAt;
 
   late final Category category;
-  late final Vault vault;
+  late final Journal journal;
   late final Entry entry;
   late final Entry? addition;
   late final List<Label> labels;
@@ -38,7 +38,7 @@ class Schedule extends Controlable {
     required this.iteration,
     required this.status,
     required this.entryId,
-    required this.vaultId,
+    required this.journalId,
     this.additionId,
     required this.categoryId,
     required this.dueAt,
@@ -69,7 +69,7 @@ class Schedule extends Controlable {
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required String categoryId,
-    required String vaultId,
+    required String journalId,
     required String entryId,
     required String? additionId,
     required DateTime dueAt,
@@ -85,7 +85,7 @@ class Schedule extends Controlable {
       iteration: 1,
       status: status,
       entryId: entryId,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       additionId: additionId,
       dueAt: dueAt,
@@ -104,7 +104,7 @@ class Schedule extends Controlable {
       iteration: row["iteration"],
       status: ScheduleStatus.parse(row["status"]),
       entryId: row["entry_id"],
-      vaultId: row["vault_id"],
+      journalId: row["journal_id"],
       additionId: row["addition_id"],
       categoryId: row["category_id"],
       dueAt: DateTime.parse(row["due_at"]),
@@ -123,7 +123,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      vaultId: vaultId,
+      journalId: journalId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -142,7 +142,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      vaultId: vaultId,
+      journalId: journalId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -161,7 +161,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      vaultId: vaultId,
+      journalId: journalId,
       additionId: additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -191,9 +191,9 @@ class Schedule extends Controlable {
     return this;
   }
 
-  Schedule withVault(Vault? vault) {
-    if (vault != null) {
-      this.vault = vault;
+  Schedule withJournal(Journal? journal) {
+    if (journal != null) {
+      this.journal = journal;
     }
 
     return this;
@@ -232,7 +232,7 @@ class Schedule extends Controlable {
       iteration: iteration,
       status: status,
       entryId: entryId,
-      vaultId: vaultId,
+      journalId: journalId,
       additionId: field == "additionId" ? null : additionId,
       categoryId: categoryId,
       dueAt: dueAt,
@@ -249,7 +249,7 @@ class Schedule extends Controlable {
     int? iteration,
     ScheduleStatus? status,
     String? entryId,
-    String? vaultId,
+    String? journalId,
     String? additionId,
     String? categoryId,
     DateTime? dueAt,
@@ -263,7 +263,7 @@ class Schedule extends Controlable {
       iteration: iteration ?? this.iteration,
       status: status ?? this.status,
       entryId: entryId ?? this.entryId,
-      vaultId: vaultId ?? this.vaultId,
+      journalId: journalId ?? this.journalId,
       additionId: additionId ?? this.additionId,
       categoryId: categoryId ?? this.categoryId,
       dueAt: dueAt ?? this.dueAt,

@@ -3,12 +3,12 @@ import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/growable_multi_select_form_field.dart';
 import 'package:bandha/common/widgets/growable_select_form_field.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/tags/entities/category.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/tags/entities/label.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/vaults/providers/vault_provider.dart';
+import 'package:bandha/features/journals/providers/journal_provider.dart';
 import 'package:bandha/features/tags/providers/category_provider.dart';
 import 'package:bandha/features/schedules/providers/schedule_provider.dart';
 import 'package:bandha/features/tags/providers/label_provider.dart';
@@ -59,7 +59,7 @@ class ScheduleEditor extends StatelessWidget {
             cycle: _d["cycle"],
             status: _d["status"],
             categoryId: _d["category_id"],
-            vaultId: _d["vault_id"],
+            journalId: _d["journal_id"],
             dueAt: _d["due_at"].dateTime,
             labelIds: _d["label_ids"],
           );
@@ -75,7 +75,7 @@ class ScheduleEditor extends StatelessWidget {
             status: _d["status"],
             cycle: _d["cycle"],
             categoryId: _d["category_id"],
-            vaultId: _d["vault_id"],
+            journalId: _d["journal_id"],
             dueAt: _d["due_at"].dateTime,
             labelIds: _d["label_ids"],
           );
@@ -98,7 +98,7 @@ class ScheduleEditor extends StatelessWidget {
     final theme = Theme.of(context);
     final scheduleProvider = context.read<ScheduleProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-    final vaultProvider = context.watch<VaultProvider>();
+    final journalProvider = context.watch<JournalProvider>();
     final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
@@ -140,7 +140,7 @@ class ScheduleEditor extends StatelessWidget {
           child: FutureBuilder(
             future: Future.wait([
               categoryProvider.search(),
-              vaultProvider.search(),
+              journalProvider.search(),
               labelProvider.search(),
               if (id != null) scheduleProvider.get(id!),
             ]),
@@ -158,7 +158,7 @@ class ScheduleEditor extends StatelessWidget {
               }
 
               final categories = snapshot.data![0] as List<Category>;
-              final vaults = snapshot.data![1] as List<Vault>;
+              final journals = snapshot.data![1] as List<Journal>;
               final labels = snapshot.data![2] as List<Label>;
               final schedule = id != null
                   ? snapshot.data![3] as Schedule
@@ -295,19 +295,19 @@ class ScheduleEditor extends StatelessWidget {
                     GrowableSelectFormField(
                       readOnly: readOnly,
                       decoration: InputStyles.field(
-                        labelText: "Vault",
-                        hintText: "Select vault...",
+                        labelText: "Journal",
+                        hintText: "Select journal...",
                       ),
-                      actionPath: "/vaults/new",
-                      actionText: "New vault",
-                      options: vaults.map((i) {
+                      actionPath: "/journals/new",
+                      actionText: "New journal",
+                      options: journals.map((i) {
                         return SelectItem(
                           value: i.id,
                           label: "${i.name} — ${i.holderName}",
                         );
                       }).toList(),
-                      initialValue: _d["vault_id"] ?? schedule?.vaultId,
-                      onSaved: (value) => _d["vault_id"] = value,
+                      initialValue: _d["journal_id"] ?? schedule?.journalId,
+                      onSaved: (value) => _d["journal_id"] = value,
                     ),
                     if (!readOnly || !isEmpty(schedule?.labels))
                       GrowableMultiSelectFormField<String>(

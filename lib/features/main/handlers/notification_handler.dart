@@ -37,14 +37,14 @@ class NotificationHandler {
       switch (controller.type) {
         case ControllerType.entry:
           return navigate("/entries/${controller.id}/detail");
-        case ControllerType.settlement:
-          return navigate("/settlements/${controller.id}/detail");
+        case ControllerType.obligation:
+          return navigate("/obligations/${controller.id}/detail");
         case ControllerType.budget:
           return navigate("/budgets/${controller.id}/detail");
         case ControllerType.schedule:
           return navigate("/schedules/${controller.id}/detail");
-        case ControllerType.pool:
-          return navigate("/pools/${controller.id}/detail");
+        case ControllerType.fund:
+          return navigate("/funds/${controller.id}/detail");
         case ControllerType.transfer:
           return navigate("/transfers/${controller.id}/detail");
         default:

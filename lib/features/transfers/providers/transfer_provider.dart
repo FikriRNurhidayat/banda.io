@@ -19,8 +19,8 @@ class TransferProvider extends ChangeNotifier {
     required double debitAmount,
     required double creditAmount,
     required DateTime issuedAt,
-    required String debitVaultId,
-    required String creditVaultId,
+    required String debitJournalId,
+    required String creditJournalId,
     String? note,
     double? fee,
   }) {
@@ -30,8 +30,8 @@ class TransferProvider extends ChangeNotifier {
           creditAmount: creditAmount,
           issuedAt: issuedAt,
           fee: fee,
-          debitVaultId: debitVaultId,
-          creditVaultId: creditVaultId,
+          debitJournalId: debitJournalId,
+          creditJournalId: creditJournalId,
           note: note,
         )
         .then((_) => notifyListeners());
@@ -42,8 +42,8 @@ class TransferProvider extends ChangeNotifier {
     required double debitAmount,
     required double creditAmount,
     required DateTime issuedAt,
-    required String debitVaultId,
-    required String creditVaultId,
+    required String debitJournalId,
+    required String creditJournalId,
     String? note,
     double? fee,
   }) {
@@ -54,8 +54,8 @@ class TransferProvider extends ChangeNotifier {
           creditAmount: creditAmount,
           fee: fee,
           issuedAt: issuedAt,
-          debitVaultId: debitVaultId,
-          creditVaultId: creditVaultId,
+          debitJournalId: debitJournalId,
+          creditJournalId: creditJournalId,
           note: note,
         )
         .then((_) => notifyListeners());

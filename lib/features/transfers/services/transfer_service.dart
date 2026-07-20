@@ -7,19 +7,19 @@ import 'package:bandha/features/tags/types/read_only_label.dart';
 import 'package:bandha/features/transfers/entities/transfer.dart';
 import 'package:bandha/features/transfers/repositories/transfer_repository.dart';
 import 'package:bandha/common/helpers/type_helper.dart';
-import 'package:bandha/features/vaults/repositories/vault_repository.dart';
+import 'package:bandha/features/journals/repositories/journal_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 
 class TransferService extends Service {
-  final VaultRepository vaultRepository;
+  final JournalRepository journalRepository;
   final CategoryRepository categoryRepository;
   final EntryRepository entryRepository;
   final TransferRepository transferRepository;
   final LabelRepository labelRepository;
 
   TransferService({
-    required this.vaultRepository,
+    required this.journalRepository,
     required this.categoryRepository,
     required this.entryRepository,
     required this.transferRepository,
@@ -31,16 +31,16 @@ class TransferService extends Service {
     required double creditAmount,
     required double? fee,
     required DateTime issuedAt,
-    required String debitVaultId,
-    required String creditVaultId,
+    required String debitJournalId,
+    required String creditJournalId,
     String? note,
   }) {
     return work(() async {
       final category = await categoryRepository.getByName(
         ReadOnlyCategory.transfer.label,
       );
-      final debitVault = await vaultRepository.get(debitVaultId);
-      final creditVault = await vaultRepository.get(creditVaultId);
+      final debitJournal = await journalRepository.get(debitJournalId);
+      final creditJournal = await journalRepository.get(creditJournalId);
       final [creditLabel, debitLabel, feeLabel] =
           await _readOnlyLabels();
 
@@ -50,7 +50,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        vaultId: creditVault.id,
+        journalId: creditJournal.id,
         categoryId: category.id,
       );
 
@@ -60,7 +60,7 @@ class TransferService extends Service {
         status: EntryStatus.done,
         issuedAt: issuedAt,
         readonly: true,
-        vaultId: debitVault.id,
+        journalId: debitJournal.id,
         categoryId: category.id,
       );
 
@@ -71,7 +71,7 @@ class TransferService extends Service {
               status: EntryStatus.done,
               issuedAt: issuedAt,
               readonly: true,
-              vaultId: creditVault.id,
+              journalId: creditJournal.id,
               categoryId: category.id,
             ).annotate("type", "fee")
           : null;
@@ -82,10 +82,10 @@ class TransferService extends Service {
         creditAmount: creditAmount,
         feeAmount: fee,
         debitId: debit.id,
-        debitVaultId: debitVault.id,
+        debitJournalId: debitJournal.id,
         feeId: exchange?.id,
         creditId: credit.id,
-        creditVaultId: creditVault.id,
+        creditJournalId: creditJournal.id,
         issuedAt: issuedAt,
       );
 
@@ -96,8 +96,8 @@ class TransferService extends Service {
           .withDebit(
             debit.controlledBy(transfer).withLabels([debitLabel]),
           )
-          .withCreditVault(creditVault)
-          .withDebitVault(debitVault)
+          .withCreditJournal(creditJournal)
+          .withDebitJournal(debitJournal)
           .withFee(
             exchange?.controlledBy(transfer).withLabels([feeLabel]),
           );
@@ -116,20 +116,20 @@ class TransferService extends Service {
     required double creditAmount,
     required double? fee,
     required DateTime issuedAt,
-    required String debitVaultId,
-    required String creditVaultId,
+    required String debitJournalId,
+    required String creditJournalId,
     String? note,
   }) {
     return work(() async {
       var transfer = await transferRepository
           .withEntries()
-          .withVaults()
+          .withJournals()
           .get(id);
 
       await abortTransfer(transfer);
 
-      final debitVault = await vaultRepository.get(debitVaultId);
-      final creditVault = await vaultRepository.get(creditVaultId);
+      final debitJournal = await journalRepository.get(debitJournalId);
+      final creditJournal = await journalRepository.get(creditJournalId);
       final [creditLabel, debitLabel, feeLabel] =
           await _readOnlyLabels();
 
@@ -140,7 +140,7 @@ class TransferService extends Service {
             status: EntryStatus.done,
             issuedAt: issuedAt,
             readonly: true,
-            vaultId: creditVault.id,
+            journalId: creditJournal.id,
           )
           .withLabels([creditLabel]);
 
@@ -155,7 +155,7 @@ class TransferService extends Service {
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
                         readonly: true,
-                        vaultId: creditVault.id,
+                        journalId: creditJournal.id,
                         categoryId: credit.categoryId,
                       )
                     : Entry.create(
@@ -164,7 +164,7 @@ class TransferService extends Service {
                         status: EntryStatus.done,
                         issuedAt: issuedAt,
                         readonly: true,
-                        vaultId: creditVault.id,
+                        journalId: creditJournal.id,
                         categoryId: credit.categoryId,
                       ).controlledBy(transfer))
                 .withLabels([feeLabel])
@@ -178,7 +178,7 @@ class TransferService extends Service {
             status: EntryStatus.done,
             issuedAt: issuedAt,
             readonly: true,
-            vaultId: debitVault.id,
+            journalId: debitJournal.id,
           )
           .withLabels([debitLabel]);
 
@@ -189,17 +189,17 @@ class TransferService extends Service {
             creditAmount: creditAmount,
             feeAmount: fee,
             debitId: debit.id,
-            debitVaultId: debitVault.id,
+            debitJournalId: debitJournal.id,
             creditId: credit.id,
-            creditVaultId: creditVault.id,
+            creditJournalId: creditJournal.id,
             issuedAt: issuedAt,
           )
           .setFeeId(exchange?.id)
           .withFee(exchange)
           .withDebit(debit)
           .withCredit(credit)
-          .withDebitVault(debitVault)
-          .withCreditVault(creditVault);
+          .withDebitJournal(debitJournal)
+          .withCreditJournal(creditJournal);
 
       await transferRepository.save(transfer);
       await entryRepository.withAnnotations().withLabels().bulkSave(
@@ -216,7 +216,7 @@ class TransferService extends Service {
     return work(() async {
       final transfer = await transferRepository
           .withEntries()
-          .withVaults()
+          .withJournals()
           .get(id);
       await abortTransfer(transfer);
       await transferRepository.delete(transfer.id);
@@ -225,24 +225,24 @@ class TransferService extends Service {
   }
 
   Future<Transfer?> get(String id) {
-    return transferRepository.withEntries().withVaults().get(id);
+    return transferRepository.withEntries().withJournals().get(id);
   }
 
   Future<List<Transfer>> search() {
-    return transferRepository.withEntries().withVaults().search();
+    return transferRepository.withEntries().withJournals().search();
   }
 
   Future<void> abortTransfer(Transfer transfer) async {
-    await vaultRepository.bulkSave([
-      transfer.debitVault.revokeEntry(transfer.debit),
-      transfer.creditVault.revokeEntries(transfer.credits),
+    await journalRepository.bulkSave([
+      transfer.debitJournal.revokeEntry(transfer.debit),
+      transfer.creditJournal.revokeEntries(transfer.credits),
     ]);
   }
 
   Future<void> executeTransfer(Transfer transfer) async {
-    await vaultRepository.bulkSave([
-      transfer.debitVault.applyEntry(transfer.debit),
-      transfer.creditVault.applyEntries(transfer.credits),
+    await journalRepository.bulkSave([
+      transfer.debitJournal.applyEntry(transfer.debit),
+      transfer.creditJournal.applyEntries(transfer.credits),
     ]);
   }
 

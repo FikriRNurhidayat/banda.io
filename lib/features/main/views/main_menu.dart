@@ -5,13 +5,13 @@ class MainMenu extends StatelessWidget {
 
   final List<List<String>> menu = [
     ["Entries", "/entries"],
+    ["Funds", "/funds"],
     ["Information", "/info"],
-    ["Pools", "/pools"],
+    ["Journals", "/journals"],
+    ["Obligations", "/obligations"],
     ["Schedules", "/schedules"],
-    ["Settlements", "/settlements"],
     ["Tools", "/tools"],
     ["Transfers", "/transfers"],
-    ["Vaults", "/vaults"],
   ];
 
   @override

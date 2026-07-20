@@ -4,7 +4,7 @@ enum ReadOnlyLabel {
   credit('Credit'),
   debit('Debit'),
   disbursement('Disbursement'),
-  settlement('Settlement'),
+  obligation('Obligation'),
   payment('Payment'),
   withdraw('Withdraw'),
   retracted('Retracted'),

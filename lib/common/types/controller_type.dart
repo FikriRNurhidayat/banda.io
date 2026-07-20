@@ -1,10 +1,10 @@
 enum ControllerType {
   entry('Entry'),
   budget('Budget'),
-  pool('Pool'),
+  fund('Fund'),
   transfer('Transfer'),
-  settlement('Settlement'),
-  settlementPayment('Settlement Payment'),
+  obligation('Obligation'),
+  obligationPayment('Obligation Payment'),
   schedule('Schedule'),
   purchase('Purchase'),
   unknown('Unknown');

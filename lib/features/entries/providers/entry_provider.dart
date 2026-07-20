@@ -39,7 +39,7 @@ class EntryProvider extends ChangeNotifier {
     required EntryType type,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     List<String>? labelIds,
   }) async {
@@ -49,7 +49,7 @@ class EntryProvider extends ChangeNotifier {
       type: type,
       status: status,
       timestamp: issuedAt,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       labelIds: labelIds,
     );
@@ -63,7 +63,7 @@ class EntryProvider extends ChangeNotifier {
     required EntryType type,
     required EntryStatus status,
     required DateTime issuedAt,
-    required String vaultId,
+    required String journalId,
     required String categoryId,
     List<String>? labelIds,
   }) async {
@@ -74,7 +74,7 @@ class EntryProvider extends ChangeNotifier {
       type: type,
       status: status,
       timestamp: issuedAt,
-      vaultId: vaultId,
+      journalId: journalId,
       categoryId: categoryId,
       labelIds: labelIds,
     );

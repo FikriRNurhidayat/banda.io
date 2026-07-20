@@ -1,7 +1,7 @@
 import 'package:bandha/common/repositories/repository.dart';
 import 'package:bandha/common/types/pair.dart';
 import 'package:bandha/common/types/specification.dart';
-import 'package:bandha/features/vaults/entities/vault.dart';
+import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/schedules/entities/schedule.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/tags/entities/category.dart';
@@ -18,8 +18,8 @@ class ScheduleRepository extends Repository {
     return ScheduleRepository(db, withArgs: withArgs);
   }
 
-  ScheduleRepository withVault() {
-    withArgs.add("vault");
+  ScheduleRepository withJournal() {
+    withArgs.add("journal");
     return ScheduleRepository(db, withArgs: withArgs);
   }
 
@@ -45,7 +45,7 @@ class ScheduleRepository extends Repository {
   save(Schedule schedule) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO schedules (id, note, amount, fee, cycle, iteration, status, category_id, entry_id, addition_id, vault_id, due_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, cycle = excluded.cycle, iteration = excluded.iteration, status = excluded.status, category_id = excluded.category_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, vault_id = excluded.vault_id, due_at = excluded.due_at, updated_at = excluded.updated_at",
+      "INSERT INTO schedules (id, note, amount, fee, cycle, iteration, status, category_id, entry_id, addition_id, journal_id, due_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, cycle = excluded.cycle, iteration = excluded.iteration, status = excluded.status, category_id = excluded.category_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, journal_id = excluded.journal_id, due_at = excluded.due_at, updated_at = excluded.updated_at",
       [
         schedule.id,
         schedule.note,
@@ -57,7 +57,7 @@ class ScheduleRepository extends Repository {
         schedule.categoryId,
         schedule.entryId,
         schedule.additionId,
-        schedule.vaultId,
+        schedule.journalId,
         schedule.dueAt.toIso8601String(),
         schedule.createdAt.toIso8601String(),
         schedule.updatedAt.toIso8601String(),
@@ -112,8 +112,8 @@ class ScheduleRepository extends Repository {
       rows = await populateLabels(rows);
     }
 
-    if (withArgs.contains("vault")) {
-      rows = await populateVault(rows);
+    if (withArgs.contains("journal")) {
+      rows = await populateJournal(rows);
     }
 
     if (withArgs.contains("category")) {
@@ -130,7 +130,7 @@ class ScheduleRepository extends Repository {
 
       return Schedule.row(r)
           .withLabels(Label.tryRows(r["labels"]))
-          .withVault(Vault.tryRow(r["vault"]))
+          .withJournal(Journal.tryRow(r["journal"]))
           .withCategory(Category.tryRow(r["category"]))
           .withEntry(entry)
           .withAddition(addition);

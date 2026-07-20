@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS entries (
     status TEXT NOT NULL,
     readonly BOOLEAN DEFAULT FALSE,
     category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-    vault_id TEXT NOT NULL REFERENCES vaults (id) ON DELETE CASCADE,
+    journal_id TEXT NOT NULL REFERENCES journals (id) ON DELETE CASCADE,
     controller_id TEXT,
     controller_type TEXT,
     issued_at TEXT NOT NULL,
