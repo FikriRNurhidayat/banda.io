@@ -55,13 +55,14 @@ class FundTile extends StatelessWidget {
         Row(
           spacing: 8,
           children: [
-            labelsBuilder(
-              context,
-              fund.labels,
-              style: theme.textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.w500,
+            if (fund.labels.isNotEmpty)
+              labelsBuilder(
+                context,
+                fund.labels,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
             ...statusBuilder(context),
           ],
         ),

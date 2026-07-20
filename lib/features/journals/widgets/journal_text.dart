@@ -13,6 +13,8 @@ class JournalText extends StatelessWidget {
     return Text(
       journal.displayName(),
       overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+      softWrap: false,
       style: theme.textTheme.bodySmall,
     );
   }

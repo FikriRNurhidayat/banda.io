@@ -1,8 +1,11 @@
 import 'package:bandha/common/decorations/input_styles.dart';
 import 'package:bandha/common/helpers/alert_helper.dart';
 import 'package:bandha/common/widgets/amount_form_field.dart';
+import 'package:bandha/common/widgets/select_form_field.dart';
 import 'package:bandha/features/journals/entities/journal.dart';
 import 'package:bandha/features/journals/providers/journal_provider.dart';
+import 'package:bandha/features/assets/entities/asset.dart';
+import 'package:bandha/features/assets/providers/asset_provider.dart';
 import 'package:bandha/common/types/form_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +39,7 @@ class JournalEditor extends StatelessWidget {
             name: _d["name"],
             holderName: _d["holderName"],
             balance: _d["balance"] ?? 0,
+            assetId: _d["assetId"],
           );
         } else {
           await journalProvider.update(
@@ -43,6 +47,7 @@ class JournalEditor extends StatelessWidget {
             name: _d["name"],
             holderName: _d["holderName"],
             balance: _d["balance"] ?? 0,
+            assetId: _d["assetId"],
           );
         }
         navigator.pop();
@@ -61,6 +66,7 @@ class JournalEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final journalProvider = context.read<JournalProvider>();
+    final assetProvider = context.read<AssetProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +99,10 @@ class JournalEditor extends StatelessWidget {
         ],
       ),
       body: FutureBuilder(
-        future: Future.wait([if (id != null) journalProvider.get(id!)]),
+        future: Future.wait([
+          if (id != null) journalProvider.get(id!),
+          assetProvider.search(),
+        ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -108,6 +117,9 @@ class JournalEditor extends StatelessWidget {
           }
 
           final journal = id != null ? snapshot.data![0] as Journal : null;
+          final List<Asset> assets = id != null
+              ? snapshot.data![1] as List<Asset>
+              : snapshot.data![0] as List<Asset>;
 
           return Padding(
             padding: EdgeInsets.all(16),
@@ -149,6 +161,25 @@ class JournalEditor extends StatelessWidget {
                     initialValue: _d["balance"] ?? journal?.balance,
                     onSaved: (value) => _d["balance"] = value ?? 0,
                   ),
+                  if (!readOnly)
+                    SelectFormField<String>(
+                      readOnly: readOnly,
+                      decoration: InputStyles.field(
+                        labelText: "Asset",
+                        hintText: "Select asset...",
+                      ),
+                      initialValue: _d["assetId"] ?? journal?.assetId,
+                      onSaved: (value) => _d["assetId"] = value,
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Asset is required"
+                          : null,
+                      options: assets.map((a) {
+                        return SelectItem(
+                          label: a.displayName(),
+                          value: a.id,
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),

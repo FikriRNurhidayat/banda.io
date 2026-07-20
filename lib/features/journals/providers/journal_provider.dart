@@ -15,9 +15,15 @@ class JournalProvider extends ChangeNotifier {
     required String name,
     required String holderName,
     required double balance,
+    required String assetId,
   }) {
     return journalService
-        .create(name: name, holderName: holderName, balance: balance)
+        .create(
+          name: name,
+          holderName: holderName,
+          balance: balance,
+          assetId: assetId,
+        )
         .then((_) => notifyListeners());
   }
 
@@ -26,6 +32,7 @@ class JournalProvider extends ChangeNotifier {
     required String name,
     required String holderName,
     required double balance,
+    String? assetId,
   }) {
     return journalService
         .update(
@@ -33,6 +40,7 @@ class JournalProvider extends ChangeNotifier {
           name: name,
           holderName: holderName,
           balance: balance,
+          assetId: assetId,
         )
         .then((_) => notifyListeners());
   }

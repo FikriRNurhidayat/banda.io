@@ -142,6 +142,7 @@ class EntryTile extends StatelessWidget {
   }
 
   entryBuilder(BuildContext context, Entry entry) {
+    final theme = Theme.of(context);
     return tileBuilder(
       context,
       onLongPress: () {

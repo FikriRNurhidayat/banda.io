@@ -42,6 +42,9 @@ import 'package:bandha/features/notifications/managers/notification_manager.dart
 import 'package:bandha/notification.dart';
 import 'package:bandha/features/funds/providers/fund_filter_provider.dart';
 import 'package:bandha/features/notifications/repositories/notification_repository.dart';
+import 'package:bandha/features/assets/repositories/asset_repository.dart';
+import 'package:bandha/features/assets/services/asset_service.dart';
+import 'package:bandha/features/assets/providers/asset_provider.dart';
 
 makeProvider({
   required Widget child,
@@ -62,6 +65,7 @@ makeProvider({
   final partyRepository = PartyRepository(dbManager);
   final fundRepository = FundRepository(dbManager);
   final scheduleRepository = ScheduleRepository(dbManager);
+  final assetRepository = AssetRepository(dbManager);
 
   final notificationManager = NotificationManager(
     notificationRepository: notificationRepository,
@@ -78,6 +82,7 @@ makeProvider({
     journalRepository: journalRepository,
     entryRepository: entryRepository,
     categoryRepository: categoryRepository,
+    assetRepository: assetRepository,
   );
   final transferService = TransferService(
     journalRepository: journalRepository,
@@ -124,6 +129,9 @@ makeProvider({
   );
 
   final toolService = ToolService(dbManager);
+  final assetService = AssetService(
+    assetRepository: assetRepository,
+  );
 
   await notificationManager.init(
     notificationHandler,
@@ -164,6 +172,7 @@ makeProvider({
     ChangeNotifierProvider(create: (_) => ScheduleFilterProvider()),
     ChangeNotifierProvider(create: (_) => TransferFilterProvider()),
     ChangeNotifierProvider(create: (_) => JournalFilterProvider()),
+    ChangeNotifierProvider(create: (_) => AssetProvider(assetService)),
   ];
 
   return MultiProvider(providers: providers, child: child);

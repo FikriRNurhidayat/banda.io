@@ -5,28 +5,33 @@ import 'package:bandha/features/journals/repositories/journal_repository.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
 import 'package:bandha/features/entries/repositories/entry_repository.dart';
 import 'package:bandha/features/tags/repositories/category_repository.dart';
+import 'package:bandha/features/assets/repositories/asset_repository.dart';
 
 class JournalService extends Service {
   final JournalRepository journalRepository;
   final EntryRepository entryRepository;
   final CategoryRepository categoryRepository;
+  final AssetRepository assetRepository;
 
   JournalService({
     required this.journalRepository,
     required this.entryRepository,
     required this.categoryRepository,
+    required this.assetRepository,
   });
 
   Future<Journal> create({
     required String name,
     required String holderName,
     required double balance,
+    required String assetId,
   }) {
     return work<Journal>(() async {
       final journal = Journal.create(
         name: name,
         holderName: holderName,
         balance: balance,
+        assetId: assetId,
       );
 
       await journalRepository.save(journal);
@@ -56,6 +61,7 @@ class JournalService extends Service {
     required String name,
     required String holderName,
     required double balance,
+    String? assetId,
   }) {
     return work(() async {
       final journal = await journalRepository.get(id);
@@ -81,17 +87,18 @@ class JournalService extends Service {
           name: name,
           holderName: holderName,
           balance: balance,
+          assetId: assetId,
         ),
       );
     });
   }
 
   search() {
-    return journalRepository.search();
+    return journalRepository.withAsset().search();
   }
 
   get(String id) {
-    return journalRepository.get(id);
+    return journalRepository.withAsset().get(id);
   }
 
   delete(String id) {

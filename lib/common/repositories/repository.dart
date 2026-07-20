@@ -65,6 +65,7 @@ class Repository {
     final List<String> categoryIds = mainRows
         .map((row) => row["category_id"] as String)
         .toList();
+
     final categoryRows = await getCategoryByIds(categoryIds);
 
     return mainRows.map((mainRow) {
@@ -83,12 +84,32 @@ class Repository {
         .toList();
     final journalRows = await getJournalByIds(journalIds);
 
+    final assetIds = journalRows
+        .map((r) => r["asset_id"] as String?)
+        .whereType<String>()
+        .toList();
+    final assetRows = assetIds.isNotEmpty
+        ? await getAssetByIds(assetIds)
+        : <Map>[];
+
     return rows.map((mainRow) {
+      final journalRow = journalRows.firstWhere(
+        (journalRow) => mainRow["journal_id"] == journalRow["id"],
+      );
+      final assetId = journalRow["asset_id"] as String? ?? "";
+      final assetRow = assetId.isNotEmpty
+          ? assetRows.cast<Map?>().firstWhere(
+              (r) => r?["id"] == assetId,
+              orElse: () => null,
+            )
+          : null;
+
       return {
         ...mainRow,
-        "journal": journalRows.firstWhere(
-          (journalRow) => mainRow["journal_id"] == journalRow["id"],
-        ),
+        "journal": {
+          ...journalRow,
+          if (assetRow != null) "asset": assetRow,
+        },
       };
     }).toList();
   }
@@ -130,6 +151,14 @@ class Repository {
     final client = await getClient();
     return client.select(
       "SELECT * FROM journals WHERE id IN (${ids.map((_) => "?").join(", ")})",
+      ids,
+    );
+  }
+
+  Future<ResultSet> getAssetByIds(List<String> ids) async {
+    final client = await getClient();
+    return client.select(
+      "SELECT * FROM assets WHERE id IN (${ids.map((_) => "?").join(", ")})",
       ids,
     );
   }

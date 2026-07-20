@@ -94,6 +94,7 @@ class ScheduleTile extends StatelessWidget {
   }
 
   scheduleBuilder(BuildContext context) {
+    final theme = Theme.of(context);
     return tileBuilder(
       context,
       onTap: () {
