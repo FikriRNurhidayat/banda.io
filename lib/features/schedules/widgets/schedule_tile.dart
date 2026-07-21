@@ -55,20 +55,12 @@ class ScheduleTile extends StatelessWidget {
   }
 
   infoBuilder(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         JournalText(schedule.journal),
         DateTimeText(schedule.dueAt),
-        if (!isNull(schedule.note) && schedule.note!.isNotEmpty)
-          Text(
-            schedule.note!,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall,
-          ),
         labelsBuilder(context, schedule.labels),
       ],
     );

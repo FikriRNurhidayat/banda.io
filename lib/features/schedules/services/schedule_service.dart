@@ -27,7 +27,7 @@ class ScheduleService extends Service {
   create({
     String? note,
     required double amount,
-    double? fee,
+    double? feeAmount,
     required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
@@ -58,9 +58,9 @@ class ScheduleService extends Service {
               .withLabels(labels)
               .annotate("iteration", 1);
 
-      final addition = fee != null
+      final fee = feeAmount != null
           ? Entry.readOnly(
-                  amount: fee * -1,
+                  amount: feeAmount * -1,
                   status: status.entryStatus,
                   issuedAt: dueAt,
                   journalId: journal.id,
@@ -73,26 +73,26 @@ class ScheduleService extends Service {
                 .annotate("iteration", 1)
           : null;
 
-      if (addition != null) {
-        entry = entry.annotate("addition_id", addition.id);
+      if (fee != null) {
+        entry = entry.annotate("fee_id", fee.id);
       }
 
       final schedule =
           Schedule.create(
                 note: note,
                 amount: amount * sign,
-                fee: fee != null ? fee * sign : null,
+                feeAmount: feeAmount != null ? feeAmount * sign : null,
                 cycle: cycle,
                 status: status,
                 categoryId: category.id,
                 journalId: journal.id,
                 entryId: entry.id,
-                additionId: addition?.id,
+                feeId: fee?.id,
                 dueAt: dueAt,
               )
               .withLabels(labels)
               .withEntry(entry)
-              .withAddition(addition)
+              .withFee(fee)
               .withJournal(journal)
               .withCategory(category);
 
@@ -122,7 +122,7 @@ class ScheduleService extends Service {
     String id, {
     String? note,
     required double amount,
-    double? fee,
+    double? feeAmount,
     required EntryType type,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
@@ -170,19 +170,19 @@ class ScheduleService extends Service {
           .withJournal(journal)
           .withLabels(labels);
 
-      final additionId = schedule.additionId;
-      final additionRemoved = schedule.hasAddition && isZero(fee);
-      final addition = fee != null
-          ? (schedule.hasAddition
-                    ? schedule.addition!.copyWith(
-                        amount: fee * -1,
+      final feeId = schedule.feeId;
+      final feeRemoved = schedule.hasFee && isZero(feeAmount);
+      final fee = feeAmount != null
+          ? (schedule.hasFee
+                    ? schedule.fee!.copyWith(
+                        amount: feeAmount * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
                         journalId: journal.id,
                         categoryId: category.id,
                       )
                     : Entry.readOnly(
-                        amount: fee * -1,
+                        amount: feeAmount * -1,
                         status: status.entryStatus,
                         issuedAt: dueAt,
                         journalId: journal.id,
@@ -194,8 +194,8 @@ class ScheduleService extends Service {
                 .annotate("entry_id", entry.id)
           : null;
 
-      if (addition != null) {
-        entry = entry.annotate("addition_id", addition.id);
+      if (fee != null) {
+        entry = entry.annotate("fee_id", fee.id);
       }
 
       schedule = schedule.copyWith(
@@ -211,11 +211,10 @@ class ScheduleService extends Service {
 
       schedule = schedule
           .withNote(note)
-          .withFee(fee != null ? fee * sign : fee)
-          .withAdditionId(addition?.id)
+          .withFee(fee)
           .withLabels(labels)
           .withEntry(entry)
-          .withAddition(addition)
+          .withFee(fee)
           .withJournal(journal)
           .withCategory(category);
 
@@ -237,8 +236,8 @@ class ScheduleService extends Service {
       await scheduleRepository.save(schedule);
       await scheduleRepository.saveLabels(schedule);
 
-      if (additionRemoved) {
-        await entryRepository.delete(additionId!);
+      if (feeRemoved) {
+        await entryRepository.delete(feeId!);
       }
 
       return schedule;
@@ -325,7 +324,8 @@ class ScheduleService extends Service {
         entry.annotations!["previous_id"],
       );
 
-      final additionId = previousEntry.annotations!["addition_id"];
+      final feeId = previousEntry.annotations!["fee_id"];
+      final fee = await entryRepository.get(feeId);
 
       await scheduleRepository.save(
         schedule
@@ -335,7 +335,7 @@ class ScheduleService extends Service {
               status: ScheduleStatus.paid,
               dueAt: schedule.previousTime,
             )
-            .withAdditionId(additionId),
+            .withFee(fee),
       );
       await entryRepository.deleteByIds(schedule.entryIds);
     });
@@ -379,13 +379,13 @@ class ScheduleService extends Service {
               .annotate("iteration", iteration);
 
       final entry = schedule.entry.annotate("next_id", newEntry.id);
-      final addition = schedule.additionId != null
-          ? schedule.addition!.annotate("next_id", newEntry.id)
+      final fee = schedule.feeId != null
+          ? schedule.fee!.annotate("next_id", newEntry.id)
           : null;
 
-      final newAddition = schedule.fee != null
+      final newFee = schedule.feeAmount != null
           ? Entry.readOnly(
-                  amount: schedule.fee!,
+                  amount: schedule.feeAmount!,
                   status: EntryStatus.pending,
                   issuedAt: schedule.nextTime,
                   journalId: schedule.journalId,
@@ -400,8 +400,8 @@ class ScheduleService extends Service {
                 .annotate("iteration", iteration)
           : null;
 
-      if (newAddition != null) {
-        newEntry = newEntry.annotate("addition_id", newAddition.id);
+      if (newFee != null) {
+        newEntry = newEntry.annotate("fee_id", newFee.id);
       }
 
       schedule = schedule
@@ -409,17 +409,17 @@ class ScheduleService extends Service {
             status: ScheduleStatus.pending,
             entryId: newEntry.id,
             iteration: iteration,
-            additionId: newAddition?.id,
+            feeId: newFee?.id,
             dueAt: schedule.nextTime,
           )
           .withCategory(schedule.category)
           .withJournal(schedule.journal)
           .withLabels(schedule.labels)
           .withEntry(newEntry)
-          .withAddition(newAddition);
+          .withFee(newFee);
 
-      final entries = [entry, addition].whereType<Entry>();
-      final newEntries = [newEntry, newAddition].whereType<Entry>();
+      final entries = [entry, fee].whereType<Entry>();
+      final newEntries = [newEntry, newFee].whereType<Entry>();
 
       await entryRepository.withAnnotations().bulkSave(entries);
       await entryRepository.withLabels().withAnnotations().bulkSave(

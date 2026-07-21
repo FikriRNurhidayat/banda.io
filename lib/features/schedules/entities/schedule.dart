@@ -11,14 +11,14 @@ class Schedule extends Controlable {
   final String id;
   final String? note;
   final double amount;
-  final double? fee;
+  final double? feeAmount;
   final ScheduleCycle cycle;
   final int iteration;
   final ScheduleStatus status;
   final String categoryId;
   final String journalId;
   final String entryId;
-  final String? additionId;
+  final String? feeId;
   final DateTime dueAt;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -26,20 +26,20 @@ class Schedule extends Controlable {
   late final Category category;
   late final Journal journal;
   late final Entry entry;
-  late final Entry? addition;
+  late final Entry? fee;
   late final List<Label> labels;
 
   Schedule({
     required this.id,
     this.note,
     required this.amount,
-    this.fee,
+    this.feeAmount,
     required this.cycle,
     required this.iteration,
     required this.status,
     required this.entryId,
     required this.journalId,
-    this.additionId,
+    this.feeId,
     required this.categoryId,
     required this.dueAt,
     required this.createdAt,
@@ -65,13 +65,13 @@ class Schedule extends Controlable {
   factory Schedule.create({
     String? note,
     required double amount,
-    double? fee,
+    double? feeAmount,
     required ScheduleCycle cycle,
     required ScheduleStatus status,
     required String categoryId,
     required String journalId,
     required String entryId,
-    required String? additionId,
+    required String? feeId,
     required DateTime dueAt,
   }) {
     final now = DateTime.now();
@@ -80,14 +80,14 @@ class Schedule extends Controlable {
       id: Entity.getId(),
       note: note,
       amount: amount,
-      fee: fee,
+      feeAmount: feeAmount,
       cycle: cycle,
       iteration: 1,
       status: status,
       entryId: entryId,
       journalId: journalId,
       categoryId: categoryId,
-      additionId: additionId,
+      feeId: feeId,
       dueAt: dueAt,
       createdAt: now,
       updatedAt: now,
@@ -99,13 +99,13 @@ class Schedule extends Controlable {
       id: row["id"],
       note: row["note"],
       amount: row["amount"],
-      fee: row["fee"],
+      feeAmount: row["fee_amount"],
       cycle: ScheduleCycle.parse(row["cycle"]),
       iteration: row["iteration"],
       status: ScheduleStatus.parse(row["status"]),
       entryId: row["entry_id"],
       journalId: row["journal_id"],
-      additionId: row["addition_id"],
+      feeId: row["fee_id"],
       categoryId: row["category_id"],
       dueAt: DateTime.parse(row["due_at"]),
       createdAt: DateTime.parse(row["created_at"]),
@@ -118,13 +118,13 @@ class Schedule extends Controlable {
       id: id,
       note: note,
       amount: amount,
-      fee: fee,
+      feeAmount: feeAmount,
       cycle: cycle,
       iteration: iteration,
       status: status,
       entryId: entryId,
       journalId: journalId,
-      additionId: additionId,
+      feeId: feeId,
       categoryId: categoryId,
       dueAt: dueAt,
       createdAt: createdAt,
@@ -132,42 +132,9 @@ class Schedule extends Controlable {
     );
   }
 
-  Schedule withFee(double? fee) {
-    return Schedule(
-      id: id,
-      note: note,
-      amount: amount,
-      fee: fee,
-      cycle: cycle,
-      iteration: iteration,
-      status: status,
-      entryId: entryId,
-      journalId: journalId,
-      additionId: additionId,
-      categoryId: categoryId,
-      dueAt: dueAt,
-      createdAt: createdAt,
-      updatedAt: DateTime.now(),
-    );
-  }
-
-  Schedule withAdditionId(String? additionId) {
-    return Schedule(
-      id: id,
-      note: note,
-      amount: amount,
-      fee: fee,
-      cycle: cycle,
-      iteration: iteration,
-      status: status,
-      entryId: entryId,
-      journalId: journalId,
-      additionId: additionId,
-      categoryId: categoryId,
-      dueAt: dueAt,
-      createdAt: createdAt,
-      updatedAt: DateTime.now(),
-    );
+  Schedule withFee(Entry? fee) {
+    this.fee = fee;
+    return this;
   }
 
   Schedule withCategory(Category? category) {
@@ -183,11 +150,6 @@ class Schedule extends Controlable {
       this.entry = entry;
     }
 
-    return this;
-  }
-
-  Schedule withAddition(Entry? addition) {
-    this.addition = addition;
     return this;
   }
 
@@ -218,39 +180,20 @@ class Schedule extends Controlable {
     return labels.map((l) => l.id).toList();
   }
 
-  get hasAddition {
-    return addition != null;
-  }
-
-  Schedule unset(String field) {
-    return Schedule(
-      id: id,
-      note: field == "note" ? null : note,
-      amount: amount,
-      fee: field == "fee" ? null : fee,
-      cycle: cycle,
-      iteration: iteration,
-      status: status,
-      entryId: entryId,
-      journalId: journalId,
-      additionId: field == "additionId" ? null : additionId,
-      categoryId: categoryId,
-      dueAt: dueAt,
-      createdAt: createdAt,
-      updatedAt: DateTime.now(),
-    );
+  get hasFee {
+    return fee != null;
   }
 
   Schedule copyWith({
     String? note,
     double? amount,
-    double? fee,
+    double? feeAmount,
     ScheduleCycle? cycle,
     int? iteration,
     ScheduleStatus? status,
     String? entryId,
     String? journalId,
-    String? additionId,
+    String? feeId,
     String? categoryId,
     DateTime? dueAt,
   }) {
@@ -258,13 +201,13 @@ class Schedule extends Controlable {
       id: id,
       note: note ?? this.note,
       amount: amount ?? this.amount,
-      fee: fee ?? this.fee,
+      feeAmount: feeAmount ?? this.feeAmount,
       cycle: cycle ?? this.cycle,
       iteration: iteration ?? this.iteration,
       status: status ?? this.status,
       entryId: entryId ?? this.entryId,
       journalId: journalId ?? this.journalId,
-      additionId: additionId ?? this.additionId,
+      feeId: feeId ?? this.feeId,
       categoryId: categoryId ?? this.categoryId,
       dueAt: dueAt ?? this.dueAt,
       createdAt: createdAt,
@@ -281,7 +224,7 @@ class Schedule extends Controlable {
   }
 
   List<Entry> get entries {
-    return [entry, addition].whereType<Entry>().toList();
+    return [entry, fee].whereType<Entry>().toList();
   }
 
   List<String> get entryIds {
@@ -303,7 +246,7 @@ class Schedule extends Controlable {
       "iteration": iteration,
       "status": status,
       "entry_id": entryId,
-      "addition_id": additionId,
+      "fee_id": feeId,
       "category_id": categoryId,
       "label_ids": labelIds,
       "due_at": dueAt,

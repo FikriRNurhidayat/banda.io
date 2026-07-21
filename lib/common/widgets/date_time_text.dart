@@ -11,7 +11,7 @@ class DateTimeText extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Text(
-      "${DateHelper.formatSimpleDate(dateTime)} at ${DateHelper.formatTime(TimeOfDay.fromDateTime(dateTime))}",
+      "${DateHelper.formatDate(dateTime)} at ${DateHelper.formatTime(TimeOfDay.fromDateTime(dateTime))}",
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.bodySmall,
     );

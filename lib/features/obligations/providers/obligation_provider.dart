@@ -38,7 +38,7 @@ class ObligationProvider extends ChangeNotifier {
       partyId: partyId,
       journalId: journalId,
       labelIds: labelIds,
-      fee: fee ?? 0,
+      feeAmount: fee ?? 0,
       issuedAt: issuedAt,
       settledAt: settledAt,
     );
@@ -68,7 +68,7 @@ class ObligationProvider extends ChangeNotifier {
       partyId: partyId,
       journalId: journalId,
       labelIds: labelIds,
-      fee: fee,
+      feeAmount: fee,
       issuedAt: issuedAt,
       settledAt: settledAt,
     );

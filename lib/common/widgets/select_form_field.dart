@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class SelectItem<T> {
   final T value;
   final String label;
+  final String? sublabel;
   final WidgetStateProperty<Color?>? color;
   final Color? backgroundColor;
 
   SelectItem({
     required this.value,
     required this.label,
+    this.sublabel,
     this.backgroundColor,
     this.color,
   });
@@ -31,54 +33,69 @@ class SelectFormField<T> extends FormField<T> {
     bool readOnly = false,
   }) : super(
          builder: (state) {
-           List<Widget> chips = !readOnly
-               ? options.map((option) {
-                   final selected = state.value == option.value;
-                   return ChoiceChip(
-                         color: option.color,
-                         backgroundColor: option.backgroundColor,
-                         label: Text(option.label),
-                         selected: selected,
-                         onSelected: (!readOnly && enabled)
-                             ? (_) {
-                                 state.didChange(option.value);
-                                 onChanged?.call(option.value);
-                               }
-                             : null,
-                       )
-                       as Widget;
-                 }).toList()
-               : options
-                     .where((option) => state.value == option.value)
-                     .map((option) {
-                       return Text(option.label) as Widget;
-                     })
-                     .toList();
+           return Builder(
+             builder: (context) {
+               List<Widget> chips = !readOnly
+                   ? options.map((option) {
+                       final selected = state.value == option.value;
+                       final hasSub = option.sublabel != null;
 
-           if (actions != null) {
-             chips.addAll(actions);
-           }
+                       return ChoiceChip(
+                             color: option.color,
+                             backgroundColor: option.backgroundColor,
+                             label: hasSub
+                                 ? Row(
+                                     mainAxisSize: MainAxisSize.min,
+                                     spacing: 8,
+                                     children: [
+                                       Text(option.label),
+                                       Text(option.sublabel!),
+                                     ],
+                                   )
+                                 : Text(option.label),
+                             selected: selected,
+                             onSelected: (!readOnly && enabled)
+                                 ? (_) {
+                                     state.didChange(option.value);
+                                     onChanged?.call(option.value);
+                                   }
+                                 : null,
+                           )
+                           as Widget;
+                     }).toList()
+                   : options
+                         .where((option) => state.value == option.value)
+                         .map((option) {
+                           return Text(option.label) as Widget;
+                         })
+                         .toList();
 
-           if (actionsBuilder != null) {
-             final actions = actionsBuilder(state.context);
-             chips.addAll(actions);
-           }
+               if (actions != null) {
+                 chips.addAll(actions);
+               }
 
-           return InputDecorator(
-             decoration:
-                 decoration ??
-                 InputDecoration(
-                   errorText: state.errorText,
-                   border: OutlineInputBorder(),
-                   enabled: enabled,
+               if (actionsBuilder != null) {
+                 final actions = actionsBuilder(state.context);
+                 chips.addAll(actions);
+               }
+
+               return InputDecorator(
+                 decoration:
+                     decoration ??
+                     InputDecoration(
+                       errorText: state.errorText,
+                       border: OutlineInputBorder(),
+                       enabled: enabled,
+                     ),
+                 child: Wrap(
+                   alignment: WrapAlignment.start,
+                   runAlignment: WrapAlignment.center,
+                   spacing: 8,
+                   runSpacing: 8,
+                   children: chips,
                  ),
-             child: Wrap(
-               alignment: WrapAlignment.start,
-               runAlignment: WrapAlignment.center,
-               spacing: 8,
-               runSpacing: 8,
-               children: chips,
-             ),
+               );
+             },
            );
          },
        );

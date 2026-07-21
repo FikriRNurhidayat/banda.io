@@ -44,7 +44,7 @@ class ObligationService extends Service {
     required EntryType type,
     required ObligationStatus status,
     required double amount,
-    double? fee = 0,
+    double? feeAmount = 0,
     required String categoryId,
     required String partyId,
     required String journalId,
@@ -67,9 +67,9 @@ class ObligationService extends Service {
         categoryId: category.id,
       );
 
-      final addition = (!isZero(fee)
+      final fee = (!isZero(feeAmount)
           ? Entry.readOnly(
-              amount: Obligation.getFee(fee!),
+              amount: Obligation.getFee(feeAmount!),
               status: EntryStatus.done,
               issuedAt: issuedAt,
               journalId: journal.id,
@@ -81,19 +81,19 @@ class ObligationService extends Service {
           Obligation.create(
                 amount: obligationAmount,
                 remainder: status.isSettled ? 0 : obligationAmount,
-                feeAmount: fee,
+                feeAmount: feeAmount,
                 status: status,
                 partyId: party.id,
                 journalId: journal.id,
                 entryId: entry.id,
                 categoryId: category.id,
-                feeId: addition?.id,
+                feeId: fee?.id,
                 issuedAt: issuedAt,
                 settledAt: settledAt,
               )
               .withJournal(journal)
               .withEntry(entry)
-              .withFee(addition)
+              .withFee(fee)
               .withParty(party);
 
       return await applyObligation(obligation, labels);
@@ -105,7 +105,7 @@ class ObligationService extends Service {
     required EntryType type,
     required ObligationStatus status,
     required double amount,
-    double? fee,
+    double? feeAmount,
     required String categoryId,
     required String partyId,
     required String journalId,
@@ -137,17 +137,18 @@ class ObligationService extends Service {
         categoryId: nCategory.id,
       );
 
-      final Entry? nAddition = ((isZero(obligation.feeAmount) && !isZero(fee))
+      final Entry? nFee =
+          ((isZero(obligation.feeAmount) && !isZero(feeAmount))
           ? Entry.readOnly(
-              amount: Obligation.getFee(fee!),
+              amount: Obligation.getFee(feeAmount!),
               status: EntryStatus.done,
               issuedAt: issuedAt,
               journalId: nJournal.id,
               categoryId: nCategory.id,
             )
-          : (!isZero(obligation.feeAmount) && !isZero(fee))
+          : (!isZero(obligation.feeAmount) && !isZero(feeAmount))
           ? obligation.fee!.copyWith(
-              amount: Obligation.getFee(fee!),
+              amount: Obligation.getFee(feeAmount!),
               issuedAt: issuedAt,
               readonly: true,
               journalId: nJournal.id,
@@ -164,7 +165,7 @@ class ObligationService extends Service {
       final nObligation = obligation
           .copyWith(
             amount: nAmount,
-            feeAmount: fee,
+            feeAmount: feeAmount,
             remainder: status.isSettled ? 0 : nRemainder,
             status: status,
             categoryId: nCategory.id,
@@ -175,7 +176,7 @@ class ObligationService extends Service {
             settledAt: settledAt,
           )
           .withEntry(nEntry)
-          .withFee(nAddition)
+          .withFee(nFee)
           .withJournal(nJournal)
           .withParty(nParty);
 
@@ -232,7 +233,9 @@ class ObligationService extends Service {
             .map(
               (journal) => journal.revokeEntries(
                 payments
-                    .where((payment) => payment.entry.journal == journal)
+                    .where(
+                      (payment) => payment.entry.journal == journal,
+                    )
                     .map((payment) => payment.entries)
                     .expand((entry) => entry)
                     .whereType<Entry>(),
@@ -260,8 +263,7 @@ class ObligationService extends Service {
     for (var entry in obligation.entries) {
       await entryRepository.saveLabels(entry.id, [
         obligationLabel.id,
-        if (obligation.fee != null &&
-            entry.id == obligation.fee!.id)
+        if (obligation.fee != null && entry.id == obligation.fee!.id)
           feeLabel.id,
         ...?labels?.map((label) => label.id),
       ]);

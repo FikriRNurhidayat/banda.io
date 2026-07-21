@@ -40,8 +40,6 @@ class EntryTile extends StatelessWidget {
               )
               .toList(),
         ),
-        if (fund.status.isReleased)
-          Icon(Icons.lock, size: 8, color: theme.colorScheme.primary),
       ],
     );
   }

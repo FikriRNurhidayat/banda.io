@@ -4,9 +4,9 @@ class MainMenu extends StatelessWidget {
   MainMenu({super.key});
 
   final List<List<String>> menu = [
+    ["Assets", "/assets"],
     ["Entries", "/entries"],
     ["Funds", "/funds"],
-    ["Information", "/info"],
     ["Journals", "/journals"],
     ["Obligations", "/obligations"],
     ["Schedules", "/schedules"],

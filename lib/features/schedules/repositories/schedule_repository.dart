@@ -45,7 +45,7 @@ class ScheduleRepository extends Repository {
   save(Schedule schedule) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO schedules (id, note, amount, fee, cycle, iteration, status, category_id, entry_id, addition_id, journal_id, due_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, cycle = excluded.cycle, iteration = excluded.iteration, status = excluded.status, category_id = excluded.category_id, entry_id = excluded.entry_id, addition_id = excluded.addition_id, journal_id = excluded.journal_id, due_at = excluded.due_at, updated_at = excluded.updated_at",
+      "INSERT INTO schedules (id, note, amount, fee, cycle, iteration, status, category_id, entry_id, fee_id, journal_id, due_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET note = excluded.note, amount = excluded.amount, fee = excluded.fee, cycle = excluded.cycle, iteration = excluded.iteration, status = excluded.status, category_id = excluded.category_id, entry_id = excluded.entry_id, fee_id = excluded.fee_id, journal_id = excluded.journal_id, due_at = excluded.due_at, updated_at = excluded.updated_at",
       [
         schedule.id,
         schedule.note,
@@ -56,7 +56,7 @@ class ScheduleRepository extends Repository {
         schedule.status.label,
         schedule.categoryId,
         schedule.entryId,
-        schedule.additionId,
+        schedule.feeId,
         schedule.journalId,
         schedule.dueAt.toIso8601String(),
         schedule.createdAt.toIso8601String(),
@@ -124,16 +124,16 @@ class ScheduleRepository extends Repository {
       final entry = Entry.tryRow(
         r["entry"],
       )?.withAnnotations(r["entry"]?["annotations"]);
-      final addition = Entry.tryRow(
-        r["addition"],
-      )?.withAnnotations(r["addition"]?["annotations"]);
+      final fee = Entry.tryRow(
+        r["fee"],
+      )?.withAnnotations(r["fee"]?["annotations"]);
 
       return Schedule.row(r)
           .withLabels(Label.tryRows(r["labels"]))
           .withJournal(Journal.tryRow(r["journal"]))
           .withCategory(Category.tryRow(r["category"]))
           .withEntry(entry)
-          .withAddition(addition);
+          .withFee(fee);
     }).toList();
   }
 

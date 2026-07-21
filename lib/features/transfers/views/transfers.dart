@@ -71,14 +71,8 @@ class Transfers extends StatelessWidget {
         builder: futureBuilder((context, snapshot) {
           final transfers = snapshot.data as List<Transfer>;
 
-          return ListView.separated(
+          return ListView.builder(
             itemCount: transfers.length,
-            separatorBuilder: (_, __) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Divider(),
-              );
-            },
             itemBuilder: (BuildContext context, int index) {
               final Transfer transfer = transfers[index];
               return TransferTile(transfer);

@@ -38,11 +38,11 @@ class ObligationPaymentRepository extends Repository {
   save(ObligationPayment entity) async {
     final client = await getClient();
     client.execute(
-      "INSERT INTO obligation_payments (obligation_id, entry_id, addition_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET addition_id = excluded.addition_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, obligation_id = excluded.obligation_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
+      "INSERT INTO obligation_payments (obligation_id, entry_id, fee_id, amount, fee, issued_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET fee_id = excluded.fee_id, amount = excluded.amount, fee = excluded.fee, entry_id = excluded.entry_id, obligation_id = excluded.obligation_id, issued_at = excluded.issued_at, updated_at = excluded.updated_at",
       [
         entity.obligationId,
         entity.entryId,
-        entity.additionId,
+        entity.feeId,
         entity.amount,
         entity.fee,
         entity.issuedAt.toIso8601String(),
@@ -182,21 +182,22 @@ class ObligationPaymentRepository extends Repository {
           .map(
             (row) => [
               row["entry_id"],
-              row["addition_id"],
+              row["fee_id"],
             ].whereType<String>(),
           )
           .expand((i) => i)
           .toList();
       final entryRows = await getEntryByIds(entryIds);
+
       rows = rows.map((row) {
         return {
           ...row,
           "entry": entryRows.firstWhere(
             (entryRow) => entryRow["id"] == row["entry_id"],
           ),
-          "addition": !isNull(row["addition_id"])
+          "fee": !isNull(row["fee_id"])
               ? entryRows.firstWhere(
-                  (entryRow) => entryRow["id"] == row["addition_id"],
+                  (entryRow) => entryRow["id"] == row["fee_id"],
                 )
               : null,
         };
@@ -257,15 +258,15 @@ class ObligationPaymentRepository extends Repository {
       final obligation = Obligation.tryParse(row["obligation"]);
       final category = Category.tryRow(row["category"]);
       final journal = Journal.tryRow(row["journal"]);
-      final addition = Entry.tryRow(
-        row["addition"],
+      final fee = Entry.tryRow(
+        row["fee"],
       )?.withCategory(category).withJournal(journal);
       final entry = Entry.tryRow(
         row["entry"],
       )?.withCategory(category).withJournal(journal);
 
       return ObligationPayment.fromRow(row)
-          .withAddition(addition)
+          .withFee(fee)
           .withObligation(obligation)
           .withEntry(entry);
     }).toList();

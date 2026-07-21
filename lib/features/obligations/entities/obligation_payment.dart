@@ -6,33 +6,29 @@ import 'package:bandha/features/obligations/entities/obligation.dart';
 class ObligationPayment extends Entity {
   final String obligationId;
   final String entryId;
-  final String? additionId;
+  final String? feeId;
   final double amount;
-  final double? fee;
+  final double? feeAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime issuedAt;
 
-  late final Entry? addition;
+  late final Entry? fee;
   late final Entry entry;
   late final Obligation obligation;
 
   ObligationPayment({
     required this.obligationId,
     required this.entryId,
-    this.additionId,
+    this.feeId,
     required this.amount,
-    this.fee,
+    this.feeAmount,
     required this.createdAt,
     required this.updatedAt,
     required this.issuedAt,
   });
 
-  static double additionAmount(Obligation obligation, double? fee) {
-    return (fee ?? 0) * -1;
-  }
-
-  static String additionNote(Obligation obligation) {
+  static String feeNote(Obligation obligation) {
     if (obligation.isIncome) {
       return obligation.status.isSettled
           ? "Obligation settlement fee"
@@ -62,26 +58,26 @@ class ObligationPayment extends Entity {
 
   factory ObligationPayment.create({
     required double amount,
-    double? fee,
+    double? feeAmount,
     required String obligationId,
     required String entryId,
-    String? additionId,
+    String? feeId,
     required DateTime issuedAt,
   }) {
     return ObligationPayment(
       obligationId: obligationId,
       amount: amount,
-      fee: fee,
+      feeAmount: feeAmount,
       entryId: entryId,
-      additionId: additionId,
+      feeId: feeId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       issuedAt: issuedAt,
     );
   }
 
-  ObligationPayment withAddition(Entry? value) {
-    addition = value;
+  ObligationPayment withFee(Entry? value) {
+    fee = value;
     return this;
   }
 
@@ -106,28 +102,28 @@ class ObligationPayment extends Entity {
   }
 
   Iterable<Entry> get entries {
-    return [entry, addition].whereType<Entry>();
+    return [entry, fee].whereType<Entry>();
   }
 
   Iterable<String> get entryIds {
     return entries.map((entry) => entry.id);
   }
 
-  bool get hasAddition {
-    return addition != null;
+  bool get hasFee {
+    return fee != null;
   }
 
   ObligationPayment copyWith({
     double? amount,
-    double? fee,
+    double? feeAmount,
     DateTime? issuedAt,
   }) {
     return ObligationPayment(
       obligationId: obligationId,
       entryId: entryId,
-      additionId: additionId,
+      feeId: feeId,
       amount: amount ?? this.amount,
-      fee: fee ?? this.fee,
+      feeAmount: feeAmount ?? this.feeAmount,
       issuedAt: issuedAt ?? this.issuedAt,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
@@ -138,9 +134,9 @@ class ObligationPayment extends Entity {
     return ObligationPayment(
       obligationId: row["obligation_id"],
       entryId: row["entry_id"],
-      additionId: row["addition_id"],
+      feeId: row["fee_id"],
       amount: row["amount"],
-      fee: row["fee"],
+      feeAmount: row["fee_amount"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
       issuedAt: DateTime.parse(row["issued_at"]),

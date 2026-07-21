@@ -23,7 +23,6 @@ import 'package:bandha/features/transfers/views/transfer_entries.dart';
 import 'package:bandha/features/transfers/views/transfer_menu.dart';
 import 'package:bandha/features/transfers/views/transfers.dart';
 import 'package:bandha/features/tags/views/category_selector.dart';
-import 'package:bandha/features/main/views/information.dart';
 import 'package:bandha/features/tags/views/label_selector.dart';
 import 'package:bandha/features/obligations/views/obligation_editor.dart';
 import 'package:bandha/features/obligations/views/obligation_filter.dart';
@@ -33,6 +32,10 @@ import 'package:bandha/features/obligations/views/obligation_entries.dart';
 import 'package:bandha/features/obligations/views/obligations.dart';
 import 'package:bandha/features/main/views/main_menu.dart';
 import 'package:bandha/features/main/views/tools.dart';
+import 'package:bandha/features/assets/views/assets.dart';
+import 'package:bandha/features/assets/views/asset_editor.dart';
+import 'package:bandha/features/assets/views/asset_menu.dart';
+import 'package:bandha/features/assets/views/asset_entries.dart';
 import 'package:flutter/material.dart';
 
 class Routes {
@@ -118,6 +121,16 @@ class Routes {
           settings: settings,
           builder: (context) => JournalEditor(),
         );
+      case '/assets':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Assets(),
+        );
+      case '/assets/new':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => AssetEditor(),
+        );
       case '/transfers':
         return MaterialPageRoute(
           settings: settings,
@@ -147,11 +160,6 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => Tools(),
-        );
-      case '/info':
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => Information(),
         );
     }
 
@@ -191,6 +199,11 @@ class Routes {
             settings: settings,
             builder: (context) => FundEditor(id: id),
           );
+        case 'assets':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => AssetEditor(id: id),
+          );
       }
     }
 
@@ -228,6 +241,11 @@ class Routes {
           return MaterialPageRoute(
             settings: settings,
             builder: (context) => FundMenu(id: id),
+          );
+        case 'assets':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => AssetMenu(id: id),
           );
       }
     }
@@ -331,6 +349,11 @@ class Routes {
           return MaterialPageRoute(
             settings: settings,
             builder: (context) => FundEditor(id: id, readOnly: true),
+          );
+        case 'assets':
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => AssetEntries(id: id),
           );
       }
     }

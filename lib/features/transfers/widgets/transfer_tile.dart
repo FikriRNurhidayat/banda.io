@@ -29,7 +29,11 @@ class TransferTile extends StatelessWidget {
     );
   }
 
-  journalBuilder(BuildContext context, String labelText, Journal journal) {
+  journalBuilder(
+    BuildContext context,
+    String labelText,
+    Journal journal,
+  ) {
     final theme = Theme.of(context);
     return <Widget>[
       Text(
@@ -64,12 +68,12 @@ class TransferTile extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
           Icon(
-            Icons.sync_alt_outlined,
+            Icons.arrow_drop_down,
             size: theme.textTheme.bodySmall?.fontSize,
           ),
           Text(
             MoneyHelper.normalize(transfer.debitAmount),
-            style: theme.textTheme.bodyMedium,
+            style: theme.textTheme.bodySmall,
           ),
         ],
       ),

@@ -212,7 +212,7 @@ class ScheduleEditor extends StatelessWidget {
                         hintText: "Enter fee...",
                       ),
                       initialValue:
-                          _d["fee"]?.abs() ?? schedule?.fee?.abs(),
+                          _d["fee"]?.abs() ?? schedule?.feeAmount?.abs(),
                       onSaved: (value) => _d["fee"] = value,
                     ),
                     SelectFormField<ScheduleCycle>(

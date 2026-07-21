@@ -54,7 +54,7 @@ class ObligationTile extends StatelessWidget {
         );
       case ObligationStatus.settled:
         return Icon(
-          Icons.check,
+          Icons.done_all,
           color: theme.colorScheme.primary,
           size: 8,
         );
@@ -78,7 +78,6 @@ class ObligationTile extends StatelessWidget {
                 obligation.category.name,
                 style: theme.textTheme.titleSmall,
               ),
-              statusBuilder(context),
               if (obligation.hasLabels)
                 labelsBuilder(
                   context,
@@ -87,6 +86,7 @@ class ObligationTile extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+              statusBuilder(context),
             ],
           ),
           DateTimeText(obligation.issuedAt),

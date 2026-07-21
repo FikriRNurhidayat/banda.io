@@ -26,7 +26,7 @@ class ObligationPaymentProvider extends ChangeNotifier {
     await paymentService.create(
       obligationId,
       amount: amount,
-      fee: fee,
+      feeAmount: fee,
       journalId: journalId,
       issuedAt: issuedAt,
     );
@@ -46,7 +46,7 @@ class ObligationPaymentProvider extends ChangeNotifier {
       obligationId,
       entryId,
       amount: amount,
-      fee: fee,
+      feeAmount: fee,
       journalId: journalId,
       issuedAt: issuedAt,
     );

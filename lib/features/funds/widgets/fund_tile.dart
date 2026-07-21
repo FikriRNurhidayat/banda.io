@@ -55,13 +55,14 @@ class FundTile extends StatelessWidget {
         Row(
           spacing: 8,
           children: [
-            labelsBuilder(
-              context,
-              fund.labels,
-              style: theme.textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.w500,
+            if (fund.labels.isNotEmpty)
+              labelsBuilder(
+                context,
+                fund.labels,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
             ...statusBuilder(context),
           ],
         ),
@@ -117,11 +118,13 @@ class FundTile extends StatelessWidget {
             Text(
               MoneyHelper.normalize(fund.balance),
               style: theme.textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
             ),
             Text("/", style: theme.textTheme.bodySmall),
             Text(
               MoneyHelper.normalize(fund.amount),
               style: theme.textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -142,9 +145,11 @@ class FundTile extends StatelessWidget {
         spacing: 8,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [infoBuilder(context), progressBuilder(context)],
+            children: [
+              Expanded(child: infoBuilder(context)),
+              progressBuilder(context),
+            ],
           ),
           progressBarBuilder(context),
         ],

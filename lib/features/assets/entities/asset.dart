@@ -1,0 +1,81 @@
+import 'package:bandha/common/entities/entity.dart';
+
+class Asset {
+  final String id;
+  final String name;
+  final String code;
+  final double total;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  Asset({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.total,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  displayName() {
+    return "$name ($code)";
+  }
+
+  static Asset? tryRow(Map? row) {
+    if (row == null) return null;
+    return Asset.row(row);
+  }
+
+  factory Asset.row(Map row) {
+    return Asset(
+      id: row["id"],
+      name: row["name"],
+      code: row["code"],
+      total: row["total"] ?? 0,
+      createdAt: DateTime.parse(row["created_at"]),
+      updatedAt: DateTime.parse(row["updated_at"]),
+    );
+  }
+
+  factory Asset.create({
+    required String name,
+    required String code,
+    double total = 0,
+  }) {
+    final now = DateTime.now();
+    return Asset(
+      id: Entity.getId(),
+      name: name,
+      code: code,
+      total: total,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  copyWith({
+    String? name,
+    String? code,
+    double? total,
+  }) {
+    return Asset(
+      id: id,
+      name: name ?? this.name,
+      code: code ?? this.code,
+      total: total ?? this.total,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  toMap() {
+    return {
+      "id": id,
+      "name": name,
+      "code": code,
+      "total": total,
+      "createdAt": createdAt,
+      "updatedAt": updatedAt,
+    };
+  }
+}

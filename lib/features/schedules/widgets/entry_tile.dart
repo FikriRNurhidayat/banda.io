@@ -60,8 +60,6 @@ class EntryTile extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
         DateTimeText(entry.issuedAt),
-        if (entry.hasWritableLabels)
-          labelsBuilder(context, entry.writableLabels),
       ],
     );
   }

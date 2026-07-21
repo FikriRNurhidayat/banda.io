@@ -14,6 +14,8 @@ import 'package:bandha/features/entries/providers/entry_provider.dart';
 import 'package:bandha/features/obligations/providers/obligation_provider.dart';
 import 'package:bandha/features/funds/providers/fund_provider.dart';
 import 'package:bandha/common/widgets/verdict.dart';
+import 'package:bandha/features/assets/entities/asset.dart';
+import 'package:bandha/features/assets/providers/asset_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -293,6 +295,35 @@ Future<bool?> confirmObligationPaymentDeletion(
             alert(messenger, "Delete payment failed");
             throw error;
           });
+    },
+  );
+}
+
+Future<bool?> confirmAssetDeletion(
+  BuildContext context,
+  Asset asset,
+) async {
+  return ask(
+    context,
+    title: "Delete asset",
+    content:
+        "You're about to delete this asset, this action cannot be reversed. Are you sure?",
+    onConfirm: (context) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final assetProvider = context.read<AssetProvider>();
+
+      await assetProvider.delete(asset.id).catchError((
+        error,
+        stackTrace,
+      ) {
+        if (kDebugMode) {
+          print(error);
+          print(stackTrace);
+        }
+
+        alert(messenger, "Delete asset failed");
+        throw error;
+      });
     },
   );
 }

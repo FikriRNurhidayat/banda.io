@@ -18,13 +18,6 @@ class MoneyText extends StatelessWidget {
     return amount >= 0 ? "+" : "-";
   }
 
-  Color getColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return amount >= 0
-        ? theme.colorScheme.onSurface
-        : theme.colorScheme.error;
-  }
-
   String formatAmount(double value, [int precision = 3]) {
     final s = value.toString();
     final parts = s.split('.');
@@ -71,7 +64,6 @@ class MoneyText extends StatelessWidget {
       style:
           style ??
           theme.textTheme.bodyLarge!.apply(
-            color: getColor(context),
             fontFamily: theme.textTheme.bodyLarge!.fontFamily,
           ),
     );

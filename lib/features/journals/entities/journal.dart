@@ -1,13 +1,17 @@
 import 'package:bandha/common/entities/entity.dart';
 import 'package:bandha/features/entries/entities/entry.dart';
+import 'package:bandha/features/assets/entities/asset.dart';
 
 class Journal {
   final String id;
   final String name;
   final String holderName;
   final double balance;
+  final String assetId;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  late Asset asset;
 
   Journal({
     required this.id,
@@ -16,6 +20,7 @@ class Journal {
     required this.createdAt,
     required this.updatedAt,
     required this.balance,
+    required this.assetId,
   });
 
   @override
@@ -30,6 +35,7 @@ class Journal {
     String? name,
     String? holderName,
     double? balance,
+    String? assetId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -40,6 +46,7 @@ class Journal {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       balance: balance ?? this.balance,
+      assetId: assetId ?? this.assetId,
     );
   }
 
@@ -87,6 +94,11 @@ class Journal {
     return copyWith(balance: balance - entry.amount);
   }
 
+  Journal withAsset(Asset? value) {
+    if (value != null) asset = value;
+    return this;
+  }
+
   displayName() {
     return "$name — $holderName";
   }
@@ -97,6 +109,7 @@ class Journal {
       "name": name,
       "holderName": holderName,
       "balance": balance,
+      "assetId": assetId,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
     };
@@ -108,26 +121,32 @@ class Journal {
   }
 
   factory Journal.row(Map<dynamic, dynamic> row) {
-    return Journal(
+    final journal = Journal(
       id: row["id"],
       name: row["name"],
       holderName: row["holder_name"],
       balance: row["balance"],
+      assetId: row["asset_id"] ?? "",
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
     );
+    final asset = Asset.tryRow(row["asset"]);
+    if (asset != null) journal.asset = asset;
+    return journal;
   }
 
   factory Journal.create({
     required String name,
     required String holderName,
     required double balance,
+    required String assetId,
   }) {
     return Journal(
       id: Entity.getId(),
       name: name,
       holderName: holderName,
       balance: balance,
+      assetId: assetId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
